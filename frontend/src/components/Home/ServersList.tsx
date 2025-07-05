@@ -54,7 +54,9 @@ const ServersList = () => {
               navigate(`/home/servers/${srv.id}`);
             }}
           >
-            {srv.name.charAt(0)}
+            <span className="truncate max-w-full px-1 text-center">
+              {srv.name}
+            </span>
           </div>
         ))}
       <div

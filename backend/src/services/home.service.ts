@@ -8,6 +8,24 @@ import { ServersService } from './servers.service';
 import { fetchFriends } from 'src/logic/home/fetchFriends';
 import { fetchConversations } from 'src/logic/home/fetchConversations';
 import { fetchServers } from 'src/logic/home/fetchServers';
+import { MessagesService } from './messages.service';
+import { MessagesGateway } from 'src/gateways/messages.gateway';
+import { ChannelsService } from './channels.service';
+import { BotsService } from './bots.service';
+import { ApplicationsService } from './applications.service';
+import { createDm } from 'src/logic/home/createDm';
+import { fetchReciever } from 'src/logic/home/fetchReciever';
+import { fetchSender } from 'src/logic/home/fetchSender';
+import { fetchMessages } from 'src/logic/home/fetchMessages';
+import { sendMessage } from 'src/logic/home/sendMessage';
+import { editMessage } from 'src/logic/home/editMessage';
+import { deleteMessage } from 'src/logic/home/deleteMessage';
+import { createGroup } from 'src/logic/home/group/createGroup';
+import { groupAdd } from 'src/logic/home/group/groupAdd';
+import { groupKick } from 'src/logic/home/group/groupKick';
+import { groupLeave } from 'src/logic/home/group/groupLeave';
+import { groupParticipants } from 'src/logic/home/group/groupParticipants';
+import { ServerMembersService } from './serverMembers.service';
 
 @Injectable()
 export class HomeService {
@@ -16,6 +34,12 @@ export class HomeService {
     private readonly conversationsService: ConversationsService,
     private readonly groupsService: GroupsService,
     private readonly serversService: ServersService,
+    private readonly messagesService: MessagesService,
+    private readonly messagesGateway: MessagesGateway,
+    private readonly channelsService: ChannelsService,
+    private readonly botsService: BotsService,
+    private readonly appService: ApplicationsService,
+    private readonly serverMembersService: ServerMembersService,
   ) {}
 
   async verifyUser(req: Request) {
@@ -41,5 +65,160 @@ export class HomeService {
 
   async fetchServers(req: Request) {
     return await fetchServers(req, this.usersService, this.serversService);
+  }
+
+  async createDm(req: Request, recieverId: string) {
+    return await createDm(
+      req,
+      recieverId,
+      this.usersService,
+      this.messagesService,
+      this.conversationsService,
+    );
+  }
+
+  async fetchReciever(req: Request, conversation: string) {
+    return await fetchReciever(
+      req,
+      conversation,
+      this.usersService,
+      this.conversationsService,
+      this.groupsService,
+      this.channelsService,
+    );
+  }
+
+  async fetchSender(req: Request, sender: string, reply_to?: string) {
+    return await fetchSender(
+      req,
+      sender,
+      this.usersService,
+      this.botsService,
+      this.appService,
+      this.messagesService,
+      reply_to,
+    );
+  }
+
+  async fetchMessages(req: Request, conversation: string, cursor?: string) {
+    return await fetchMessages(
+      req,
+      conversation,
+      this.usersService,
+      this.messagesService,
+      this.conversationsService,
+      this.groupsService,
+      this.channelsService,
+      cursor,
+    );
+  }
+
+  async sendMessage(
+    req: Request,
+    message: string,
+    conversation: string,
+    replyTo?: string,
+  ) {
+    return await sendMessage(
+      req,
+      message,
+      conversation,
+      this.usersService,
+      this.messagesService,
+      this.conversationsService,
+      this.messagesGateway,
+      this.groupsService,
+      this.channelsService,
+      replyTo,
+    );
+  }
+
+  async editMessage(
+    req: Request,
+    message: string,
+    messageId: string,
+    conversation: string,
+  ) {
+    return await editMessage(
+      req,
+      message,
+      messageId,
+      conversation,
+      this.usersService,
+      this.messagesService,
+      this.conversationsService,
+      this.messagesGateway,
+      this.groupsService,
+      this.channelsService,
+      this.serverMembersService,
+    );
+  }
+
+  async deleteMessage(req: Request, message: string, conversation: string) {
+    return await deleteMessage(
+      req,
+      message,
+      conversation,
+      this.usersService,
+      this.messagesService,
+      this.conversationsService,
+      this.messagesGateway,
+      this.groupsService,
+      this.channelsService,
+      this.serverMembersService,
+    );
+  }
+
+  async createGroup(req: Request, name: string, participants: string[]) {
+    return await createGroup(
+      req,
+      name,
+      participants,
+      this.usersService,
+      this.messagesService,
+      this.groupsService,
+    );
+  }
+
+  async groupAdd(req: Request, group: string, participants: string[]) {
+    return await groupAdd(
+      req,
+      group,
+      participants,
+      this.usersService,
+      this.messagesService,
+      this.groupsService,
+    );
+  }
+
+  async groupKick(req: Request, group: string, participant: string) {
+    return await groupKick(
+      req,
+      group,
+      participant,
+      this.usersService,
+      this.messagesService,
+      this.groupsService,
+    );
+  }
+
+  async groupLeave(req: Request, group: string) {
+    return await groupLeave(
+      req,
+      group,
+      this.usersService,
+      this.messagesService,
+      this.groupsService,
+    );
+  }
+
+  async groupParticipants(req: Request, group: string) {
+    return await groupParticipants(
+      req,
+      group,
+      this.usersService,
+      this.messagesService,
+      this.groupsService,
+    );
   }
 }
