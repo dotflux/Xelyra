@@ -4,6 +4,10 @@ import { UsersModule } from './modules/users.module';
 import { DummyUsersModule } from './modules/dummyUsers.module';
 import { SignupModule } from './modules/signup.module';
 import { LoginModule } from './modules/login.module';
+import { ConversationsModule } from './modules/conversations.module';
+import { GroupsModule } from './modules/groups.module';
+import { ServersModule } from './modules/servers.module';
+import { HomeModule } from './modules/home.module';
 
 @Module({
   imports: [
@@ -12,6 +16,10 @@ import { LoginModule } from './modules/login.module';
     DummyUsersModule,
     SignupModule,
     LoginModule,
+    ConversationsModule,
+    GroupsModule,
+    ServersModule,
+    HomeModule,
   ],
 })
 export class AppModule {}
