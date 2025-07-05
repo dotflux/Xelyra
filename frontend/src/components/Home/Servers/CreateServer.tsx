@@ -53,57 +53,75 @@ const CreateServer = (props: Props) => {
   if (!props.isOpen) return;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-gray-900 rounded-lg shadow-lg w-full max-w-md p-6 relative">
-        {/* Header */}
-        <h2 className="text-2xl font-semibold text-white mb-4">
-          Create Server
-        </h2>
-        <button
-          onClick={props.onClose}
-          className="absolute top-3 right-3 text-gray-400 hover:text-white"
-          aria-label="Close"
-        >
-          X
-        </button>
-
-        {/* Server Name Input */}
-        <div className="mb-4">
-          <label className="block text-white mb-1">Server Name</label>
-          <input
-            type="text"
-            value={name}
-            maxLength={20}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Enter server name (Optional)"
-            className="w-full px-3 py-2 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
-          <p className="text-gray-400 text-sm mt-1">{name.length}/20</p>
-        </div>
-
-        {/* Error */}
-        {error && (
-          <p className="text-red-500 text-sm mb-2 flex items-center">
-            <img src={errorIcon} /> {error}
-          </p>
-        )}
-
-        {/* Actions */}
-        <div className="flex justify-end space-x-3">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="bg-[#2a2b2e] rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl border border-[#3a3b3e] relative">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-bold text-white">Create Server</h2>
           <button
             onClick={props.onClose}
-            className="px-4 py-2 text-white bg-gray-600 rounded hover:bg-gray-500"
-            disabled={isSubmitting}
+            className="text-gray-400 hover:text-white p-2 rounded-full hover:bg-gray-700/50 transition-all duration-200"
+            aria-label="Close modal"
           >
-            Cancel
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
           </button>
-          <button
-            onClick={onSubmit}
-            className="px-4 py-2 text-white bg-indigo-600 rounded hover:bg-indigo-500 disabled:opacity-50"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Creating…" : "Create"}
-          </button>
+        </div>
+
+        <div className="space-y-4">
+          <div>
+            <label
+              htmlFor="serverName"
+              className="block text-sm font-medium text-gray-300 mb-2"
+            >
+              Server Name
+            </label>
+            <input
+              type="text"
+              id="serverName"
+              value={name}
+              maxLength={20}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full px-3 py-2 bg-[#191a1d] border border-[#3a3b3e] rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200"
+              placeholder="Enter server name (Optional)"
+            />
+            <p className="text-gray-400 text-sm mt-2">{name.length}/20</p>
+          </div>
+
+          {/* Error */}
+          {error && (
+            <p className="text-red-500 text-sm mb-2 flex items-center">
+              <img src={errorIcon} className="h-4 w-4 mr-2" /> {error}
+            </p>
+          )}
+
+          {/* Actions */}
+          <div className="flex justify-end space-x-3 mt-6">
+            <button
+              onClick={props.onClose}
+              className="px-4 py-2 text-white bg-gray-600 rounded-lg hover:bg-gray-500 transition-all duration-200"
+              disabled={isSubmitting}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={onSubmit}
+              className="px-4 py-2 text-white bg-indigo-600 rounded-lg hover:bg-indigo-500 disabled:opacity-50 transition-all duration-200"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Creating…" : "Create"}
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -57,7 +57,7 @@ const MessageBox = (props: Props) => {
 
   useEffect(() => {
     fetchSender();
-  }, []);
+  }, [props.user, props.repliedTo]);
 
   const onDelete = async () => {
     try {
@@ -132,7 +132,7 @@ const MessageBox = (props: Props) => {
               fill="none"
             />
           </svg>
-          <div className="flex-1 px-2 py-0.5 text-xs text-gray-400">
+          <div className="flex-1 px-3 py-1 text-xs text-gray-400 bg-gray-700/30 rounded-lg border border-gray-600/30 mt-2">
             {(repliedContent || "").length > 60
               ? (repliedContent || "").slice(0, 60) + "…"
               : repliedContent || ""}
@@ -140,13 +140,13 @@ const MessageBox = (props: Props) => {
         </div>
       )}
       <div
-        className={`group relative flex items-start gap-3 ${
-          props.grouped ? "mt-[1px]" : "mt-3"
+        className={`group relative flex items-start gap-2 ${
+          props.grouped ? "mt-[1px] ml-[8px]" : "mt-3"
         } hover:bg-gray-900 px-1`}
         style={{ lineHeight: "1.2" }}
       >
         {!props.grouped ? (
-          <div className="flex-none h-8 w-8 bg-[#4f46e5] rounded-full flex items-center justify-center text-xs text-white">
+          <div className="h-10 w-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-lg font-bold text-white shadow-md">
             {senderInfo?.username.charAt(0).toUpperCase() || "?"}
           </div>
         ) : (
@@ -185,12 +185,12 @@ const MessageBox = (props: Props) => {
                 </div>
 
                 {/* icon container */}
-                <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 flex space-x-2">
+                <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 flex space-x-2 transition-all duration-200">
                   {/* Reply icon (always visible on hover) */}
                   <img
                     src={replyIcon}
                     alt="reply"
-                    className="h-4 w-4 cursor-pointer hover:text-white"
+                    className="h-4 w-4 cursor-pointer hover:text-white opacity-70 hover:opacity-100 transition-opacity"
                     onClick={() => {
                       props.setRepliedTo(props.createdAt);
                       props.setRepliedContent(props.message);
@@ -203,13 +203,13 @@ const MessageBox = (props: Props) => {
                       <img
                         src={editIcon}
                         alt="edit"
-                        className="h-4 w-4 cursor-pointer hover:text-white"
+                        className="h-4 w-4 cursor-pointer hover:text-white opacity-70 hover:opacity-100 transition-opacity"
                         onClick={() => setEditing(true)}
                       />
                       <img
                         src={deleteIcon}
                         alt="delete"
-                        className="h-4 w-4 cursor-pointer hover:text-red-500"
+                        className="h-4 w-4 cursor-pointer hover:text-red-500 opacity-70 hover:opacity-100 transition-opacity"
                         onClick={() => onDelete()}
                       />
                     </>

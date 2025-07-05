@@ -78,26 +78,33 @@ const FriendList = (props: Props) => {
   }, []);
 
   return (
-    <aside className="flex-1 bg-[#202225] border-l border-[#2a2b2e] p-4 flex flex-col space-y-4 shadow-inner">
-      <h2 className="text-sm font-semibold text-gray-400 uppercase">Friends</h2>
-      <ul className="flex-1 overflow-y-auto space-y-3">
+    <aside className="flex-1 bg-[#202225] border-l border-[#2a2b2e] p-6 flex flex-col space-y-6 shadow-2xl overflow-hidden">
+      <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider">
+        Friends
+      </h2>
+      <ul className="flex-1 overflow-y-auto overflow-x-hidden space-y-3 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent">
         {friendInfo?.map((f, i) => (
           <li
             key={i}
-            className="flex items-center space-x-3 p-2 rounded hover:bg-[#2a2b2e] transition cursor-pointer"
+            className="flex items-center p-3 rounded-xl hover:bg-[#2a2b2e] transition-all duration-200 hover:scale-[1.02] group min-w-0"
           >
-            <div className="h-8 w-8 bg-[#4f46e5] rounded-full flex items-center justify-center text-xs text-white">
+            <div className="h-10 w-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-lg group-hover:shadow-indigo-500/25 transition-all duration-200 flex-shrink-0">
               {f.username.charAt(0).toUpperCase()}
             </div>
-            <span className="text-gray-200">{f.username}</span>
+            <span className="text-gray-200 font-medium flex-1 group-hover:text-white transition-colors duration-200 truncate min-w-0 ml-4">
+              {f.username}
+            </span>
             <div
-              className="ml-auto p-1 h-12 w-12 hover:bg-gray-800 rounded-full flex items-center justify-center cursor-pointer"
+              className="p-2 h-10 w-10 hover:bg-gray-800 rounded-full flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110 hover:shadow-lg flex-shrink-0 ml-2"
               onClick={(e) => {
                 e.stopPropagation(); // prevents li click if you add one later
                 onMessage(f.id, f.conversation);
               }}
             >
-              <img src={messageIcon} className="h-6 w-6" />
+              <img
+                src={messageIcon}
+                className="h-5 w-5 opacity-70 hover:opacity-100 transition-opacity"
+              />
             </div>
           </li>
         ))}

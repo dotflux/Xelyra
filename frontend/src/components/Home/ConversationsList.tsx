@@ -44,32 +44,38 @@ const ConversationsList = () => {
   }, []);
 
   return (
-    <nav className="w-72 bg-[#1e1f22] border-r border-[#2a2b2e] p-4 flex flex-col space-y-4 shadow-inner">
+    <nav className="w-72 bg-[#1e1f22] border-r border-[#2a2b2e] p-6 flex flex-col space-y-6 shadow-2xl overflow-hidden">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-gray-400 uppercase">
+        <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider">
           Direct Messages
         </h2>
         <div
           onClick={() => setGroupOpen(true)}
-          className="cursor-pointer p-1 hover:bg-gray-800 rounded"
+          className="cursor-pointer p-2 hover:bg-gray-800 rounded-lg transition-colors duration-200 hover:scale-110"
         >
-          <img src={plusIcon} alt="Add Group" className="h-4 w-4" />
+          <img
+            src={plusIcon}
+            alt="Add Group"
+            className="h-4 w-4 opacity-70 hover:opacity-100 transition-opacity"
+          />
         </div>
       </div>
 
-      <ul className="flex-1 overflow-y-auto space-y-2">
+      <ul className="flex-1 overflow-y-auto overflow-x-hidden space-y-2 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent">
         {conversationInfo?.map((chan, i) => (
           <li
             key={i}
-            className="flex items-center px-2 py-1 rounded hover:bg-[#2a2b2e] text-gray-300 cursor-pointer transition gap-2"
+            className="flex items-center px-3 py-2 rounded-xl hover:bg-[#2a2b2e] text-gray-300 cursor-pointer transition-all duration-200 hover:scale-[1.02] group min-w-0"
             onClick={() => {
               navigate(`/home?channel=${chan.id}`);
             }}
           >
-            <div className="h-8 w-8 bg-[#4f46e5] rounded-full flex items-center justify-center text-xs text-white">
+            <div className="h-10 w-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-lg group-hover:shadow-indigo-500/25 transition-all duration-200 flex-shrink-0">
               {chan.reciever.charAt(0).toUpperCase()}
             </div>
-            {chan.reciever}
+            <span className="ml-3 font-medium group-hover:text-white transition-colors duration-200 truncate min-w-0 flex-1">
+              {chan.reciever}
+            </span>
           </li>
         ))}
       </ul>

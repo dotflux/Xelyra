@@ -3,6 +3,7 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom scrollbar styles */
 html,
 body /* Global scrollbar styles */
 * {

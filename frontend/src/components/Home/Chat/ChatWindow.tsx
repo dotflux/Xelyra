@@ -138,18 +138,22 @@ const ChatWindow = (props: Props) => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#121316] z-10">
+    <div className="flex flex-col h-full bg-[#121316]">
       {/* Top Bar */}
-      <div className="h-14 bg-[#191a1d] border-b border-[#2a2b2e] px-4 flex items-center">
-        <TopBar showPanel={showPanel} setShowPanel={setShowPanel} />
-      </div>
+      <TopBar showPanel={showPanel} setShowPanel={setShowPanel} />
 
       {/* Messages Area */}
       <div
-        className="flex-1 overflow-y-auto px-4 py-3"
+        className="flex-1 overflow-y-auto px-4 py-3 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent"
         ref={messagesContainerRef}
         onScroll={handleScroll}
       >
+        {loadingMore && (
+          <div className="text-center py-4">
+            <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-500"></div>
+          </div>
+        )}
+
         {messages?.length ? (
           messages.map((msg, i) => {
             const prev = messages[i - 1];
@@ -185,11 +189,20 @@ const ChatWindow = (props: Props) => {
             );
           })
         ) : (
-          <p className="text-gray-500 text-center mt-8">No messages yet</p>
+          <div className="text-center mt-16">
+            <div className="text-gray-500 text-lg font-medium">
+              No messages yet
+            </div>
+            <div className="text-gray-600 text-sm mt-2">
+              Start a conversation!
+            </div>
+          </div>
         )}
         <div ref={bottomRef} />
       </div>
-      <div className="h-14 bg-[#191a1d] border-b border-[#2a2b2e] px-4 flex items-center mb-2">
+
+      {/* Typer */}
+      <div className="border-t border-[#2a2b2e] bg-[#191a1d]">
         <Typer
           channelId={channel}
           replyTo={replyTo}
@@ -198,6 +211,7 @@ const ChatWindow = (props: Props) => {
           setRepliedContent={setRepliedContent}
         />
       </div>
+
       {showPanel && (
         <GroupPanel
           showPanel={showPanel}

@@ -108,7 +108,7 @@ const GroupPanel = (props: Props) => {
               className="group flex items-center justify-between p-2 rounded hover:bg-[#2a2b2e] transition"
             >
               <div className="flex items-center space-x-3">
-                <div className="h-8 w-8 bg-blue-500 rounded-full flex items-center justify-center text-sm font-semibold text-white">
+                <div className="h-10 w-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-lg font-bold text-white shadow-md mr-3">
                   {p.username.charAt(0).toUpperCase()}
                 </div>
                 <span className="text-sm text-white">{p.username}</span>

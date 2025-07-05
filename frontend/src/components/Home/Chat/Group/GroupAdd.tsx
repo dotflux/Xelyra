@@ -97,82 +97,126 @@ const GroupAdd = (props: Props) => {
   if (!props.isOpen) return;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-gray-900 rounded-lg shadow-lg w-full max-w-md p-6 relative">
-        {/* Header */}
-        <h2 className="text-2xl font-semibold text-white mb-4">Add To Group</h2>
-        <button
-          onClick={props.onClose}
-          className="absolute top-3 right-3 text-gray-400 hover:text-white"
-          aria-label="Close"
-        >
-          X
-        </button>
-
-        {/* Selected Participants */}
-        {participants.length > 0 && (
-          <div className="mb-4 flex flex-wrap gap-2">
-            {participants.map((id) => {
-              const friend = friends && friends.find((f) => f.id === id);
-              return (
-                <span
-                  key={id}
-                  className="flex items-center bg-indigo-600 text-white px-2 py-1 rounded-full text-sm"
-                >
-                  {friend?.username || id}
-                  <button
-                    onClick={() => toggleParticipant(id)}
-                    className="ml-2 hover:text-gray-200"
-                  >
-                    X
-                  </button>
-                </span>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Friend List */}
-        <div className="mb-4 max-h-48 overflow-y-auto border border-gray-700 rounded p-2">
-          {friends &&
-            friends.map((f) => (
-              <div
-                key={f.id}
-                onClick={() => toggleParticipant(f.id)}
-                className={`cursor-pointer px-3 py-2 mb-1 rounded ${
-                  participants.includes(f.id)
-                    ? "bg-indigo-500 text-white"
-                    : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                }`}
-              >
-                {f.username}
-              </div>
-            ))}
-        </div>
-
-        {/* Error */}
-        {error && (
-          <p className="text-red-500 text-sm mb-2 flex items-center">
-            <img src={errorIcon} /> {error}
-          </p>
-        )}
-
-        {/* Actions */}
-        <div className="flex justify-end space-x-3">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="bg-[#2a2b2e] rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl border border-[#3a3b3e]">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-bold text-white">Add To Group</h2>
           <button
             onClick={props.onClose}
-            className="px-4 py-2 text-white bg-gray-600 rounded hover:bg-gray-500"
-            disabled={isSubmitting}
+            className="text-gray-400 hover:text-white p-2 rounded-full hover:bg-gray-700/50 transition-all duration-200"
+            aria-label="Close modal"
           >
-            Cancel
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
           </button>
-          <button
-            onClick={onSubmit}
-            className="px-4 py-2 text-white bg-indigo-600 rounded hover:bg-indigo-500 disabled:opacity-50"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Adding" : "Add"}
-          </button>
+        </div>
+
+        <div className="space-y-4">
+          {/* Selected Participants */}
+          {participants.length > 0 && (
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-3">
+                Selected ({participants.length})
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {participants.map((id) => {
+                  const friend = friends && friends.find((f) => f.id === id);
+                  return (
+                    <span
+                      key={id}
+                      className="flex items-center bg-gradient-to-r from-indigo-500 to-indigo-600 text-white px-3 py-2 rounded-full text-sm font-medium shadow-lg"
+                    >
+                      {friend?.username || id}
+                      <button
+                        onClick={() => toggleParticipant(id)}
+                        className="ml-2 hover:text-gray-200 transition-colors duration-200"
+                      >
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+                      </button>
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Friend List */}
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-3">
+              Select Friends
+            </label>
+            <div className="max-h-48 overflow-y-auto border border-[#3a3b3e] rounded-lg p-3 bg-[#191a1d] scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent">
+              {friends &&
+                friends.map((f) => (
+                  <div
+                    key={f.id}
+                    onClick={() => toggleParticipant(f.id)}
+                    className={`cursor-pointer px-4 py-3 mb-2 rounded-lg transition-all duration-200 hover:scale-[1.02] ${
+                      participants.includes(f.id)
+                        ? "bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-lg"
+                        : "bg-[#2a2b2e] text-gray-300 hover:bg-[#3a3b3e]"
+                    }`}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="h-10 w-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-lg font-bold text-white shadow-md mr-3">
+                        {f.username.charAt(0).toUpperCase()}
+                      </div>
+                      <span className="font-medium">{f.username}</span>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
+
+          {/* Error */}
+          {error && (
+            <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+              <p className="text-red-400 text-sm flex items-center">
+                <img src={errorIcon} className="w-4 h-4 mr-2" /> {error}
+              </p>
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className="flex space-x-3 pt-4">
+            <button
+              type="button"
+              onClick={props.onClose}
+              className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-all duration-200 hover:shadow-lg"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={onSubmit}
+              disabled={isSubmitting}
+              className="flex-1 px-4 py-2 bg-[#7289DA] hover:bg-[#5b6eae] disabled:bg-gray-700 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-all duration-200 hover:shadow-lg disabled:shadow-none"
+            >
+              {isSubmitting ? "Adding..." : "Add to Group"}
+            </button>
+          </div>
         </div>
       </div>
     </div>

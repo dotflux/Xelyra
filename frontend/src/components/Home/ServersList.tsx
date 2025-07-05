@@ -44,12 +44,12 @@ const ServersList = () => {
   }, []);
 
   return (
-    <aside className="w-20 bg-[#111214] p-2 flex flex-col items-center space-y-2 shadow-lg">
+    <aside className="w-20 bg-[#111214] p-3 flex flex-col items-center space-y-3 shadow-2xl border-r border-gray-700/50">
       {serversInfo &&
         serversInfo.map((srv, i) => (
           <div
             key={i}
-            className="h-12 w-12 bg-[#4f46e5] rounded-2xl flex items-center justify-center text-xs font-semibold text-white hover:bg-[#6366f1] transition"
+            className="h-12 w-12 bg-[#4f46e5] rounded-2xl flex items-center justify-center text-xs font-bold text-white hover:bg-[#6366f1] transition-all duration-200 cursor-pointer shadow-lg hover:shadow-indigo-500/25"
             onClick={() => {
               navigate(`/home/servers/${srv.id}`);
             }}
@@ -60,12 +60,15 @@ const ServersList = () => {
           </div>
         ))}
       <div
-        className="mt-2 border-1 border-gray-800 hover:bg-blue-600 rounded-md w-8 h-8 flex items-center justify-center"
+        className="mt-2 border-2 border-dashed border-gray-600 hover:border-indigo-500 hover:bg-indigo-500/10 rounded-xl w-10 h-10 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110"
         onClick={() => {
           setServerModal(true);
         }}
       >
-        <img src={plusIcon} className="h-6 w-6" />
+        <img
+          src={plusIcon}
+          className="h-5 w-5 opacity-60 hover:opacity-100 transition-opacity"
+        />
       </div>
       {serverModal && (
         <CreateServer

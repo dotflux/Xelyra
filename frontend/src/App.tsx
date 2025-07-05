@@ -4,9 +4,14 @@ import SignupOtp from "./components/signup/SignupOtp";
 import Login from "./components/login/Login";
 import AuthenticatedLayout from "./components/Home/AuthenticatedLayout";
 import Home from "./components/Home/Home";
+import Index from "./Index";
 
 function App() {
   const router = createBrowserRouter([
+    {
+      index: true,
+      element: <Index />,
+    },
     {
       path: "/signup",
       element: <Signup />,
