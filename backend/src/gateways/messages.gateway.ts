@@ -50,8 +50,28 @@ export class MessagesGateway implements OnGatewayInit {
     });
   }
 
+  emitCommandEdit(
+    channelId: string,
+    messageId: string,
+    newText: string,
+    edited: boolean,
+  ) {
+    this.server.to(channelId).emit('commandEdited', {
+      messageId,
+      message: newText,
+      edited,
+    });
+  }
+
   emitMessageDelete(channelId: string, messageId: string) {
     this.server.to(channelId).emit('messageDeleted', {
+      channelId,
+      messageId,
+    });
+  }
+
+  emitCommandDelete(channelId: string, messageId: string) {
+    this.server.to(channelId).emit('commandDeleted', {
       channelId,
       messageId,
     });

@@ -6,6 +6,7 @@ import TopBar from "./TopBar";
 import Typer from "./Typer";
 import MessageBox from "./MessageBox";
 import GroupPanel from "./Group/GroupPanel";
+import CommandBox from "./CommandBox";
 
 interface Message {
   user: string;
@@ -17,6 +18,8 @@ interface Message {
   created_timestamp: string;
   edited: boolean;
   reply_to: string;
+  command?: string;
+  bot_id?: string;
 }
 
 interface Props {
@@ -38,23 +41,52 @@ const ChatWindow = (props: Props) => {
   const [showPanel, setShowPanel] = useState(false);
   const [initialLoad, setInitialLoad] = useState(true);
 
-  const fetchMessages = async (cursor?: string) => {
+  const fetchMessages = async (
+    cursors?: { userCursor?: string; commandCursor?: string },
+    limit: number = cursors ? 10 : 20
+  ) => {
     setLoadingMore(true);
     try {
+      console.log("Fetching messages. Cursors:", cursors, "Limit:", limit);
       const response = await axios.post(
         "http://localhost:3000/home/messages",
-        { conversation: channel, cursor },
+        {
+          conversation: channel,
+          userCursor: cursors?.userCursor,
+          commandCursor: cursors?.commandCursor,
+          limit,
+        },
         { withCredentials: true }
       );
       if (response.data.valid) {
-        const newMessages = response.data.allMessages;
-        setHasMore(newMessages.length === 10);
-        if (cursor) {
+        // Merge and sort messages and commands by created_timestamp (oldest to newest)
+        const allMessages = [
+          ...(response.data.messages || []),
+          ...(response.data.commands || []),
+        ].sort(
+          (a, b) =>
+            new Date(a.created_timestamp).getTime() -
+            new Date(b.created_timestamp).getTime()
+        );
+        // Debug: print the final render order
+        console.log("FINAL RENDER ORDER:");
+        allMessages.forEach((msg, idx) => {
+          console.log(
+            `#${idx + 1}:`,
+            msg.created_timestamp,
+            msg.command ? `(COMMAND: /${msg.command})` : "(USER MESSAGE)"
+          );
+        });
+        setHasMore(
+          response.data.messages?.length === limit ||
+            response.data.commands?.length === limit
+        );
+        if (cursors) {
           // Pagination: prepend and maintain scroll
           if (messagesContainerRef.current) {
             const prevScrollHeight = messagesContainerRef.current.scrollHeight;
             const prevScrollTop = messagesContainerRef.current.scrollTop;
-            setMessages((prev) => [...newMessages, ...prev]);
+            setMessages((prev) => [...allMessages, ...prev]);
             setTimeout(() => {
               if (messagesContainerRef.current) {
                 const newScrollHeight =
@@ -64,11 +96,11 @@ const ChatWindow = (props: Props) => {
               }
             }, 0);
           } else {
-            setMessages((prev) => [...newMessages, ...prev]);
+            setMessages((prev) => [...allMessages, ...prev]);
           }
         } else {
           // Initial load: set messages and scroll to bottom
-          setMessages(newMessages);
+          setMessages(allMessages);
           setInitialLoad(true);
         }
       }
@@ -82,18 +114,6 @@ const ChatWindow = (props: Props) => {
   useEffect(() => {
     fetchMessages();
   }, [channel]);
-
-  useEffect(() => {
-    if (initialLoad && messages.length > 0) {
-      setTimeout(() => {
-        if (messagesContainerRef.current) {
-          messagesContainerRef.current.scrollTop =
-            messagesContainerRef.current.scrollHeight;
-        }
-        setInitialLoad(false);
-      }, 0);
-    }
-  }, [messages, initialLoad]);
 
   useEffect(() => {
     if (!channel) return;
@@ -117,7 +137,17 @@ const ChatWindow = (props: Props) => {
       );
     });
 
+    socketRef.current.on("commandEdited", ({ messageId, message, edited }) => {
+      setMessages((prev) =>
+        prev.map((m) => (m.id === messageId ? { ...m, message, edited } : m))
+      );
+    });
+
     socketRef.current.on("messageDeleted", ({ messageId }) => {
+      setMessages((prev) => prev.filter((m) => m.id !== messageId));
+    });
+
+    socketRef.current.on("commandDeleted", ({ messageId }) => {
       setMessages((prev) => prev.filter((m) => m.id !== messageId));
     });
 
@@ -131,9 +161,32 @@ const ChatWindow = (props: Props) => {
   // Scroll handler
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const target = e.target as HTMLDivElement;
+    console.log(
+      "ScrollTop:",
+      target.scrollTop,
+      "hasMore:",
+      hasMore,
+      "loadingMore:",
+      loadingMore
+    );
     if (target.scrollTop < 100 && hasMore && !loadingMore) {
-      const oldest = messages[0]?.created_at;
-      if (oldest) fetchMessages(oldest);
+      // Find the oldest user message and command message created_at
+      const oldestUserCreatedAt = messages.filter((m) => !m.command)[0]
+        ?.created_at;
+      const oldestCommandCreatedAt = messages.filter((m) => m.command)[0]
+        ?.created_at;
+      console.log("Fetching older messages with cursors:", {
+        userCursor: oldestUserCreatedAt,
+        commandCursor: oldestCommandCreatedAt,
+      });
+      if (oldestUserCreatedAt || oldestCommandCreatedAt)
+        fetchMessages(
+          {
+            userCursor: oldestUserCreatedAt,
+            commandCursor: oldestCommandCreatedAt,
+          },
+          10
+        );
     }
   };
 
@@ -158,18 +211,40 @@ const ChatWindow = (props: Props) => {
           messages.map((msg, i) => {
             const prev = messages[i - 1];
             const sameSender = prev && prev.user === msg.user;
-
             const sameMinute =
               prev &&
               Math.abs(
                 new Date(msg.created_timestamp).getTime() -
                   new Date(prev.created_timestamp).getTime()
               ) < 60_000;
-
-            // Don't group messages that are replies
             const isReply = msg.reply_to && msg.reply_to.trim() !== "";
-            const grouped = sameSender && sameMinute && !isReply;
+            const prevIsCommand = prev && prev.command;
+            const currentIsCommand = msg.command;
+            const grouped =
+              sameSender &&
+              sameMinute &&
+              !isReply &&
+              !prevIsCommand &&
+              !currentIsCommand;
 
+            // Render CommandBox for command/bot messages
+            if (msg.command) {
+              return (
+                <CommandBox
+                  key={i}
+                  botName={msg.bot_id ? msg.bot_id : "Bot"}
+                  command={msg.command}
+                  message={msg.message}
+                  createdAt={msg.created_at}
+                  createdAtTimestamp={msg.created_timestamp}
+                  conversation={msg.conversation}
+                  id={msg.id}
+                  edited={msg.edited}
+                />
+              );
+            }
+
+            // Render MessageBox for normal messages
             return (
               <MessageBox
                 key={i}

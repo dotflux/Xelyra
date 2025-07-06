@@ -71,22 +71,41 @@ export const fetchMessages = async (
       throw new BadRequestException('Not a member');
     }
 
-    let allMessages;
-    if (cursor) {
-      allMessages = await messagesService.getOlderMessages(
-        conversation,
-        cursor,
-      );
+    // Get limit from request or use defaults
+    const limit =
+      req.body && req.body.limit ? parseInt(req.body.limit) : cursor ? 10 : 20;
+    const userCursor = req.body.userCursor;
+    const commandCursor = req.body.commandCursor;
+    let allMessages: any[] = [],
+      allCommands: any[] = [];
+    if (userCursor || commandCursor) {
+      if (userCursor) {
+        allMessages = await messagesService.getOlderMessages(
+          conversation,
+          userCursor,
+          limit,
+        );
+      } else {
+        allMessages = [];
+      }
+      if (commandCursor) {
+        allCommands = await messagesService.getOlderCommands(
+          conversation,
+          commandCursor,
+          limit,
+        );
+      } else {
+        allCommands = [];
+      }
     } else {
-      allMessages = await messagesService.getMessages(conversation);
+      allMessages = await messagesService.getMessages(conversation, limit);
+      allCommands = await messagesService.getCommands(conversation, limit);
     }
-    // Reverse to display oldest-to-newest
-    allMessages = allMessages.reverse();
-
     return {
       valid: true,
       message: 'Messages fetched.',
-      allMessages,
+      messages: allMessages,
+      commands: allCommands,
     };
   } catch (error) {
     if (

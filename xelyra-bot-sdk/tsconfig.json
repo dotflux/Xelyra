@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ES2021" /* Modern JS target */,
+    "module": "CommonJS" /* For Node & bundlers */,
+    "declaration": true /* Emit .d.ts files */,
+    "baseUrl": ".",
+    "paths": {
+      "@xelyra/bot-sdk": ["./src"]
+    },
+    "types": ["node"],
+    "outDir": "dist" /* Build output folder */,
+    "rootDir": "src" /* Source folder */,
+    "strict": true /* Enable all strict checks */,
+    "esModuleInterop": true /* Allow default imports from CJS */,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts"]
+}

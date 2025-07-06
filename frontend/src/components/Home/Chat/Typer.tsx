@@ -1,6 +1,11 @@
-import { useState, type KeyboardEvent, type FormEvent } from "react";
+import { useState, type KeyboardEvent, type FormEvent, useRef } from "react";
 import sendIcon from "../../../assets/angleRight.svg";
 import axios from "axios";
+import SlashAutocomplete, {
+  type PickedCommand,
+  isOpen as isAutocompleteOpen,
+  handleKey as handleAutocompleteKey,
+} from "./SlashAutoComplete";
 
 interface Props {
   channelId: string | null;
@@ -12,46 +17,88 @@ interface Props {
 
 const Typer = (props: Props) => {
   const [text, setText] = useState("");
+  const [picked, setPicked] = useState<PickedCommand | null>(null);
+  const taRef = useRef<HTMLTextAreaElement>(null);
+
   const sendMessage = async () => {
+    if (!props.channelId || !text.trim()) return;
+
+    // 1) Slash dispatch if at very start and we have a picked command
+    const m = text.match(/^\/(\w+)(?:\s+(.*))?$/);
+    if (m && picked) {
+      const [, name, raw = ""] = m;
+      const options = raw
+        .split(/\s+/)
+        .map((p) => p.split(":", 2))
+        .filter(([k, v]) => k && v)
+        .map(([n, v]) => ({ name: n, value: v }));
+      try {
+        const res = await axios.post(
+          `http://localhost:3000/developer/applications/${picked.app_id}/commands/dispatch`,
+          { command: name, channelId: props.channelId, options },
+          { withCredentials: true }
+        );
+        if (res.data.valid) {
+          setText("");
+          setPicked(null);
+          props.setReplyTo("");
+          props.setRepliedContent("");
+        }
+      } catch (err) {
+        console.error("Dispatch error:", err);
+      }
+      return;
+    }
+
+    // 2) Otherwise normal chat
     try {
-      if (!props.channelId) return;
-      const response = await axios.post(
+      const res = await axios.post(
         "http://localhost:3000/home/messages/send",
         {
           conversation: props.channelId,
           message: text,
           replyTo: props.replyTo,
         },
-        {
-          withCredentials: true,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
+        { withCredentials: true }
       );
-
-      if (response.data.valid) {
+      if (res.data.valid) {
         setText("");
         props.setReplyTo(null);
         props.setRepliedContent("");
       }
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        console.log(error.response.data.message);
-      } else {
-        console.log("Network Error:", error);
-      }
+    } catch (err) {
+      console.error("Send error:", err);
     }
   };
 
   const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (isAutocompleteOpen()) {
+      switch (e.key) {
+        case "ArrowDown":
+        case "ArrowUp":
+        case "Enter":
+        case "Tab":
+        case "Escape":
+          e.preventDefault();
+          handleAutocompleteKey(e);
+          return;
+      }
+    }
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
     }
   };
+
+  const onChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setText(e.target.value);
+    if (!e.target.value.startsWith(`/${picked?.name}`)) {
+      setPicked(null);
+    }
+  };
+
   return (
-    <div className="p-3">
+    <div className="p-3 relative">
       {props.repliedContent && (
         <div className="flex items-center bg-gradient-to-r from-indigo-500/15 via-purple-500/10 to-indigo-600/15 border-l-4 px-4 py-3 mb-3 rounded-r-2xl text-sm text-gray-200 max-w-full backdrop-blur-sm shadow-lg border-r border-t border-b border-indigo-500/20 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 to-purple-500/5"></div>
@@ -113,8 +160,9 @@ const Typer = (props: Props) => {
         className="w-full flex items-end bg-[#191a1d] rounded-2xl px-3 py-2 space-x-3 border border-[#2a2b2e] focus-within:border-indigo-500/50 focus-within:ring-2 focus-within:ring-indigo-500/20 transition-all duration-200"
       >
         <textarea
+          ref={taRef}
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          onChange={onChange}
           onKeyDown={onKeyDown}
           placeholder="Message #channel"
           rows={1}
@@ -130,6 +178,12 @@ const Typer = (props: Props) => {
           <img src={sendIcon} alt="Send" className="h-4 w-4 invert" />
         </button>
       </form>
+      <SlashAutocomplete
+        value={text}
+        onChange={setText}
+        onPick={setPicked}
+        textareaRef={taRef}
+      />
     </div>
   );
 };

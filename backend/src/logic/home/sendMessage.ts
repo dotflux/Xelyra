@@ -100,7 +100,7 @@ export const sendMessage = async (
       created_at: saved.created_at,
       created_timestamp: saved.created_timestamp,
       id: saved.id.toString(),
-      reply_to: saved.replyTo,
+      reply_to: saved.reply_to,
     });
 
     return {

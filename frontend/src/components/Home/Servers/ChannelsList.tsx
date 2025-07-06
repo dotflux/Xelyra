@@ -158,8 +158,8 @@ const ChannelsList = (props: Props) => {
                 >
                   {/* Icon based on type */}
                   {chan.type === "voice" ? (
-                    <span className="mr-2 text-lg">
-                      <img src={vcIcon} alt="vc" />
+                    <span className="mr-2 flex items-center">
+                      <img src={vcIcon} alt="vc" className="w-4 h-4" />
                     </span>
                   ) : (
                     <span className="mr-2 text-lg">#</span>
@@ -167,7 +167,12 @@ const ChannelsList = (props: Props) => {
                   <span className="truncate flex-1">{chan.name}</span>
                   <img
                     src={cogIcon}
-                    className="cursor-pointer w-4 h-4 opacity-70 group-hover:opacity-100 ml-auto"
+                    className={`cursor-pointer w-4 h-4 ml-auto transition-opacity duration-150
+                      ${
+                        selectedChannel === chan.id
+                          ? "opacity-100"
+                          : "opacity-0 group-hover:opacity-100"
+                      }`}
                     title="Channel Settings"
                     onClick={(e) => {
                       e.stopPropagation();

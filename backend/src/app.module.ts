@@ -19,6 +19,10 @@ import { RolesModule } from './modules/roles.module';
 import { UserPermissionsModule } from './modules/userPermissions.module';
 import { ChannelOverwritesModule } from './modules/channelOverwrites.module';
 import { PermissionsModule } from './modules/permissions.module';
+import { SlashCommandsModule } from './modules/slashCommands.module';
+import { ServerAppsModule } from './modules/serverApps.module';
+import { BotsGatewayModule } from './modules/botsGateway.module';
+import { DeveloperModule } from './modules/developer.module';
 
 @Module({
   imports: [
@@ -42,6 +46,10 @@ import { PermissionsModule } from './modules/permissions.module';
     UserPermissionsModule,
     ChannelOverwritesModule,
     PermissionsModule,
+    SlashCommandsModule,
+    ServerAppsModule,
+    BotsGatewayModule,
+    DeveloperModule,
   ],
 })
 export class AppModule {}
