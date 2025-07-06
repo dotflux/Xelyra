@@ -14,6 +14,11 @@ import { MessagesGatewayModule } from './modules/msgGateway.module';
 import { MessagesModule } from './modules/messages.module';
 import { ApplicationsModule } from './modules/applications.module';
 import { BotsModule } from './modules/bots.module';
+import { ServersFunctionModule } from './modules/serverFunction.module';
+import { RolesModule } from './modules/roles.module';
+import { UserPermissionsModule } from './modules/userPermissions.module';
+import { ChannelOverwritesModule } from './modules/channelOverwrites.module';
+import { PermissionsModule } from './modules/permissions.module';
 
 @Module({
   imports: [
@@ -32,6 +37,11 @@ import { BotsModule } from './modules/bots.module';
     MessagesModule,
     ApplicationsModule,
     BotsModule,
+    ServersFunctionModule,
+    RolesModule,
+    UserPermissionsModule,
+    ChannelOverwritesModule,
+    PermissionsModule,
   ],
 })
 export class AppModule {}

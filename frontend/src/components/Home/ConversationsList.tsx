@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import plusIcon from "../../assets/plus.svg";
 import CreateGroup from "./Chat/Group/CreateGroup";
 
@@ -13,6 +13,11 @@ const ConversationsList = () => {
   const [conversationInfo, setConvInfo] = useState<ConvInfo[] | null>(null);
   const [isGroupOpen, setGroupOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Get selected conversation from URL
+  const searchParams = new URLSearchParams(location.search);
+  const selectedChannel = searchParams.get("channel");
 
   const onMount = async () => {
     try {
@@ -65,7 +70,11 @@ const ConversationsList = () => {
         {conversationInfo?.map((chan, i) => (
           <li
             key={i}
-            className="flex items-center px-3 py-2 rounded-xl hover:bg-[#2a2b2e] text-gray-300 cursor-pointer transition-all duration-200 hover:scale-[1.02] group min-w-0"
+            className={`flex items-center px-3 py-2 rounded-xl cursor-pointer transition-all duration-200 min-w-0 group ${
+              selectedChannel === chan.id
+                ? "bg-[#2a2b2e] border border-gray-700"
+                : "hover:bg-[#2a2b2e] hover:scale-[1.02]"
+            } text-gray-300`}
             onClick={() => {
               navigate(`/home?channel=${chan.id}`);
             }}

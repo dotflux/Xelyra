@@ -26,6 +26,7 @@ import { groupKick } from 'src/logic/home/group/groupKick';
 import { groupLeave } from 'src/logic/home/group/groupLeave';
 import { groupParticipants } from 'src/logic/home/group/groupParticipants';
 import { ServerMembersService } from './serverMembers.service';
+import { createServer } from 'src/logic/home/servers/createServer';
 
 @Injectable()
 export class HomeService {
@@ -219,6 +220,18 @@ export class HomeService {
       this.usersService,
       this.messagesService,
       this.groupsService,
+    );
+  }
+
+  async createServer(req: Request, name: string) {
+    return await createServer(
+      req,
+      name,
+      this.usersService,
+      this.messagesService,
+      this.serversService,
+      this.serverMembersService,
+      this.channelsService,
     );
   }
 }

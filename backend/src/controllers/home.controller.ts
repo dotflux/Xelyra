@@ -131,4 +131,9 @@ export class HomeController {
   async groupParticipants(@Req() req: Request, @Body('group') group: string) {
     return await this.homeService.groupParticipants(req, group);
   }
+
+  @Post('servers/create')
+  async createServer(@Req() req: Request, @Body('name') name: string) {
+    return await this.homeService.createServer(req, name);
+  }
 }

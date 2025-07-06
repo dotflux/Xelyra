@@ -100,8 +100,8 @@ const CreateGroup = (props: Props) => {
   if (!props.isOpen) return;
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-[#2a2b2e] rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl border border-[#3a3b3e]">
+    <div className="fixed inset-0 bg-black/20 backdrop-blur-md flex items-center justify-center z-50">
+      <div className="bg-[#18181c] rounded-xl shadow-2xl w-full max-w-md p-7 relative border border-[#23232a]">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold text-white">Create Group</h2>
           <button

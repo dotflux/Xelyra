@@ -5,6 +5,7 @@ import Login from "./components/login/Login";
 import AuthenticatedLayout from "./components/Home/AuthenticatedLayout";
 import Home from "./components/Home/Home";
 import Index from "./Index";
+import Server from "./components/Home/Servers/Server";
 
 function App() {
   const router = createBrowserRouter([
@@ -31,6 +32,10 @@ function App() {
         {
           index: true,
           element: <Home />,
+        },
+        {
+          path: "servers/:id",
+          element: <Server />,
         },
       ],
     },
