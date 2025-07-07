@@ -132,4 +132,40 @@ export class UsersService {
       throw err;
     }
   }
+
+  async updateDisplayName(id: string, newName: string) {
+    const query = `UPDATE xelyra.users SET display_name = ? WHERE id = ?`;
+    const params = [newName, id];
+    try {
+      const results = await this.scyllaService.execute(query, params);
+      return results.rows;
+    } catch (err) {
+      console.error('Error updating display name:', err);
+      throw err;
+    }
+  }
+
+  async updatePfp(id: string, pfpUrl: string) {
+    const query = `UPDATE xelyra.users SET pfp = ? WHERE id = ?`;
+    const params = [pfpUrl, id];
+    try {
+      const results = await this.scyllaService.execute(query, params);
+      return results.rows;
+    } catch (err) {
+      console.error('Error updating pfp:', err);
+      throw err;
+    }
+  }
+
+  async setXynId(id: string, userId: string) {
+    const query = `UPDATE xelyra.users SET xyn_id = ? WHERE id = ?`;
+    const params = [id, userId];
+    try {
+      const results = await this.scyllaService.execute(query, params);
+      return results.rows;
+    } catch (err) {
+      console.error('Error setting xyn id:', err);
+      throw err;
+    }
+  }
 }

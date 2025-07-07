@@ -11,6 +11,9 @@ export interface User {
   servers: string[];
   friends: string[];
   conversations: string[];
+  pfp?: string;
+  displayName?: string;
+  xyn_id?: string;
 }
 
 interface UserContextType {

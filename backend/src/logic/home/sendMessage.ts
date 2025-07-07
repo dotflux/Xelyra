@@ -25,6 +25,7 @@ export const sendMessage = async (
   groupsService: GroupsService,
   channelsService: ChannelsService,
   replyTo?: string,
+  files?: any[],
 ) => {
   try {
     const token = req.cookies?.user_token;
@@ -91,6 +92,7 @@ export const sendMessage = async (
       false,
       false,
       repliedMessage.length > 0 ? repliedMessage[0].created_at : '',
+      files || undefined,
     );
 
     messagesGateway.sendToConversation(conversation, {
@@ -101,11 +103,24 @@ export const sendMessage = async (
       created_timestamp: saved.created_timestamp,
       id: saved.id.toString(),
       reply_to: saved.reply_to,
+      files: saved.files || [],
     });
+
+    const dummyiD = uuidv4();
+    console.log('heres new id', dummyiD);
+    const dmId = [user[0].id, process.env.AI_ID as string].sort().join('_');
+    await conversationsService.createConversation(
+      dummyiD,
+      dmId,
+      [user[0].id, process.env.AI_ID as string],
+      'dm',
+    );
 
     return {
       valid: true,
       message: 'Message sent.',
+      messageId: saved.created_at,
+      files: saved.files || [],
     };
   } catch (error) {
     if (

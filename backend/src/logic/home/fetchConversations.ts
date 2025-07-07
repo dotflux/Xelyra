@@ -57,6 +57,7 @@ export const fetchConversations = async (
         return {
           id: convId,
           reciever: otherUser.username,
+          recieverPfp: otherUser.pfp,
           type: 'dm' as const,
         };
       }),
@@ -69,7 +70,12 @@ export const fetchConversations = async (
         if (!grp) {
           throw new BadRequestException(`Group ${grpId} not found`);
         }
-        return { id: grpId, reciever: grp.name, type: 'group' as const };
+        return {
+          id: grpId,
+          reciever: grp.name,
+          recieverPfp: grp.pfp,
+          type: 'group' as const,
+        };
       }),
     );
 

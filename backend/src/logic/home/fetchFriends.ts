@@ -12,6 +12,7 @@ export interface FriendInfo {
   username: string;
   id: string;
   conversation: string | null;
+  pfp: string;
 }
 
 export const fetchFriends = async (
@@ -54,6 +55,7 @@ export const fetchFriends = async (
         username: friendUser[0].username,
         id: friendUser[0].id,
         conversation: conversationId,
+        pfp: friendUser[0].pfp,
       });
     }
 

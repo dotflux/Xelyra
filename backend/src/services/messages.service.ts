@@ -14,14 +14,16 @@ export class MessagesService {
     isRead: boolean,
     edited: boolean,
     replyTo: string,
+    files?: any[],
   ) {
     const createdAt = uuidv1();
     const createdAtTs = new Date();
     const validReplyTo =
       replyTo && /^[0-9a-fA-F-]{36}$/.test(replyTo) ? replyTo : null;
+    const filesValue = files || [];
     const query = `
-      INSERT INTO xelyra.messages (id, message, user, conversation, is_read, edited, created_at, reply_to)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO xelyra.messages (id, message, user, conversation, is_read, edited, created_at, reply_to, files)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
     const params = [
       id,
@@ -32,6 +34,7 @@ export class MessagesService {
       edited,
       createdAt,
       validReplyTo,
+      filesValue,
     ];
     try {
       await this.scyllaService.execute(query, params);
@@ -44,6 +47,7 @@ export class MessagesService {
         id,
         edited,
         reply_to: replyTo,
+        files: filesValue,
       };
     } catch (err) {
       console.error('Error inserting messages:', err);
@@ -173,7 +177,7 @@ export class MessagesService {
   }
 
   async getMessages(conversation: string, limit = 30) {
-    const query = `SELECT id, user, message, conversation, is_read, edited, reply_to, created_at, toTimestamp(created_at) AS created_timestamp
+    const query = `SELECT id, user, message, conversation, is_read, edited, reply_to, created_at, toTimestamp(created_at) AS created_timestamp, files
 FROM xelyra.messages
 WHERE conversation = ?
 ORDER BY created_at DESC
@@ -181,7 +185,10 @@ LIMIT ?;`;
     const params = [conversation, limit];
     try {
       const results = await this.scyllaService.execute(query, params);
-      return results.rows;
+      return results.rows.map((row: any) => ({
+        ...row,
+        files: row.files || [],
+      }));
     } catch (err) {
       console.error('Error finding message by id:', err);
       throw err;
@@ -189,7 +196,7 @@ LIMIT ?;`;
   }
 
   async getOlderMessages(conversation: string, created_at: string, limit = 10) {
-    const query = `SELECT id, user, message, conversation, is_read, edited, reply_to, created_at, toTimestamp(created_at) AS created_timestamp
+    const query = `SELECT id, user, message, conversation, is_read, edited, reply_to, created_at, toTimestamp(created_at) AS created_timestamp, files
 FROM xelyra.messages
 WHERE conversation = ? AND created_at < ?
 ORDER BY created_at DESC
@@ -197,7 +204,10 @@ LIMIT ?;`;
     const params = [conversation, created_at, limit];
     try {
       const results = await this.scyllaService.execute(query, params);
-      return results.rows;
+      return results.rows.map((row: any) => ({
+        ...row,
+        files: row.files || [],
+      }));
     } catch (err) {
       console.error('Error finding message by id:', err);
       throw err;

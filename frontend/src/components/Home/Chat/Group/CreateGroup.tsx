@@ -203,7 +203,7 @@ const CreateGroup = (props: Props) => {
                     }`}
                   >
                     <div className="flex items-center space-x-3">
-                      <div className="h-10 w-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-lg font-bold text-white shadow-md mr-3">
+                      <div className="h-10 w-10 bg-gradient-to-br from-gray-800 to-gray-900 rounded-full flex items-center justify-center text-lg font-bold text-white shadow-md mr-3">
                         {f.username.charAt(0).toUpperCase()}
                       </div>
                       <span className="font-medium">{f.username}</span>

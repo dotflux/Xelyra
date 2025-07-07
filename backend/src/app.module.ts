@@ -23,6 +23,7 @@ import { SlashCommandsModule } from './modules/slashCommands.module';
 import { ServerAppsModule } from './modules/serverApps.module';
 import { BotsGatewayModule } from './modules/botsGateway.module';
 import { DeveloperModule } from './modules/developer.module';
+import { GenAIModule } from './modules/genai.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { DeveloperModule } from './modules/developer.module';
     ServerAppsModule,
     BotsGatewayModule,
     DeveloperModule,
+    GenAIModule,
   ],
 })
 export class AppModule {}

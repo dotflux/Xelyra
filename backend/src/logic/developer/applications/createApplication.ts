@@ -41,9 +41,9 @@ export const createApplication = async (
     if (name.length > 20) {
       throw new BadRequestException('Name must not exceed 20 characters');
     }
-    if (description && description.length > 120) {
+    if (description && description.length > 200) {
       throw new BadRequestException(
-        'Description must not exceed 120 characters',
+        'Description must not exceed 200 characters',
       );
     }
 

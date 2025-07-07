@@ -47,7 +47,7 @@ const CreateCategory = (props: Props) => {
 
   if (!props.isOpen) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-md">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md">
       <div className="bg-[#18181c] rounded-xl shadow-2xl w-full max-w-md p-7 relative border border-[#23232a]">
         <h2 className="text-2xl font-bold text-white mb-5 tracking-tight">
           Create Category

@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS xelyra.messages (
   message TEXT,
   user UUID,
   conversation UUID,
+  files LIST<FROZEN<file_info>>,
   is_read BOOLEAN,
   edited BOOLEAN,
   created_at TIMEUUID,

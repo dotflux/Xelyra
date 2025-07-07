@@ -27,6 +27,9 @@ import { groupLeave } from 'src/logic/home/group/groupLeave';
 import { groupParticipants } from 'src/logic/home/group/groupParticipants';
 import { ServerMembersService } from './serverMembers.service';
 import { createServer } from 'src/logic/home/servers/createServer';
+import { fetchGroupInfo } from 'src/logic/home/group/fetchGroupInfo';
+import { changeGroupPfp } from 'src/logic/home/group/changeGroupPfp';
+import { changeGroupName } from 'src/logic/home/group/changeGroupName';
 
 @Injectable()
 export class HomeService {
@@ -119,6 +122,7 @@ export class HomeService {
     message: string,
     conversation: string,
     replyTo?: string,
+    files?: any[],
   ) {
     return await sendMessage(
       req,
@@ -131,6 +135,7 @@ export class HomeService {
       this.groupsService,
       this.channelsService,
       replyTo,
+      files,
     );
   }
 
@@ -181,6 +186,15 @@ export class HomeService {
     );
   }
 
+  async fetchGroupInfo(req: Request, groupId: string) {
+    return await fetchGroupInfo(
+      req,
+      groupId,
+      this.usersService,
+      this.messagesService,
+      this.groupsService,
+    );
+  }
   async groupAdd(req: Request, group: string, participants: string[]) {
     return await groupAdd(
       req,
@@ -232,6 +246,32 @@ export class HomeService {
       this.serversService,
       this.serverMembersService,
       this.channelsService,
+    );
+  }
+
+  async changeGroupPfp(
+    req: Request,
+    groupId: string,
+    file?: any,
+    imageUrl?: string,
+  ) {
+    return await changeGroupPfp(
+      req,
+      this.groupsService,
+      groupId,
+      this.usersService,
+      file,
+      imageUrl,
+    );
+  }
+
+  async changeGroupName(req: Request, groupId: string, name: string) {
+    return await changeGroupName(
+      req,
+      this.groupsService,
+      groupId,
+      name,
+      this.usersService,
     );
   }
 }

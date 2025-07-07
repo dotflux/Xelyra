@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import ChannelSettings from "./ChannelSettings/ChannelSettings";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
+import BelowBar from "../BelowBar";
 
 interface ServerInfo {
   id: string;
@@ -84,6 +85,10 @@ const Server = () => {
         <div className={channel ? "flex-1" : "relative flex h-full w-full"}>
           {channel ? <ChatWindow id={user.id} /> : "No channel selected."}
         </div>
+      </div>
+      {/* BelowBar: fixed at bottom left, always visible */}
+      <div className="fixed left-0 bottom-0 z-30 m-4">
+        <BelowBar />
       </div>
       {showChannelSettings !== null && (
         <ChannelSettings

@@ -20,6 +20,7 @@ interface Message {
   reply_to: string;
   command?: string;
   bot_id?: string;
+  files?: string[];
 }
 
 interface Props {
@@ -37,9 +38,16 @@ const ChatWindow = (props: Props) => {
   const [hasMore, setHasMore] = useState(true);
   const [replyTo, setReplyTo] = useState<string | null>(null);
   const [repliedContent, setRepliedContent] = useState("");
+  const [repliedSenderType, setRepliedSenderType] = useState<string | null>(
+    null
+  );
 
   const [showPanel, setShowPanel] = useState(false);
   const [initialLoad, setInitialLoad] = useState(true);
+  const [channelInfo, setChannelInfo] = useState<{
+    name: string;
+    type: string;
+  } | null>(null);
 
   const fetchMessages = async (
     cursors?: { userCursor?: string; commandCursor?: string },
@@ -193,7 +201,11 @@ const ChatWindow = (props: Props) => {
   return (
     <div className="flex flex-col h-full bg-[#121316]">
       {/* Top Bar */}
-      <TopBar showPanel={showPanel} setShowPanel={setShowPanel} />
+      <TopBar
+        showPanel={showPanel}
+        setShowPanel={setShowPanel}
+        onChannelInfoChange={setChannelInfo}
+      />
 
       {/* Messages Area */}
       <div
@@ -260,6 +272,8 @@ const ChatWindow = (props: Props) => {
                 setRepliedTo={setReplyTo}
                 setRepliedContent={setRepliedContent}
                 repliedTo={msg.reply_to}
+                files={msg.files}
+                setRepliedSenderType={setRepliedSenderType}
               />
             );
           })
@@ -284,6 +298,9 @@ const ChatWindow = (props: Props) => {
           repliedContent={repliedContent}
           setReplyTo={setReplyTo}
           setRepliedContent={setRepliedContent}
+          repliedSenderType={repliedSenderType}
+          channelName={channelInfo?.name}
+          channelType={channelInfo?.type}
         />
       </div>
 

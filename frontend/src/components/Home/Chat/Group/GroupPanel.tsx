@@ -5,6 +5,7 @@ import plusIcon from "../../../../assets/plus.svg";
 import gearIcon from "../../../../assets/cog.svg";
 import kickIcon from "../../../../assets/userRemove.svg";
 import GroupAdd from "./GroupAdd";
+import GroupSettingsModal from "./GroupSettingsModal";
 
 interface Props {
   showPanel: boolean;
@@ -21,6 +22,7 @@ const GroupPanel = (props: Props) => {
   if (!props.showPanel) return;
   const [partInfo, setPartInfo] = useState<Participant[] | null>(null);
   const [showAdd, setShowAdd] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   const onMount = async () => {
     try {
@@ -93,7 +95,10 @@ const GroupPanel = (props: Props) => {
           >
             <img src={plusIcon} alt="Add" className="h-5 w-5" />
           </button>
-          <button className="p-1 hover:bg-[#2a2b2e] rounded">
+          <button
+            className="p-1 hover:bg-[#2a2b2e] rounded"
+            onClick={() => setShowSettings(true)}
+          >
             <img src={gearIcon} alt="Settings" className="h-5 w-5" />
           </button>
         </div>
@@ -108,7 +113,7 @@ const GroupPanel = (props: Props) => {
               className="group flex items-center justify-between p-2 rounded hover:bg-[#2a2b2e] transition"
             >
               <div className="flex items-center space-x-3">
-                <div className="h-10 w-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-lg font-bold text-white shadow-md mr-3">
+                <div className="h-10 w-10 bg-gradient-to-br from-gray-800 to-gray-900 rounded-full flex items-center justify-center text-lg font-bold text-white shadow-md mr-3">
                   {p.username.charAt(0).toUpperCase()}
                 </div>
                 <span className="text-sm text-white">{p.username}</span>
@@ -130,6 +135,13 @@ const GroupPanel = (props: Props) => {
           onClose={() => {
             setShowAdd(false);
           }}
+        />
+      )}
+      {showSettings && (
+        <GroupSettingsModal
+          isOpen={showSettings}
+          onClose={() => setShowSettings(false)}
+          groupId={props.channel}
         />
       )}
     </div>

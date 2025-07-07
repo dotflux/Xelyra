@@ -1,6 +1,18 @@
-import { Body, Controller, Post, Res, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  Res,
+  Req,
+  UseInterceptors,
+  UploadedFiles,
+} from '@nestjs/common';
 import { HomeService } from 'src/services/home.service';
 import { Request, Response } from 'express';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { Multer } from 'multer';
+import { diskStorage } from 'multer';
+import { extname, join, resolve } from 'path';
 
 @Controller('home')
 export class HomeController {
@@ -48,17 +60,41 @@ export class HomeController {
   }
 
   @Post('messages/send')
+  @UseInterceptors(
+    FileFieldsInterceptor([{ name: 'files', maxCount: 10 }], {
+      storage: diskStorage({
+        destination: resolve(__dirname, '../../uploads'),
+        filename: (req, file, cb) => {
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(null, uniqueSuffix + extname(file.originalname));
+        },
+      }),
+    }),
+  )
   async sendMessage(
     @Req() req: Request,
     @Body('message') message: string,
     @Body('conversation') conversation: string,
     @Body('replyTo') replyTo?: string,
+    @UploadedFiles() uploadedFiles?: { files?: Multer.File[] },
   ) {
+    let filesMeta: any[] = [];
+    if (uploadedFiles?.files && uploadedFiles.files.length > 0) {
+      filesMeta = uploadedFiles.files.map((file) => ({
+        filename: file.filename,
+        originalname: file.originalname,
+        url: `/uploads/${file.filename}`,
+        type: file.mimetype,
+        size: file.size,
+      }));
+    }
     return await this.homeService.sendMessage(
       req,
       message,
       conversation,
       replyTo,
+      filesMeta,
     );
   }
 
@@ -104,6 +140,11 @@ export class HomeController {
     return await this.homeService.createGroup(req, name, participants);
   }
 
+  @Post('groups/fetch/info')
+  async fetchGroupInfo(@Req() req: Request, @Body('group') groupId: string) {
+    return await this.homeService.fetchGroupInfo(req, groupId);
+  }
+
   @Post('groups/add')
   async groupAdd(
     @Req() req: Request,
@@ -135,5 +176,71 @@ export class HomeController {
   @Post('servers/create')
   async createServer(@Req() req: Request, @Body('name') name: string) {
     return await this.homeService.createServer(req, name);
+  }
+
+  @Post('pfp')
+  @UseInterceptors(
+    FileFieldsInterceptor([{ name: 'pfp', maxCount: 1 }], {
+      storage: diskStorage({
+        destination: resolve(__dirname, '../../uploads'),
+        filename: (req, file, cb) => {
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(null, uniqueSuffix + extname(file.originalname));
+        },
+      }),
+    }),
+  )
+  async changePfp(
+    @Req() req: Request,
+    @UploadedFiles() uploadedFiles?: { pfp?: Multer.File[] },
+    @Body('aiImageUrl') aiImageUrl?: string,
+  ) {
+    const { changePfp } = await import('src/logic/home/user/changePfp');
+    const file =
+      uploadedFiles?.pfp && uploadedFiles.pfp.length > 0
+        ? uploadedFiles.pfp[0]
+        : undefined;
+    return await changePfp(
+      req,
+      this.homeService['usersService'],
+      file,
+      aiImageUrl,
+    );
+  }
+
+  @Post('groups/pfp')
+  @UseInterceptors(
+    FileFieldsInterceptor([{ name: 'pfp', maxCount: 1 }], {
+      storage: diskStorage({
+        destination: resolve(__dirname, '../../uploads'),
+        filename: (req, file, cb) => {
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(null, uniqueSuffix + extname(file.originalname));
+        },
+      }),
+    }),
+  )
+  async changeGroupPfp(
+    @Req() req: Request,
+    @Body('groupId') groupId: string,
+    @UploadedFiles() uploadedFiles?: { pfp?: Multer.File[] },
+    @Body('imageUrl') imageUrl?: string,
+  ) {
+    const file =
+      uploadedFiles?.pfp && uploadedFiles.pfp.length > 0
+        ? uploadedFiles.pfp[0]
+        : undefined;
+    return await this.homeService.changeGroupPfp(req, groupId, file, imageUrl);
+  }
+
+  @Post('groups/name')
+  async changeGroupName(
+    @Req() req: Request,
+    @Body('groupId') groupId: string,
+    @Body('name') name: string,
+  ) {
+    return await this.homeService.changeGroupName(req, groupId, name);
   }
 }

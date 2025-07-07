@@ -6,6 +6,8 @@ import ConversationsList from "./ConversationsList";
 import ChatWindow from "./Chat/ChatWindow";
 import { useSearchParams } from "react-router-dom";
 import { useUser } from "./UserContext";
+import BelowBar from "./BelowBar";
+import Xyn from "./Xyn";
 
 const Home = () => {
   const [searchParams] = useSearchParams();
@@ -18,30 +20,7 @@ const Home = () => {
   return (
     <div className="relative h-screen w-screen overflow-hidden">
       <HomeBg />
-
-      {/* FriendList toggle button shown only on mobile */}
-      {!channel && (
-        <button
-          onClick={() => setShowFriendsOverlay(true)}
-          className="sm:hidden fixed bottom-6 right-6 z-20 bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-full shadow-2xl transition-all duration-200 hover:scale-110 hover:shadow-indigo-500/25"
-          title="Open Friends"
-        >
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
-            />
-          </svg>
-        </button>
-      )}
-
+      {/* Main layout */}
       <div className="relative z-10 flex h-full">
         {/* 1) ServersList */}
         <div className={channel ? "hidden sm:flex" : "flex"}>
@@ -58,13 +37,28 @@ const Home = () => {
           {channel ? (
             <ChatWindow id={user.id} />
           ) : (
-            <FriendList
-              onClose={() => {
-                setShowFriendsOverlay(false);
-              }}
-            />
+            <>
+              <FriendList
+                onClose={() => {
+                  setShowFriendsOverlay(false);
+                }}
+              />
+              {/* Xyn side column */}
+              <div className="hidden md:flex w-[420px] max-w-[40vw] border-l border-[#23232a] bg-[#18191c]">
+                <Xyn />
+              </div>
+            </>
           )}
         </div>
+      </div>
+
+      {/* BelowBar: fixed at bottom left, always visible, never inside chat/friend list */}
+      <div
+        className={`fixed left-0 bottom-0 z-30 m-4 ${
+          channel ? "hidden sm:block" : ""
+        }`}
+      >
+        <BelowBar />
       </div>
 
       {/* FriendList Full-Screen Overlay */}

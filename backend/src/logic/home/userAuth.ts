@@ -13,6 +13,9 @@ export interface UserData {
   servers: string[];
   friends: string[];
   conversations: string[];
+  pfp: string;
+  displayName: string;
+  xyn_id: string;
 }
 
 export const userAuth = async (req: Request, usersService: UsersService) => {
@@ -41,6 +44,9 @@ export const userAuth = async (req: Request, usersService: UsersService) => {
       servers: user[0].servers,
       friends: user[0].servers,
       conversations: user[0].conversations,
+      pfp: user[0].pfp,
+      displayName: user[0].display_name,
+      xyn_id: user[0].xyn_id,
     };
     return {
       valid: true,

@@ -3,6 +3,8 @@ import { DummyUsersService } from 'src/services/dummyUsers.service';
 import * as dotenv from 'dotenv';
 import { Response } from 'express';
 import { UsersService } from 'src/services/users.service';
+import { ConversationsService } from 'src/services/conversations.service';
+import { v4 as uuidv4 } from 'uuid';
 
 dotenv.config();
 
@@ -12,6 +14,7 @@ export const signupOtp = async (
   res: Response,
   dummyUsersService: DummyUsersService,
   usersService: UsersService,
+  conversationsService: ConversationsService,
 ) => {
   try {
     if (!otp || !email) {
@@ -38,7 +41,20 @@ export const signupOtp = async (
         inRegistration[0].email,
         inRegistration[0].password,
       );
+      const newId = uuidv4();
+      const dmId = [inRegistration[0].id, process.env.AI_ID as string]
+        .sort()
+        .join('_');
       res.clearCookie('auth_token');
+      await Promise.all([
+        conversationsService.createConversation(
+          newId,
+          dmId,
+          [inRegistration[0].id, process.env.AI_ID as string],
+          'dm',
+        ),
+        usersService.setXynId(newId, inRegistration[0].id),
+      ]);
       return { valid: true, message: 'User registered successfully' };
     }
   } catch (error) {

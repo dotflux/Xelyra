@@ -10,6 +10,8 @@ import { MessagesGateway } from 'src/gateways/messages.gateway';
 import { GroupsService } from 'src/services/groups.service';
 import { ChannelsService } from 'src/services/channels.service';
 import { ServerMembersService } from 'src/services/serverMembers.service';
+import * as fs from 'fs';
+import { resolve } from 'path';
 
 dotenv.config();
 
@@ -76,6 +78,29 @@ export const deleteMessage = async (
     if (messageRow[0].user.toString() !== user[0].id.toString()) {
       throw new BadRequestException('Cant delete that message.');
     }
+
+    // Delete files from disk if present
+    console.log('Files to delete:', messageRow[0].files);
+    if (Array.isArray(messageRow[0].files)) {
+      for (const file of messageRow[0].files) {
+        if (file && file.filename) {
+          const filePath = resolve(process.cwd(), 'uploads', file.filename);
+          console.log(
+            'Attempting to delete file:',
+            filePath,
+            fs.existsSync(filePath),
+          );
+          try {
+            if (fs.existsSync(filePath)) {
+              fs.unlinkSync(filePath);
+            }
+          } catch (err) {
+            console.error('Failed to delete file:', filePath, err);
+          }
+        }
+      }
+    }
+
     await messagesService.deleteMsg(conversation, messageRow[0].created_at);
 
     messagesGateway.emitMessageDelete(conversation, message);

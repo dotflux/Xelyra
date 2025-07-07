@@ -75,6 +75,30 @@ export class GroupsService {
     }
   }
 
+  async updatePfp(groupId: string, pfpUrl: string) {
+    const query = `UPDATE xelyra.groups SET pfp = ? WHERE id = ?`;
+    const params = [pfpUrl, groupId];
+    try {
+      const results = await this.scyllaService.execute(query, params);
+      return results.rows;
+    } catch (err) {
+      console.error('Error updating group pfp:', err);
+      throw err;
+    }
+  }
+
+  async updateName(groupId: string, name: string) {
+    const query = `UPDATE xelyra.groups SET name = ? WHERE id = ?`;
+    const params = [name, groupId];
+    try {
+      const results = await this.scyllaService.execute(query, params);
+      return results.rows;
+    } catch (err) {
+      console.error('Error updating group name:', err);
+      throw err;
+    }
+  }
+
   async deleteGroup(group: string) {
     const query = `DELETE FROM xelyra.groups WHERE id = ?`;
     const params = [group];
