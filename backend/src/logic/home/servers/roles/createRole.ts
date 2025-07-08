@@ -17,6 +17,7 @@ export const createRole = async (
   req: Request,
   id: string,
   name: string,
+  colour: string,
   template: string,
   permissions: Permission[],
   usersService: UsersService,
@@ -84,7 +85,7 @@ export const createRole = async (
       newId,
       finalName,
       lv,
-      '#374151',
+      colour ? colour : '#374151',
       finalPermissions,
     );
 

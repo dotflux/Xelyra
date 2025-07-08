@@ -13,7 +13,7 @@ dotenv.config();
 export interface ServerInfo {
   id: string;
   name: string;
-  icon: string;
+  pfp: string | null;
 }
 
 export const fetchServer = async (
@@ -60,7 +60,7 @@ export const fetchServer = async (
     const serverInfo: ServerInfo = {
       id: server[0].id,
       name: server[0].name,
-      icon: server[0].icon,
+      pfp: server[0].pfp ? `http://localhost:3000${server[0].pfp}` : null,
     };
 
     return {

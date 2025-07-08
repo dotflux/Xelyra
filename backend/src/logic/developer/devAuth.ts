@@ -10,6 +10,7 @@ dotenv.config();
 export interface UserData {
   id: string;
   username: string;
+  pfp?: string;
 }
 
 export const devAuth = async (req: Request, usersService: UsersService) => {
@@ -36,6 +37,7 @@ export const devAuth = async (req: Request, usersService: UsersService) => {
     const userData: UserData = {
       id: user[0].id,
       username: user[0].username,
+      pfp: user[0].pfp || undefined,
     };
     return {
       valid: true,

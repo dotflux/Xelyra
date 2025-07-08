@@ -8,6 +8,7 @@ interface AppInfo {
   description: string;
   count: number;
   app_id: string;
+  pfp?: string;
 }
 
 const AppOverview = () => {
@@ -17,6 +18,7 @@ const AppOverview = () => {
   const [description, setDescription] = useState("");
 
   const [isDirty, setIsDirty] = useState(false);
+  const [pfpUploading, setPfpUploading] = useState(false);
 
   useEffect(() => {
     const onMount = async () => {
@@ -65,6 +67,8 @@ const AppOverview = () => {
 
       if (res.data.valid) {
         setAppInfo(res.data.newInfo);
+        setName(res.data.newInfo.app_name);
+        setDescription(res.data.newInfo.description);
       }
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
@@ -72,6 +76,35 @@ const AppOverview = () => {
       } else {
         console.log("Network Error:", error);
       }
+    }
+  };
+
+  const handlePfpChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || !e.target.files[0] || !id) return;
+    const file = e.target.files[0];
+    const formData = new FormData();
+    formData.append("file", file);
+    setPfpUploading(true);
+    try {
+      const res = await axios.post(
+        `http://localhost:3000/developer/applications/${id}/update/pfp`,
+        formData,
+        {
+          withCredentials: true,
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
+      if (res.data.valid && res.data.pfp) {
+        setAppInfo((prev) => (prev ? { ...prev, pfp: res.data.pfp } : prev));
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        console.log(error.response.data.message);
+      } else {
+        console.log("Network Error:", error);
+      }
+    } finally {
+      setPfpUploading(false);
     }
   };
 
@@ -103,7 +136,7 @@ const AppOverview = () => {
             <label className="text-white font-medium mb-1">Description</label>
             <textarea
               placeholder="Enter app description"
-              value={description}
+              value={description || ""}
               maxLength={120}
               onChange={(e) => {
                 setDescription(e.target.value);
@@ -133,12 +166,43 @@ const AppOverview = () => {
         </div>
 
         {/* Right side: Avatar box */}
-        <div className="flex-shrink-0 flex items-center justify-center">
-          <div className="h-32 w-32 bg-[#0d0d0e] rounded-2xl shadow-sm hover:shadow-md transition-shadow flex items-center justify-center">
-            <div className="h-16 w-16 bg-gray-800 rounded-full flex items-center justify-center text-2xl font-semibold text-white">
-              {appInfo.app_name.charAt(0).toUpperCase()}
-            </div>
+        <div className="flex-shrink-0 flex flex-col items-center justify-center gap-2">
+          <div className="h-32 w-32 bg-[#0d0d0e] rounded-2xl shadow-sm hover:shadow-md transition-shadow flex items-center justify-center overflow-hidden">
+            {appInfo.pfp ? (
+              <img
+                src={
+                  appInfo.pfp.startsWith("/uploads/")
+                    ? `http://localhost:3000${appInfo.pfp}`
+                    : appInfo.pfp
+                }
+                alt="App PFP"
+                className="h-32 w-32 object-cover rounded-2xl"
+              />
+            ) : (
+              <div className="h-16 w-16 bg-gray-800 rounded-full flex items-center justify-center text-2xl font-semibold text-white">
+                {appInfo.app_name.charAt(0).toUpperCase()}
+              </div>
+            )}
           </div>
+          <label
+            className="mt-2 flex flex-col items-center gap-1 w-full"
+            htmlFor="app-pfp-input"
+          >
+            <span className="text-xs text-gray-300 font-medium">
+              Change App Icon
+            </span>
+            <input
+              id="app-pfp-input"
+              type="file"
+              accept="image/*"
+              className="block text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 w-full"
+              onChange={handlePfpChange}
+              disabled={pfpUploading}
+            />
+          </label>
+          {pfpUploading && (
+            <span className="text-xs text-gray-400 mt-1">Uploading...</span>
+          )}
         </div>
       </div>
       {isDirty && (

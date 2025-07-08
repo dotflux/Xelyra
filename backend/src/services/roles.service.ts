@@ -65,4 +65,53 @@ export class RolesService {
       throw err;
     }
   }
+
+  async findAllServerRolesFull(server: string) {
+    const query = `SELECT role_id, name, color, level, permissions FROM xelyra.roles WHERE server_id = ?`;
+    const params = [server];
+    try {
+      const results = await this.scyllaService.execute(query, params);
+      return results.rows;
+    } catch (err) {
+      console.error('Error finding all server roles (full):', err);
+      throw err;
+    }
+  }
+
+  async renameRole(serverId: string, roleId: string, newName: string) {
+    const query = `UPDATE xelyra.roles SET name = ? WHERE server_id = ? AND role_id = ?`;
+    const params = [newName, serverId, roleId];
+    try {
+      await this.scyllaService.execute(query, params);
+    } catch (err) {
+      console.error('Error renaming role:', err);
+      throw err;
+    }
+  }
+
+  async changeRoleColor(serverId: string, roleId: string, color: string) {
+    const query = `UPDATE xelyra.roles SET color = ? WHERE server_id = ? AND role_id = ?`;
+    const params = [color, serverId, roleId];
+    try {
+      await this.scyllaService.execute(query, params);
+    } catch (err) {
+      console.error('Error changing role color:', err);
+      throw err;
+    }
+  }
+
+  async updateRolePermissions(
+    serverId: string,
+    roleId: string,
+    permissions: string[],
+  ) {
+    const query = `UPDATE xelyra.roles SET permissions = ? WHERE server_id = ? AND role_id = ?`;
+    const params = [permissions, serverId, roleId];
+    try {
+      await this.scyllaService.execute(query, params);
+    } catch (err) {
+      console.error('Error updating role permissions:', err);
+      throw err;
+    }
+  }
 }

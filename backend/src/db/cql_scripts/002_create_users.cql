@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS xelyra.users (
   email TEXT,
   password TEXT,
   display_name TEXT,
+  bio TEXT,
   pfp TEXT,
   xyn_id UUID,
   conversations list<uuid>,
@@ -11,5 +12,7 @@ CREATE TABLE IF NOT EXISTS xelyra.users (
   servers list<uuid>,
   friends list<uuid>,
   applications list<uuid>,
+  requests list<uuid>,
+  requests_sent list<uuid>,
   created_at TIMESTAMP
 );

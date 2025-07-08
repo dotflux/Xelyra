@@ -61,4 +61,16 @@ export class ApplicationsService {
       throw err;
     }
   }
+
+  async updatePfp(id: string, pfpUrl: string) {
+    const query = `UPDATE xelyra.applications SET pfp=? WHERE app_id=?`;
+    const params = [pfpUrl, id];
+    try {
+      const results = await this.scyllaService.execute(query, params);
+      return results.rows;
+    } catch (err) {
+      console.error('Error updating application pfp:', err);
+      throw err;
+    }
+  }
 }

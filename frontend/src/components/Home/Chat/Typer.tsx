@@ -45,6 +45,45 @@ const Typer = (props: Props) => {
   const sendMessage = async () => {
     if (!props.channelId || !text.trim()) return;
 
+    // Command dispatch logic
+    if (picked && text.startsWith(`/${picked.name}`)) {
+      // Parse options from the message text
+      const options: { name: string; value: string }[] = [];
+      const afterCmd = text.slice(picked.name.length + 2); // skip '/cmd '
+      // Match optionName:value pairs
+      afterCmd.replace(/(\w+):([^\s]+)/g, (match, key, value) => {
+        options.push({ name: key, value });
+        return match;
+      });
+      try {
+        const res = await axios.post(
+          `http://localhost:3000/developer/applications/${picked.app_id}/commands/dispatch`,
+          {
+            command: picked.name,
+            channelId: props.channelId,
+            options,
+          },
+          { withCredentials: true }
+        );
+        if (res.data.valid) {
+          setText("");
+          setPicked(null);
+          props.setReplyTo(null);
+          props.setRepliedContent("");
+        }
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          console.error(
+            "Command dispatch error:",
+            err.response?.data || err.message
+          );
+        } else {
+          console.error("Command dispatch error:", err);
+        }
+      }
+      return;
+    }
+
     const isAIMentioned = /@Xyn\b/i.test(text);
     const shouldTriggerAI =
       props.alwaysTriggerAI ||

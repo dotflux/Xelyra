@@ -243,4 +243,47 @@ export class HomeController {
   ) {
     return await this.homeService.changeGroupName(req, groupId, name);
   }
+  @Post('requests')
+  async fetchRequests(@Req() req: Request) {
+    return await this.homeService.fetchRequests(req);
+  }
+  @Post('requests/send')
+  async sendRequest(
+    @Req() req: Request,
+    @Body('recieverName') recieverId: string,
+  ) {
+    return await this.homeService.sendRequest(req, recieverId);
+  }
+  @Post('requests/accept')
+  async acceptRequest(
+    @Req() req: Request,
+    @Body('recieverId') recieverId: string,
+  ) {
+    return await this.homeService.acceptRequest(req, recieverId);
+  }
+  @Post('requests/reject')
+  async rejectRequest(
+    @Req() req: Request,
+    @Body('recieverId') recieverId: string,
+  ) {
+    return await this.homeService.rejectRequest(req, recieverId);
+  }
+  @Post('requests/cancel')
+  async cancelRequest(
+    @Req() req: Request,
+    @Body('recieverId') recieverId: string,
+  ) {
+    return await this.homeService.cancelRequest(req, recieverId);
+  }
+  @Post('requests/sent')
+  async listSentRequests(@Req() req: Request) {
+    return await this.homeService.listSentRequests(req);
+  }
+  @Post('popupInfo')
+  async fetchPopupInfo(
+    @Req() req: Request,
+    @Body('userToFetch') userToFetch: string,
+  ) {
+    return await this.homeService.fetchPopupInfo(req, userToFetch);
+  }
 }

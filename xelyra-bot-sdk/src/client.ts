@@ -74,12 +74,13 @@ export class XelyraClient extends EventEmitter<XelyraEvents> {
             data: { content, ephemeral },
           });
         },
-        send: (message: string) => {
+        send: (message: string, embeds?: any[]) => {
           return this.sendMessage(
             raw.channelId,
             message,
             raw.command,
-            raw.userId
+            raw.userId,
+            embeds
           );
         },
       };
@@ -111,14 +112,21 @@ export class XelyraClient extends EventEmitter<XelyraEvents> {
     channelId: string,
     message: string,
     command: string,
-    user: string
+    user: string,
+    embeds?: any[]
   ): Promise<BotMessage> {
     return new Promise((resolve, reject) => {
       if (!this.socket.connected) {
         return reject(new Error("Socket not connected"));
       }
 
-      this.socket.emit("sendMessage", { channelId, message, command, user });
+      this.socket.emit("sendMessage", {
+        channelId,
+        message,
+        command,
+        user,
+        embeds,
+      });
 
       const onAck = (ack: { id: UUID; created_at: string }) => {
         const botMsg = new BotMessage(ack.id, channelId, this);

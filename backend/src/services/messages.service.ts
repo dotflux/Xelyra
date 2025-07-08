@@ -185,7 +185,7 @@ LIMIT ?;`;
     const params = [conversation, limit];
     try {
       const results = await this.scyllaService.execute(query, params);
-      return results.rows.map((row: any) => ({
+      return (results.rows || []).map((row: any) => ({
         ...row,
         files: row.files || [],
       }));
@@ -204,7 +204,7 @@ LIMIT ?;`;
     const params = [conversation, created_at, limit];
     try {
       const results = await this.scyllaService.execute(query, params);
-      return results.rows.map((row: any) => ({
+      return (results.rows || []).map((row: any) => ({
         ...row,
         files: row.files || [],
       }));
@@ -222,10 +222,14 @@ LIMIT ?;`;
     user: string,
     conversation: string,
     edited: boolean,
+    embeds?: any[],
   ) {
     const createdAt = uuidv1();
     const createdAtTs = new Date();
-    const query = `INSERT INTO xelyra.commands (id, command, message, bot_id, user, conversation, edited, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+    const embedsValue = Array.isArray(embeds)
+      ? embeds.map((e) => (typeof e === 'string' ? e : JSON.stringify(e)))
+      : [];
+    const query = `INSERT INTO xelyra.commands (id, command, message, bot_id, user, conversation, edited, created_at, embeds) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
     const params = [
       id,
       command,
@@ -235,6 +239,7 @@ LIMIT ?;`;
       conversation,
       edited,
       createdAt,
+      embedsValue,
     ];
     try {
       await this.scyllaService.execute(query, params);
@@ -248,6 +253,7 @@ LIMIT ?;`;
         created_timestamp: createdAtTs.toISOString(),
         id,
         edited,
+        embeds: embedsValue,
       };
     } catch (err) {
       console.error('Error creating command:', err);
@@ -256,7 +262,7 @@ LIMIT ?;`;
   }
 
   async getCommands(conversation: string, limit = 30) {
-    const query = `SELECT id, command, message, bot_id, user, conversation, edited, created_at, toTimestamp(created_at) AS created_timestamp
+    const query = `SELECT id, command, message, bot_id, user, conversation, edited, created_at, toTimestamp(created_at) AS created_timestamp, embeds
 FROM xelyra.commands
 WHERE conversation = ?
 ORDER BY created_at DESC

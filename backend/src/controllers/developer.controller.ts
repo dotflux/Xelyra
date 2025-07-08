@@ -1,8 +1,19 @@
-import { Body, Controller, Post, Res, Req, Param } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  Res,
+  Req,
+  Param,
+  UseInterceptors,
+  UploadedFile,
+} from '@nestjs/common';
 import { DeveloperService } from 'src/services/developer.service';
 import { Request, Response } from 'express';
 import { Permission } from 'src/services/roles.service';
 import { SlashOption } from 'src/services/slashCommands.service';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { File as MulterFile } from 'multer';
 
 @Controller('developer')
 export class DeveloperController {
@@ -133,5 +144,15 @@ export class DeveloperController {
     @Param('conversation') conversation: string,
   ) {
     return await this.devService.fetchCommandInfo(req, id, conversation);
+  }
+
+  @Post('applications/:id/update/pfp')
+  @UseInterceptors(FileInterceptor('file'))
+  async updateAppPfp(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @UploadedFile() file: MulterFile,
+  ) {
+    return await this.devService.updateAppPfp(req, id, file);
   }
 }

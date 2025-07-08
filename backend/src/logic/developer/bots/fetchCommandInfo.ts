@@ -21,6 +21,7 @@ export interface CommandInfo {
   app_name: string;
   command_name: string;
   sender_username: string;
+  sender_pfp: string;
 }
 
 export const fetchCommandInfo = async (
@@ -91,6 +92,7 @@ export const fetchCommandInfo = async (
       app_name: app[0].name,
       command_name: commandRow[0].command,
       sender_username: sender[0].username,
+      sender_pfp: sender[0].pfp,
     };
 
     return {

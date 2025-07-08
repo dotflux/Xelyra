@@ -9,6 +9,7 @@ import { ServersService } from '../../../services/servers.service';
 import { ChannelsService } from '../../../services/channels.service';
 import { PermissionsService } from '../../../services/permissions.service';
 import { ServerMembersService } from '../../../services/serverMembers.service';
+import { ConversationsService } from '../../../services/conversations.service';
 
 dotenv.config();
 
@@ -17,6 +18,7 @@ export interface ChannelInfo {
   id: string;
   type: string;
   category: string;
+  unreadCount: number;
 }
 
 export interface CategoryWithChannels {
@@ -34,6 +36,7 @@ export const listChannels = async (
   channelsService: ChannelsService,
   permissionsService: PermissionsService,
   serverMemberService: ServerMembersService,
+  conversationsService: ConversationsService,
 ) => {
   try {
     const token = req.cookies?.user_token;
@@ -96,11 +99,17 @@ export const listChannels = async (
       // );
 
       if (channelsByCategory.has(String(channel.category))) {
+        const unreadCounter = await conversationsService.findUnreadCounter(
+          channel.id,
+          user[0].id.toString(),
+        );
+        const unreadCount = unreadCounter.length;
         const channelInfo: ChannelInfo = {
           name: channel.name,
           id: channel.id,
           type: channel.type,
           category: String(channel.category),
+          unreadCount,
         };
         channelsByCategory.get(String(channel.category))!.push(channelInfo);
       }

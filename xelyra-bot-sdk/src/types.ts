@@ -16,5 +16,5 @@ export interface InteractionContext {
   args: Record<string, any>;
   respond: (content: string, ephemeral?: boolean) => void;
 
-  send: (message: string) => Promise<BotMessage>;
+  send: (message: string, embeds?: any[]) => Promise<BotMessage>;
 }

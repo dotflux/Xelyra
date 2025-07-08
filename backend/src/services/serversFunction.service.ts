@@ -21,6 +21,13 @@ import { assignPermission } from 'src/logic/home/servers/roles/assignPermission'
 import { fetchChannelSettings } from 'src/logic/home/servers/fetchChannelSetttings';
 import { createCategory } from 'src/logic/home/servers/createCategory';
 import { fetchServer } from 'src/logic/home/servers/fetchServer';
+import { ConversationsService } from './conversations.service';
+import { addToServer } from 'src/logic/home/servers/addToServer';
+import { fetchRoles } from 'src/logic/home/servers/roles/fetchRole';
+import { renameRole } from 'src/logic/home/servers/roles/renameRole';
+import { changeRoleColor } from 'src/logic/home/servers/roles/changeRoleColor';
+import { updateRolePermissions } from 'src/logic/home/servers/roles/updateRolePermissions';
+import { updateServerInfo } from 'src/logic/home/servers/updateServerInfo';
 
 @Injectable()
 export class ServersFunctionService {
@@ -35,6 +42,7 @@ export class ServersFunctionService {
     private readonly userPermsService: UserPermissionsService,
     private readonly channelOverService: ChannelOverwritesService,
     private readonly permissionsService: PermissionsService,
+    private readonly conversationsService: ConversationsService,
   ) {}
 
   async fetchServer(req: Request, id: string) {
@@ -58,6 +66,7 @@ export class ServersFunctionService {
       this.channelsService,
       this.permissionsService,
       this.serverMembersService,
+      this.conversationsService,
     );
   }
 
@@ -99,6 +108,7 @@ export class ServersFunctionService {
     req: Request,
     id: string,
     name: string,
+    color: string,
     template: string,
     permissions: Permission[],
   ) {
@@ -106,6 +116,7 @@ export class ServersFunctionService {
       req,
       id,
       name,
+      color,
       template,
       permissions,
       this.usersService,
@@ -116,7 +127,9 @@ export class ServersFunctionService {
     );
   }
 
-  async fetchRoles(req: Request, id: string) {}
+  async fetchRoles(req: Request, id: string) {
+    return await fetchRoles(req, id, this.rolesService);
+  }
 
   async assignRole(req: Request, id: string, userId: string, role: string) {
     return await assignRole(
@@ -196,5 +209,45 @@ export class ServersFunctionService {
       this.channelOverService,
       this.serverMembersService,
     );
+  }
+
+  async addToServer(req: Request, id: string) {
+    return await addToServer(
+      req,
+      id,
+      this.usersService,
+      this.messagesService,
+      this.serversService,
+      this.serverMembersService,
+      this.channelsService,
+    );
+  }
+
+  async renameRole(serverId: string, roleId: string, newName: string) {
+    return await renameRole(serverId, roleId, newName, this.rolesService);
+  }
+
+  async changeRoleColor(serverId: string, roleId: string, color: string) {
+    return await changeRoleColor(serverId, roleId, color, this.rolesService);
+  }
+
+  async updateRolePermissions(
+    serverId: string,
+    roleId: string,
+    permissions: string[],
+  ) {
+    return await updateRolePermissions(
+      serverId,
+      roleId,
+      permissions,
+      this.rolesService,
+    );
+  }
+
+  async updateServerInfo(
+    serverId: string,
+    updates: { name?: string; pfp?: string },
+  ) {
+    return await updateServerInfo(serverId, updates, this.serversService);
   }
 }

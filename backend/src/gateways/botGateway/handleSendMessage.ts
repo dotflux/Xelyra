@@ -10,6 +10,7 @@ export async function handleSendMessageLogic(
     message: string;
     command: string;
     user: string;
+    embeds?: any[];
   },
   messagesService: MessagesService,
   messagesGateway: MessagesGateway,
@@ -34,6 +35,7 @@ export async function handleSendMessageLogic(
     payload.user,
     payload.channelId,
     false,
+    payload.embeds,
   );
 
   await messagesService.createCommandLookup(

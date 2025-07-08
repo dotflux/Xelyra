@@ -30,6 +30,13 @@ import { createServer } from 'src/logic/home/servers/createServer';
 import { fetchGroupInfo } from 'src/logic/home/group/fetchGroupInfo';
 import { changeGroupPfp } from 'src/logic/home/group/changeGroupPfp';
 import { changeGroupName } from 'src/logic/home/group/changeGroupName';
+import { listRequests } from 'src/logic/home/user/listRequests';
+import { sendRequest } from 'src/logic/home/user/sendRequest';
+import { acceptRequest } from 'src/logic/home/user/acceptRequest';
+import { rejectRequest } from 'src/logic/home/user/rejectRequest';
+import { cancelRequest } from 'src/logic/home/user/cancelRequest';
+import { listSentRequests } from 'src/logic/home/user/listSentRequests';
+import { fetchPopupInfo } from 'src/logic/home/fetchPopupInfo';
 
 @Injectable()
 export class HomeService {
@@ -272,6 +279,41 @@ export class HomeService {
       groupId,
       name,
       this.usersService,
+    );
+  }
+
+  async fetchRequests(req: Request) {
+    return await listRequests(req, this.usersService);
+  }
+
+  async sendRequest(req: Request, recieverId: string) {
+    return await sendRequest(req, recieverId, this.usersService);
+  }
+
+  async acceptRequest(req: Request, recieverId: string) {
+    return await acceptRequest(req, recieverId, this.usersService);
+  }
+
+  async rejectRequest(req: Request, recieverId: string) {
+    return await rejectRequest(req, recieverId, this.usersService);
+  }
+
+  async cancelRequest(req: Request, recieverId: string) {
+    return await cancelRequest(req, recieverId, this.usersService);
+  }
+
+  async listSentRequests(req: Request) {
+    return await listSentRequests(req, this.usersService);
+  }
+
+  async fetchPopupInfo(req: Request, userToFetch: string) {
+    return await fetchPopupInfo(
+      req,
+      userToFetch,
+      this.usersService,
+      this.botsService,
+      this.appService,
+      this.messagesService,
     );
   }
 }

@@ -3,5 +3,6 @@ CREATE TABLE IF NOT EXISTS xelyra.applications (
   owner_id    UUID,
   name        TEXT,
   description TEXT,
-  created_at  TIMESTAMP
+  created_at  TIMESTAMP,
+  pfp         TEXT
 );

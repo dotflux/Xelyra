@@ -11,6 +11,7 @@ dotenv.config();
 export interface Application {
   app_id: string;
   app_name: string;
+  app_pfp: string;
 }
 
 export const fetchApplications = async (
@@ -39,6 +40,13 @@ export const fetchApplications = async (
     }
 
     const userApplications: Application[] = [];
+    if (user[0].applications.length === 0) {
+      return {
+        valid: true,
+        message: 'User Applications Fetched',
+        userApplications: [],
+      };
+    }
 
     for (const app of user[0].applications) {
       const exists = await appService.findById(app);
@@ -48,6 +56,7 @@ export const fetchApplications = async (
       userApplications.push({
         app_id: exists[0].app_id,
         app_name: exists[0].name,
+        app_pfp: exists[0].pfp,
       });
     }
 

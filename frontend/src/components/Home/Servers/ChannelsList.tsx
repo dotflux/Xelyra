@@ -15,6 +15,7 @@ interface ChannelInfo {
   id: string;
   type: string;
   category: string;
+  unreadCount: number;
 }
 
 interface CategoryWithChannels {
@@ -28,6 +29,9 @@ interface Props {
   isOpen: boolean;
   closeSettings: () => void;
   serverName: string;
+  onOpenCreateCategory: () => void;
+  onOpenCreateChannel: (categoryId: string) => void;
+  onOpenServerSettings: () => void;
 }
 
 const ChannelsList = (props: Props) => {
@@ -36,8 +40,6 @@ const ChannelsList = (props: Props) => {
   const [categories, setCategories] = useState<CategoryWithChannels[] | null>(
     null
   );
-  const [createOpen, setCreateOpen] = useState<null | string>(null); // store category id for which modal is open
-  const [createCategoryOpen, setCreateCategoryOpen] = useState(false);
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -121,10 +123,19 @@ const ChannelsList = (props: Props) => {
           {dropdownOpen && (
             <div className="absolute right-0 mt-2 w-44 bg-[#23232a] border border-gray-800 rounded shadow-lg z-50 animate-fade-in">
               <button
+                className="w-full text-left px-4 py-2 text-gray-100 hover:bg-[#23232a]/80 rounded transition font-semibold border-b border-[#23232a]"
+                onClick={() => {
+                  setDropdownOpen(false);
+                  props.onOpenServerSettings();
+                }}
+              >
+                Server Settings
+              </button>
+              <button
                 className="w-full text-left px-4 py-2 text-gray-100 hover:bg-[#23232a]/80 rounded transition"
                 onClick={() => {
                   setDropdownOpen(false);
-                  setCreateCategoryOpen(true);
+                  props.onOpenCreateCategory();
                 }}
               >
                 + Create Category
@@ -162,7 +173,7 @@ const ChannelsList = (props: Props) => {
                 title="Add Channel"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setCreateOpen(cat.category);
+                  props.onOpenCreateChannel(cat.category);
                 }}
               />
             </div>
@@ -190,7 +201,13 @@ const ChannelsList = (props: Props) => {
                     ) : (
                       <FaHashtag className="mr-2 text-gray-400 w-5 h-5" />
                     )}
-                    <span className="truncate flex-1 font-medium tracking-wide">
+                    <span className="truncate flex-1 font-medium tracking-wide flex items-center">
+                      {chan.type === "text" && chan.unreadCount > 0 && (
+                        <span
+                          className="w-2 h-2 rounded-full bg-white mr-2 inline-block shadow-md"
+                          title="Unread"
+                        />
+                      )}
                       {chan.name}
                     </span>
                     <img
@@ -212,23 +229,9 @@ const ChannelsList = (props: Props) => {
                 ))}
               </ul>
             )}
-            {/* Create Channel Modal for this category */}
-            {createOpen === cat.category && (
-              <CreateChannel
-                isOpen={true}
-                onClose={() => setCreateOpen(null)}
-                categoryId={cat.category}
-              />
-            )}
           </li>
         ))}
       </ul>
-      {createCategoryOpen && (
-        <CreateCategory
-          isOpen={createCategoryOpen}
-          onClose={() => setCreateCategoryOpen(false)}
-        />
-      )}
     </nav>
   );
 };

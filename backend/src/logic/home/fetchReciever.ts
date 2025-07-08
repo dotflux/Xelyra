@@ -13,6 +13,7 @@ dotenv.config();
 export interface RecieverInfo {
   id: string;
   username: string;
+  pfp: string;
 }
 
 export const fetchReciever = async (
@@ -66,6 +67,7 @@ export const fetchReciever = async (
           id: otherRows[0].id,
           username: otherRows[0].username,
           type: 'dm',
+          pfp: otherRows[0].pfp,
         },
       };
     }
@@ -84,6 +86,7 @@ export const fetchReciever = async (
           id: grpRows[0].id,
           username: grpRows[0].name,
           type: 'group',
+          pfp: grpRows[0].pfp,
         },
       };
     }

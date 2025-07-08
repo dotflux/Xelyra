@@ -62,11 +62,12 @@ export const updateAppOverview = async (
 
     const countServer = await serverAppService.findAppServers(app[0].app_id);
 
-    const newInfo: NewInfo = {
+    const newInfo: NewInfo & { pfp?: string } = {
       app_name: name,
       description,
       count: countServer.length,
       app_id: app[0].app_id,
+      pfp: app[0].pfp || undefined,
     };
 
     return {

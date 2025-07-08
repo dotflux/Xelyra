@@ -95,6 +95,31 @@ export const sendMessage = async (
       files || undefined,
     );
 
+    if (isDm) {
+      const otherId = conversationRow[0].participants.find(
+        (p: string) => p != user[0].id.toString(),
+      );
+      await conversationsService.createUnreadCounter(conversation, otherId);
+      await conversationsService.setLastMessageTimestamp(
+        conversation,
+        new Date(saved.created_timestamp),
+      );
+    }
+    if (isGroup) {
+      for (const participant of groupRow[0].participants) {
+        if (participant.toString() != user[0].id.toString()) {
+          await conversationsService.createUnreadCounter(
+            conversation,
+            participant.toString(),
+          );
+        }
+      }
+      await groupsService.setLastMessageTimestamp(
+        conversation,
+        new Date(saved.created_timestamp),
+      );
+    }
+
     messagesGateway.sendToConversation(conversation, {
       conversation: conversation.toString(),
       message: message,
@@ -105,16 +130,6 @@ export const sendMessage = async (
       reply_to: saved.reply_to,
       files: saved.files || [],
     });
-
-    const dummyiD = uuidv4();
-    console.log('heres new id', dummyiD);
-    const dmId = [user[0].id, process.env.AI_ID as string].sort().join('_');
-    await conversationsService.createConversation(
-      dummyiD,
-      dmId,
-      [user[0].id, process.env.AI_ID as string],
-      'dm',
-    );
 
     return {
       valid: true,

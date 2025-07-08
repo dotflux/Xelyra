@@ -1,10 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import editIcon from "../../../assets/edit.svg";
 import deleteIcon from "../../../assets/trash.svg";
 import axios from "axios";
 import EditMessage from "./EditMessage";
 import replyIcon from "../../../assets/reply.svg";
 import React from "react";
+import Embed from "./Embed";
+import UserPopup from "./UserPopup";
 
 interface Sender {
   username: string;
@@ -28,6 +30,7 @@ interface Props {
   repliedTo: string | null;
   files?: any[];
   setRepliedSenderType?: React.Dispatch<React.SetStateAction<string | null>>;
+  embeds?: string[] | object[];
 }
 
 const BACKEND_URL = "http://localhost:3000";
@@ -75,6 +78,11 @@ const MessageBox = (props: Props) => {
   const [imageDims, setImageDims] = useState<{
     [key: number]: { width: number; height: number };
   }>({});
+  const [userPopupOpen, setUserPopupOpen] = useState(false);
+  const [userPopupData, setUserPopupData] = useState<any | null>(null);
+  const pfpRef = useRef<HTMLDivElement>(
+    null
+  ) as React.RefObject<HTMLDivElement>;
 
   const fetchSender = async () => {
     try {
@@ -157,8 +165,34 @@ const MessageBox = (props: Props) => {
     minute: "2-digit",
   });
 
+  const handlePfpClick = async () => {
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/home/popupInfo",
+        { userToFetch: props.user },
+        {
+          withCredentials: true,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      if (response.data.valid) {
+        setUserPopupData(response.data.senderData);
+        setUserPopupOpen(true);
+      }
+    } catch (error) {
+      // Optionally show error
+    }
+  };
+
   return (
     <>
+      {/* User Info Popup */}
+      <UserPopup
+        open={userPopupOpen}
+        onClose={() => setUserPopupOpen(false)}
+        senderData={userPopupData || {}}
+        anchorRef={pfpRef}
+      />
       {/* Discord-style reply bar and connector above the username/timestamp */}
       {props.repliedTo && repliedContent && !props.grouped && (
         <div
@@ -205,12 +239,10 @@ const MessageBox = (props: Props) => {
               {repliedUsername || "User"}
             </span>
             <span
-              className="text-xs text-indigo-200 truncate max-w-[180px] italic opacity-90"
+              className="text-xs text-indigo-200 italic opacity-90 flex-1 min-w-0 truncate"
               title={repliedContent || undefined}
             >
-              {(repliedContent || "").length > 60
-                ? (repliedContent || "").slice(0, 60) + "…"
-                : repliedContent || ""}
+              {repliedContent || ""}
             </span>
           </div>
         </div>
@@ -218,22 +250,67 @@ const MessageBox = (props: Props) => {
       <div
         className={`group relative flex items-start gap-2 ${
           props.grouped ? "mt-[1px] ml-[8px]" : "mt-3"
-        } hover:bg-gray-900 px-1`}
+        } hover:bg-gray-900/70 px-1 transition-colors duration-150`}
         style={{ lineHeight: "1.2" }}
       >
+        {/* Action bar on hover */}
+        {!props.grouped && (
+          <div className="absolute right-2 top-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex gap-1 bg-black/60 backdrop-blur-md rounded-xl shadow-lg p-1 border border-gray-800">
+            <button
+              className="p-1 hover:bg-indigo-700/70 rounded-lg transition-colors"
+              title="Reply"
+              onClick={() => {
+                props.setRepliedTo(props.id);
+                props.setRepliedContent(props.message);
+                if (props.setRepliedSenderType)
+                  props.setRepliedSenderType(senderInfo?.type || null);
+              }}
+            >
+              <img src={replyIcon} alt="Reply" className="w-5 h-5" />
+            </button>
+            {props.userId === props.user && (
+              <>
+                <button
+                  className="p-1 hover:bg-indigo-700/70 rounded-lg transition-colors"
+                  title="Edit"
+                  onClick={() => setEditing(true)}
+                >
+                  <img src={editIcon} alt="Edit" className="w-5 h-5" />
+                </button>
+                <button
+                  className="p-1 hover:bg-red-700/70 rounded-lg transition-colors"
+                  title="Delete"
+                  onClick={onDelete}
+                >
+                  <img src={deleteIcon} alt="Delete" className="w-5 h-5" />
+                </button>
+              </>
+            )}
+          </div>
+        )}
         {!props.grouped ? (
           senderInfo?.pfp ? (
-            <img
-              src={
-                senderInfo.pfp.startsWith("/uploads/")
-                  ? `${BACKEND_URL}${senderInfo.pfp}`
-                  : senderInfo.pfp
-              }
-              alt={senderInfo.displayName || senderInfo.username}
-              className="h-10 w-10 rounded-full object-cover bg-gray-700 border border-gray-800 shadow-md"
-            />
+            <div
+              ref={pfpRef}
+              className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center cursor-pointer border-2 border-indigo-700/40 shadow"
+              onClick={handlePfpClick}
+              title={senderInfo?.username || "User"}
+            >
+              <img
+                src={
+                  senderInfo.pfp.startsWith("/uploads/")
+                    ? `${BACKEND_URL}${senderInfo.pfp}`
+                    : senderInfo.pfp
+                }
+                alt={senderInfo.username}
+                className="w-full h-full rounded-full object-cover"
+              />
+            </div>
           ) : (
-            <div className="h-10 w-10 bg-gradient-to-br from-gray-800 to-gray-900 rounded-full flex items-center justify-center text-lg font-bold text-white shadow-md">
+            <div
+              ref={pfpRef}
+              className="h-10 w-10 bg-gradient-to-br from-gray-800 to-gray-900 rounded-full flex items-center justify-center text-lg font-bold text-white shadow-md"
+            >
               {senderInfo?.username.charAt(0).toUpperCase() || "?"}
             </div>
           )
@@ -277,7 +354,7 @@ const MessageBox = (props: Props) => {
               />
             ) : (
               <>
-                <div className="max-w-[75%] text-sm text-gray-200 whitespace-pre-wrap break-words">
+                <div className="max-w-full sm:max-w-[75%] text-sm text-gray-200 whitespace-pre-wrap break-words overflow-x-hidden">
                   {parseMessageFormatting(props.message)}
                   {props.edited && (
                     <span className="text-gray-400 text-xs ml-1">(edited)</span>
@@ -297,7 +374,7 @@ const MessageBox = (props: Props) => {
                             <img
                               src={`${BACKEND_URL}${file.url}`}
                               alt={file.filename}
-                              className="rounded shadow border border-gray-700 max-w-[600px] max-h-[400px] w-auto h-auto"
+                              className="rounded shadow border border-gray-700 w-full max-w-[600px] h-auto max-h-[400px]"
                               style={{ display: "block" }}
                               onLoad={(e) => {
                                 const img = e.currentTarget;
@@ -357,43 +434,27 @@ const MessageBox = (props: Props) => {
                   </div>
                 )}
 
-                {/* icon container */}
-                <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 flex space-x-2 transition-all duration-200">
-                  {/* Reply icon (always visible on hover) */}
-                  <img
-                    src={replyIcon}
-                    alt="reply"
-                    className="h-4 w-4 cursor-pointer hover:text-white opacity-70 hover:opacity-100 transition-opacity"
-                    onClick={() => {
-                      props.setRepliedTo(props.createdAt);
-                      props.setRepliedContent(props.message);
-                      if (props.setRepliedSenderType) {
-                        props.setRepliedSenderType(senderInfo?.type || null);
-                      }
-                    }}
-                    title="Reply"
-                  />
-
-                  {/* Edit/Delete (only if user is the author) */}
-                  {props.userId === props.user && (
-                    <>
-                      <img
-                        src={editIcon}
-                        alt="edit"
-                        className="h-4 w-4 cursor-pointer hover:text-white opacity-70 hover:opacity-100 transition-opacity"
-                        onClick={() => setEditing(true)}
-                        title="Edit"
-                      />
-                      <img
-                        src={deleteIcon}
-                        alt="delete"
-                        className="h-4 w-4 cursor-pointer hover:text-red-500 opacity-70 hover:opacity-100 transition-opacity"
-                        onClick={() => onDelete()}
-                        title="Delete"
-                      />
-                    </>
+                {/* Embeds */}
+                {Array.isArray((props as any).embeds) &&
+                  (props as any).embeds.length > 0 && (
+                    <div className="mt-2 flex flex-col gap-2">
+                      {(props as any).embeds.map(
+                        (embed: string | object, idx: number) => {
+                          let parsed: any = embed;
+                          if (typeof embed === "string") {
+                            try {
+                              parsed = JSON.parse(embed);
+                            } catch {
+                              return null;
+                            }
+                          }
+                          if (!parsed || typeof parsed !== "object")
+                            return null;
+                          return <Embed key={idx} {...parsed} />;
+                        }
+                      )}
+                    </div>
                   )}
-                </div>
               </>
             )}
           </div>

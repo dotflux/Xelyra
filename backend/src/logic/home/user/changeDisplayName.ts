@@ -7,7 +7,7 @@ import { UsersService } from 'src/services/users.service';
 
 dotenv.config();
 
-export const fetchReciever = async (
+export const changeDisplayName = async (
   req: Request,
   newName: string,
   usersService: UsersService,

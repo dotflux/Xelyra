@@ -14,6 +14,7 @@ export interface AppInfo {
   description: string;
   count: number;
   app_id: string;
+  pfp: string;
 }
 
 export const fetchAppOverview = async (
@@ -57,6 +58,7 @@ export const fetchAppOverview = async (
       description: app[0].description,
       count: serverCount.length,
       app_id: app[0].app_id,
+      pfp: app[0].pfp,
     };
 
     return {

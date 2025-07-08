@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import Embed from "./Embed";
 
 interface CommandBoxProps {
   botName: string;
@@ -11,12 +12,14 @@ interface CommandBoxProps {
   conversation: string;
   id: string;
   edited?: boolean;
+  embeds?: string[] | object[];
 }
 
 interface CommandInfo {
   app_name: string;
   command_name: string;
   sender_username: string;
+  sender_pfp?: string;
 }
 
 const CommandBox: React.FC<CommandBoxProps> = ({
@@ -29,6 +32,7 @@ const CommandBox: React.FC<CommandBoxProps> = ({
   conversation,
   id,
   edited = false,
+  embeds,
 }) => {
   const [commandInfo, setCommandInfo] = useState<CommandInfo | null>(null);
   const [loading, setLoading] = useState(true);
@@ -107,6 +111,21 @@ const CommandBox: React.FC<CommandBoxProps> = ({
             {error && <span className="text-red-400">{error}</span>}
             {commandInfo && (
               <>
+                {commandInfo.sender_pfp ? (
+                  <img
+                    src={
+                      commandInfo.sender_pfp.startsWith("/uploads/")
+                        ? `http://localhost:3000${commandInfo.sender_pfp}`
+                        : commandInfo.sender_pfp
+                    }
+                    alt={commandInfo.sender_username}
+                    className="w-5 h-5 rounded-full object-cover border border-blue-400 shadow mr-1"
+                  />
+                ) : (
+                  <span className="w-5 h-5 rounded-full bg-blue-900 text-blue-200 flex items-center justify-center text-xs font-bold mr-1 select-none">
+                    {commandInfo.sender_username.charAt(0).toUpperCase()}
+                  </span>
+                )}
                 <span className="text-blue-300 font-semibold">
                   {commandInfo.sender_username}
                 </span>
@@ -150,6 +169,23 @@ const CommandBox: React.FC<CommandBoxProps> = ({
             {message && (
               <div className="max-w-[75%] text-sm text-blue-100 whitespace-pre-wrap break-words mt-1">
                 {message}
+              </div>
+            )}
+            {/* Embeds */}
+            {Array.isArray(embeds) && embeds.length > 0 && (
+              <div className="mt-2 flex flex-col gap-2">
+                {embeds.map((embed: string | object, idx: number) => {
+                  let parsed: any = embed;
+                  if (typeof embed === "string") {
+                    try {
+                      parsed = JSON.parse(embed);
+                    } catch {
+                      return null;
+                    }
+                  }
+                  if (!parsed || typeof parsed !== "object") return null;
+                  return <Embed key={idx} {...parsed} />;
+                })}
               </div>
             )}
           </div>

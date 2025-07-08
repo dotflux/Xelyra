@@ -32,4 +32,29 @@ export class ServersService {
       throw err;
     }
   }
+
+  async updateServerInfo(
+    serverId: string,
+    updates: { name?: string; pfp?: string },
+  ) {
+    const fields: string[] = [];
+    const params: any[] = [];
+    if (updates.name) {
+      fields.push('name = ?');
+      params.push(updates.name);
+    }
+    if (updates.pfp) {
+      fields.push('pfp = ?');
+      params.push(updates.pfp);
+    }
+    if (fields.length === 0) return;
+    const query = `UPDATE xelyra.servers SET ${fields.join(', ')} WHERE id = ?`;
+    params.push(serverId);
+    try {
+      await this.scyllaService.execute(query, params);
+    } catch (err) {
+      console.error('Error updating server info:', err);
+      throw err;
+    }
+  }
 }

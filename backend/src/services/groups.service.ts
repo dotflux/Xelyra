@@ -110,4 +110,15 @@ export class GroupsService {
       throw err;
     }
   }
+  async setLastMessageTimestamp(id: string, timestamp: Date) {
+    const query = `UPDATE xelyra.groups SET last_message_timestamp = ? WHERE id = ?`;
+    const params = [timestamp, id];
+    try {
+      const results = await this.scyllaService.execute(query, params);
+      return results.rows;
+    } catch (err) {
+      console.error('Error setting last message timestamp:', err);
+      throw err;
+    }
+  }
 }

@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { GenAIService } from '../services/genai.service';
 import { UsersService } from '../services/users.service';
-import { fetchReciever } from '../logic/home/user/changeDisplayName';
+import { changeDisplayName } from '../logic/home/user/changeDisplayName';
 import { Request } from 'express';
 import { MessagesService } from 'src/services/messages.service';
 import { v4 as uuidv4 } from 'uuid';
@@ -55,13 +55,56 @@ export class GenAiController {
     }
     console.log(replyTo);
 
+    // Handle image generation queries
+    let generatedImageFile: any = null;
+    let imagePrompt: string | null = null;
+    // If the AI response is GENERATE_IMAGE: ...
+    if (response.trim().startsWith('GENERATE_IMAGE:')) {
+      imagePrompt = response.replace('GENERATE_IMAGE:', '').trim();
+    } else if (
+      /\b(generate|show|draw|picture|image|visual|look like)\b/i.test(
+        message,
+      ) &&
+      !response.includes('CHANGE_PFP:')
+    ) {
+      // Fallback: if user query is a visual/image request
+      imagePrompt = message;
+    }
+    if (imagePrompt) {
+      try {
+        const generatedImage =
+          await this.genaiImageService.generateImage(imagePrompt);
+        // Save the image to disk or storage and get a URL
+        const fs = require('fs');
+        const path = require('path');
+        const uploadsDir = path.join(__dirname, '../../uploads');
+        if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
+        const filename = `genai_${Date.now()}_${Math.random().toString(36).slice(2)}.${generatedImage.ext}`;
+        const filepath = path.join(uploadsDir, filename);
+        fs.writeFileSync(filepath, generatedImage.buffer);
+        const fileUrl = `/uploads/${filename}`;
+        generatedImageFile = {
+          url: fileUrl,
+          filename,
+          type: `image/${generatedImage.ext}`,
+          size: generatedImage.buffer.length,
+        };
+        // Send a message referencing the image
+        response = `Here is what you asked for:`;
+        files = [generatedImageFile];
+      } catch (err) {
+        console.error('[GenAI] Error generating image:', err);
+        response = 'Failed to generate image.';
+      }
+    }
+
     // Handle CHANGE_DISPLAYNAME command anywhere in the response
     if (response.includes('CHANGE_DISPLAYNAME:')) {
       console.log('changing display name called');
       const match = response.match(/CHANGE_DISPLAYNAME:.*$/m);
       if (match) {
         const newName = match[0].replace('CHANGE_DISPLAYNAME:', '').trim();
-        const result = await fetchReciever(req, newName, this.usersService);
+        const result = await changeDisplayName(req, newName, this.usersService);
         response = 'Display name changed to ' + newName;
       }
     }
@@ -133,6 +176,7 @@ export class GenAiController {
       false,
       false,
       replyTo,
+      files,
     );
 
     this.messagesGateway.sendToConversation(conversationId, {

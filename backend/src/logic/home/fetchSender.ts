@@ -54,13 +54,14 @@ export const fetchSender = async (
     const isUser = senderRow.length > 0;
 
     let appName = '';
-
+    let appPfp = '';
     if (botRow.length > 0) {
       const app = await appService.findById(botRow[0].app_id);
       if (app.length === 0) {
         throw new BadRequestException('No such app');
       }
       appName = app[0].name;
+      appPfp = app[0].pfp;
     }
 
     let repliedContent = null;
@@ -108,7 +109,7 @@ export const fetchSender = async (
         : botRow[0].bot_id.toString() === (process.env.AI_ID as string)
           ? 'ai'
           : 'bot',
-      pfp: isUser ? senderRow[0].pfp : botRow[0].pfp,
+      pfp: isUser ? senderRow[0].pfp : appPfp,
     };
 
     return {

@@ -13,6 +13,8 @@ export interface ConvInfo {
   reciever: string;
   id: string;
   type: 'dm' | 'group';
+  unreadCount?: number;
+  last_message_timestamp?: Date;
 }
 
 export const fetchConversations = async (
@@ -54,11 +56,18 @@ export const fetchConversations = async (
         if (!otherUser) {
           throw new BadRequestException(`User ${otherId} not found`);
         }
+        const unreadCounter = await conversationsService.findUnreadCounter(
+          convId,
+          user[0].id.toString(),
+        );
+        const unreadCount = unreadCounter.length;
         return {
           id: convId,
           reciever: otherUser.username,
           recieverPfp: otherUser.pfp,
           type: 'dm' as const,
+          unreadCount,
+          last_message_timestamp: conv.last_message_timestamp,
         };
       }),
     );
@@ -70,11 +79,18 @@ export const fetchConversations = async (
         if (!grp) {
           throw new BadRequestException(`Group ${grpId} not found`);
         }
+        const unreadCounter = await conversationsService.findUnreadCounter(
+          grpId,
+          user[0].id.toString(),
+        );
+        const unreadCount = unreadCounter.length;
         return {
           id: grpId,
           reciever: grp.name,
           recieverPfp: grp.pfp,
           type: 'group' as const,
+          unreadCount,
+          last_message_timestamp: grp.last_message_timestamp,
         };
       }),
     );

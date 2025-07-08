@@ -8,10 +8,18 @@ import { useSearchParams } from "react-router-dom";
 import { useUser } from "./UserContext";
 import BelowBar from "./BelowBar";
 import Xyn from "./Xyn";
+import CreateServer from "./Servers/CreateServer";
+import CreateCategory from "./Servers/CreateCategory";
+import CreateChannel from "./Servers/CreateChannel";
 
 const Home = () => {
   const [searchParams] = useSearchParams();
   const [showFriendsOverlay, setShowFriendsOverlay] = useState(false);
+  const [serverModal, setServerModal] = useState(false);
+  const [createCategoryOpen, setCreateCategoryOpen] = useState(false);
+  const [createChannelOpen, setCreateChannelOpen] = useState<null | string>(
+    null
+  );
   const channel = searchParams.get("channel");
   const { user } = useUser();
 
@@ -24,7 +32,7 @@ const Home = () => {
       <div className="relative z-10 flex h-full">
         {/* 1) ServersList */}
         <div className={channel ? "hidden sm:flex" : "flex"}>
-          <ServersList />
+          <ServersList onOpenCreateServer={() => setServerModal(true)} />
         </div>
 
         {/* 2) ConversationsList */}
@@ -90,6 +98,28 @@ const Home = () => {
             />
           </div>
         </div>
+      )}
+      {/* CreateServer Modal (global overlay) */}
+      {serverModal && (
+        <CreateServer
+          isOpen={serverModal}
+          onClose={() => setServerModal(false)}
+        />
+      )}
+      {/* CreateCategory Modal (global overlay) */}
+      {createCategoryOpen && (
+        <CreateCategory
+          isOpen={createCategoryOpen}
+          onClose={() => setCreateCategoryOpen(false)}
+        />
+      )}
+      {/* CreateChannel Modal (global overlay) */}
+      {createChannelOpen && (
+        <CreateChannel
+          isOpen={true}
+          onClose={() => setCreateChannelOpen(null)}
+          categoryId={createChannelOpen}
+        />
       )}
     </div>
   );

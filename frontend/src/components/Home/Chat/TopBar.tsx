@@ -8,6 +8,7 @@ interface Reciever {
   id: string;
   username: string;
   type: string;
+  pfp?: string;
 }
 
 interface Props {
@@ -86,6 +87,10 @@ const TopBar = (props: Props) => {
         });
       }
     }
+    // Debug: log pfp value
+    if (recieverInfo) {
+      console.log("TopBar recieverInfo.pfp:", recieverInfo.pfp);
+    }
   }, [channelInfo, recieverInfo, serverId]);
 
   return (
@@ -99,6 +104,18 @@ const TopBar = (props: Props) => {
             <span className="text-xl text-indigo-300 font-bold">#</span>
           )}
         </div>
+      ) : recieverInfo?.pfp ? (
+        <img
+          src={
+            recieverInfo.pfp.startsWith("/uploads/")
+              ? `http://localhost:3000${recieverInfo.pfp}`
+              : recieverInfo.pfp.startsWith("http")
+              ? recieverInfo.pfp
+              : `http://localhost:3000/uploads/${recieverInfo.pfp}`
+          }
+          alt={recieverInfo.username}
+          className="h-8 w-8 rounded-full object-cover shadow-md mr-2"
+        />
       ) : (
         <div className="h-8 w-8 bg-gradient-to-br from-gray-800 to-gray-900 rounded-full flex items-center justify-center text-base font-bold text-white shadow-md mr-2">
           {recieverInfo?.username.charAt(0).toUpperCase() || "?"}

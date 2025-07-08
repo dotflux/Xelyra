@@ -7,6 +7,7 @@ import Typer from "./Typer";
 import MessageBox from "./MessageBox";
 import GroupPanel from "./Group/GroupPanel";
 import CommandBox from "./CommandBox";
+import { useUser } from "../UserContext";
 
 interface Message {
   user: string;
@@ -21,6 +22,7 @@ interface Message {
   command?: string;
   bot_id?: string;
   files?: string[];
+  embeds?: string[];
 }
 
 interface Props {
@@ -48,6 +50,8 @@ const ChatWindow = (props: Props) => {
     name: string;
     type: string;
   } | null>(null);
+
+  const { user } = useUser();
 
   const fetchMessages = async (
     cursors?: { userCursor?: string; commandCursor?: string },
@@ -213,13 +217,38 @@ const ChatWindow = (props: Props) => {
         ref={messagesContainerRef}
         onScroll={handleScroll}
       >
-        {loadingMore && (
+        {!channel ? (
+          <div className="flex flex-col items-center justify-center h-full text-center select-none">
+            <div className="mb-4">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="mx-auto h-16 w-16 text-indigo-400 opacity-70"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={1.5}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 20h.01M12 4v16m8-8H4"
+                />
+              </svg>
+            </div>
+            <div className="text-2xl font-bold text-indigo-300 mb-2">
+              No Channel Selected
+            </div>
+            <div className="text-gray-400 text-base max-w-md mx-auto">
+              Please select a channel from the left sidebar to start chatting.
+              <br />
+              Channels are where conversations happen in your server!
+            </div>
+          </div>
+        ) : loadingMore ? (
           <div className="text-center py-4">
             <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-500"></div>
           </div>
-        )}
-
-        {messages?.length ? (
+        ) : messages?.length ? (
           messages.map((msg, i) => {
             const prev = messages[i - 1];
             const sameSender = prev && prev.user === msg.user;
@@ -252,6 +281,7 @@ const ChatWindow = (props: Props) => {
                   conversation={msg.conversation}
                   id={msg.id}
                   edited={msg.edited}
+                  embeds={msg.embeds}
                 />
               );
             }
@@ -274,6 +304,7 @@ const ChatWindow = (props: Props) => {
                 repliedTo={msg.reply_to}
                 files={msg.files}
                 setRepliedSenderType={setRepliedSenderType}
+                embeds={msg.embeds}
               />
             );
           })

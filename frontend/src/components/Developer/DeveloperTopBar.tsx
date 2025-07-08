@@ -1,6 +1,7 @@
 interface User {
   username: string;
   id: string;
+  pfp?: string;
 }
 
 interface Props {
@@ -22,10 +23,21 @@ const DeveloperTopBar = (props: Props) => {
       <div className="flex items-center space-x-4">
         {props.user && (
           <div className="flex items-center space-x-2">
-            {/* Placeholder avatar circle */}
-            <div className="h-8 w-8 bg-blue-700 rounded-full flex items-center justify-center text-white font-medium">
-              {props.user.username.charAt(0).toUpperCase()}
-            </div>
+            {props.user.pfp ? (
+              <img
+                src={
+                  props.user.pfp.startsWith("/uploads/")
+                    ? `http://localhost:3000${props.user.pfp}`
+                    : props.user.pfp
+                }
+                alt="User PFP"
+                className="h-8 w-8 rounded-full object-cover"
+              />
+            ) : (
+              <div className="h-8 w-8 bg-blue-700 rounded-full flex items-center justify-center text-white font-medium">
+                {props.user.username.charAt(0).toUpperCase()}
+              </div>
+            )}
             <span className="text-sm text-white">{props.user.username}</span>
           </div>
         )}

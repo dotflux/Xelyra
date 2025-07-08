@@ -11,6 +11,7 @@ dotenv.config();
 export interface ServerInfo {
   name: string;
   id: string;
+  pfp?: string;
 }
 
 export const fetchServers = async (
@@ -49,6 +50,9 @@ export const fetchServers = async (
       serverInfo.push({
         name: serverUser[0].name,
         id: serverUser[0].id,
+        pfp: serverUser[0].pfp
+          ? `http://localhost:3000${serverUser[0].pfp}`
+          : undefined,
       });
     }
 

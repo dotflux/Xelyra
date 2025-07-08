@@ -11,6 +11,7 @@ import { RolesModule } from './roles.module';
 import { UserPermissionsModule } from './userPermissions.module';
 import { ChannelOverwritesModule } from './channelOverwrites.module';
 import { PermissionsModule } from './permissions.module';
+import { ConversationsModule } from './conversations.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { PermissionsModule } from './permissions.module';
     UserPermissionsModule,
     ChannelOverwritesModule,
     PermissionsModule,
+    ConversationsModule,
   ],
   controllers: [ServerController],
   providers: [ServersFunctionService],

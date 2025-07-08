@@ -2,7 +2,7 @@ import { XelyraClient } from "../xelyra-bot-sdk/src/client";
 
 const bot = new XelyraClient({
   token:
-    "7df1a47d-984c-4f3d-bb94-11a9c7cd1223.e877a3dcedc2afa1b5b63d15cbc0227bdda93c59dc8ceb5e34bca0a6ccbc514d",
+    "6e75c183-60c8-4838-8ba8-839ab7db2d62.0779012d6382319da9abaa0cc43be2b4392f343ee46bbd4dfeac8d72cd631979",
   gatewayUrl: "http://localhost:3000/bot",
 });
 
@@ -29,6 +29,26 @@ bot.command(
 
 bot.command("ping", async (ctx) => {
   await ctx.send("PONG! 🏓");
+});
+
+bot.command("test", async (ctx) => {
+  await ctx.send("TEST!");
+});
+
+bot.command("embedtest", async (ctx) => {
+  await ctx.send("Here is a sample embed!", [
+    {
+      title: "Welcome to Xelyra!",
+      description:
+        "This is a modern Discord-style embed. You can use **bold**, *italic*, and more!",
+      color: "#5865F2",
+      image: "https://cataas.com/cat",
+      fields: [
+        { name: "Field 1", value: "Some value" },
+        { name: "Field 2", value: "Another value" },
+      ],
+    },
+  ]);
 });
 
 bot.login();

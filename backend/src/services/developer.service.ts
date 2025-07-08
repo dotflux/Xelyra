@@ -29,6 +29,7 @@ import { fetchAppBot } from 'src/logic/developer/applications/appSettings/fetchA
 import { updateAppOverview } from 'src/logic/developer/applications/appSettings/updateAppOverview';
 import { fetchBotToken } from 'src/logic/developer/bots/fetchBotToken';
 import { fetchCommandInfo } from 'src/logic/developer/bots/fetchCommandInfo';
+import { updateAppPfp } from 'src/logic/developer/applications/appSettings/updateAppPfp';
 
 @Injectable()
 export class DeveloperService {
@@ -217,6 +218,16 @@ export class DeveloperService {
       this.slashCmdService,
       this.botsService,
       this.channelsService,
+    );
+  }
+
+  async updateAppPfp(req: Request, id: string, file: any) {
+    return await updateAppPfp(
+      req,
+      id,
+      file,
+      this.usersService,
+      this.appService,
     );
   }
 }

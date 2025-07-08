@@ -3,5 +3,6 @@ CREATE TABLE IF NOT EXISTS xelyra.conversations (
   dm_id TEXT,
   participants list<uuid>,
   type TEXT,
+  last_message_timestamp TIMESTAMP,
   created_at TIMESTAMP
 );
