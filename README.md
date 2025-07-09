@@ -3,6 +3,7 @@
 > **The Next-Generation Communication Platform** - A modern, Discord-inspired chat application with cutting-edge AI integration, real-time messaging, and an extensible bot SDK.
 
 ![Xelyra Landing Page](frontend/src/assets/landing_page.gif)
+_Welcome to Xelyra: Modern, sleek, and built for the future of communication._
 
 ## 🌟 **Revolutionary Features**
 
@@ -16,26 +17,39 @@ Meet **Xyn**, your intelligent AI companion integrated directly into Xelyra. Xyn
 - **Provide contextual assistance** across the platform
 
 ![Meet Xyn](frontend/src/assets/meet_xyn.png)
+_Meet Xyn: Your friendly, always-available AI assistant in Xelyra._
 
 **AI-Generated Profile Pictures:**
+
 ![AI Profile Picture Generation](frontend/src/assets/xyn_changes_generated_pfp.gif)
+_Watch as Xyn generates a unique profile picture for you using AI, based on your description!_
 
 **File-Based Profile Updates:**
+
 ![File-Based Profile Updates](frontend/src/assets/xyn_changes_byfile.png)
+_Easily update your profile picture by uploading an image file—Xyn handles the rest._
 
 **Natural Language Account Management:**
+
 ![Natural Language Account Management](frontend/src/assets/xyn_changes_name.gif)
+_Change your display name and other details just by chatting with Xyn—no forms required!_
 
 ### 🔧 **Advanced Bot SDK & Developer Tools**
 
 **Developer Portal:**
+
 ![Developer Portal](frontend/src/assets/developer_page.gif)
+_Powerful developer dashboard for managing your applications, bots, and integrations._
 
 **Comprehensive SDK Documentation:**
+
 ![SDK Documentation](frontend/src/assets/sdk_documentation.gif)
+_In-depth, interactive SDK documentation to help you build bots and integrations quickly._
 
 **Rich Message Formats & Embeds:**
+
 ![Message Formats and Embeds](frontend/src/assets/formats_and_embed.gif)
+_Send messages with rich embeds, formatting, and media for a dynamic chat experience._
 
 #### **🚀 Xelyra Bot SDK - The Most Advanced Bot Framework**
 
@@ -184,10 +198,14 @@ CREATE TABLE roles (
 ### 🎮 **Server Management & Social Features**
 
 **Server Creation:**
+
 ![Server Creation](frontend/src/assets/create_server.gif)
+_Create new servers in seconds—customize everything from the name to the icon._
 
 **Friend System:**
+
 ![Add Friends](frontend/src/assets/add_friends.gif)
+_Add friends and grow your network with a simple, intuitive interface._
 
 **Advanced Features:**
 
@@ -231,12 +249,7 @@ AI_ID=117cd972-3760-47b9-9c38-e6bbc28196f5
 cd backend
 npm install
 
-# Configure environment variables
-cp .env.example .env
-# Add your ScyllaDB, Redis, and Gemini API credentials
-
-# Initialize database
-npm run db:setup
+# Setup env variables, Scylla db and Redis
 
 # Start development server
 npm run start:dev
@@ -256,8 +269,6 @@ npm run dev
 cd xelyra-bot-sdk
 npm install
 
-# Create your first bot
-npm run example
 ```
 
 ### **4. Database Initialization**
@@ -342,13 +353,6 @@ We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.
 ## 📄 **License**
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🔗 **Links**
-
-- **Documentation**: [docs.xelyra.com](https://docs.xelyra.com)
-- **API Reference**: [api.xelyra.com](https://api.xelyra.com)
-- **SDK Documentation**: [sdk.xelyra.com](https://sdk.xelyra.com)
-- **Community**: [community.xelyra.com](https://community.xelyra.com)
 
 ---
 
