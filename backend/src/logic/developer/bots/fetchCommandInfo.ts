@@ -19,9 +19,11 @@ dotenv.config();
 
 export interface CommandInfo {
   app_name: string;
+  app_pfp: string;
   command_name: string;
   sender_username: string;
   sender_pfp: string;
+  sender_display_name: string;
 }
 
 export const fetchCommandInfo = async (
@@ -90,9 +92,11 @@ export const fetchCommandInfo = async (
 
     const commandInfo: CommandInfo = {
       app_name: app[0].name,
+      app_pfp: app[0].pfp,
       command_name: commandRow[0].command,
       sender_username: sender[0].username,
       sender_pfp: sender[0].pfp,
+      sender_display_name: sender[0].display_name,
     };
 
     return {

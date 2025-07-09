@@ -5,6 +5,8 @@ const BelowBar: React.FC = () => {
   const { user } = useUser();
   if (!user) return null;
 
+  const displayName = user.displayName || user.username;
+
   return (
     <div className="w-80 h-16 bg-[#232428]/95 border border-[#2a2b2e] rounded-2xl px-4 py-2 flex items-center shadow-2xl gap-x-4">
       {user.pfp ? (
@@ -14,17 +16,17 @@ const BelowBar: React.FC = () => {
               ? `http://localhost:3000${user.pfp}`
               : user.pfp
           }
-          alt={user.displayName || user.username}
+          alt={displayName}
           className="h-10 w-10 rounded-full object-cover bg-gray-700 border border-gray-800 shadow-md"
         />
       ) : (
         <div className="h-10 w-10 bg-gradient-to-br from-gray-800 to-gray-900 rounded-full flex items-center justify-center text-lg font-bold text-white shadow-md">
-          {(user.displayName || user.username).charAt(0).toUpperCase()}
+          {displayName.charAt(0).toUpperCase()}
         </div>
       )}
       <div className="flex flex-col justify-center min-w-0 flex-1">
         <span className="font-medium text-white text-base leading-5 whitespace-nowrap overflow-visible">
-          {user.displayName || user.username}
+          {displayName}
         </span>
         <span className="text-xs text-green-400 flex items-center gap-1">
           <span className="inline-block w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>

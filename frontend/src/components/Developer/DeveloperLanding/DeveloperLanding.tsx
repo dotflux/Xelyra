@@ -48,7 +48,7 @@ const DeveloperLanding = () => {
   }, []);
 
   return (
-    <div className="relative min-h-screen flex flex-col items-center justify-start overflow-x-hidden bg-transparent pt-28">
+    <div className="relative min-h-screen flex flex-col items-center justify-start bg-transparent pt-28">
       <StickyNav />
       <DevBackground />
       <div id="hero">

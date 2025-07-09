@@ -4,9 +4,10 @@ import deleteIcon from "../../../assets/trash.svg";
 import axios from "axios";
 import EditMessage from "./EditMessage";
 import replyIcon from "../../../assets/reply.svg";
-import React from "react";
 import Embed from "./Embed";
 import UserPopup from "./UserPopup";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { atomDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 interface Sender {
   username: string;
@@ -35,29 +36,128 @@ interface Props {
 
 const BACKEND_URL = "http://localhost:3000";
 
-// Add a function to parse *italic* and **bold**
+// Enhanced message formatting: supports bold, italic, inline code, and code blocks
 function parseMessageFormatting(text: string): React.ReactNode[] {
   const result: React.ReactNode[] = [];
-  let remaining = text;
-  const regex = /\*\*([^*]+)\*\*|\*([^*]+)\*/g;
+  // Flexible code block regex: ```lang\s*\n?code\n?```
+  const codeBlockRegex = /```([a-zA-Z0-9]*)[ \t]*\n?([\s\S]*?)```/g;
   let lastIndex = 0;
   let match;
+  while ((match = codeBlockRegex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      result.push(
+        ...parseLinesWithHeadings(text.slice(lastIndex, match.index))
+      );
+    }
+    const lang = match[1] || "text";
+    const code = match[2];
+    result.push(
+      <SyntaxHighlighter
+        key={match.index}
+        language={lang}
+        style={atomDark}
+        customStyle={{
+          borderRadius: "0.5rem",
+          fontSize: "0.97em",
+          margin: "0.5em 0",
+          background: "#23232a",
+          border: "1px solid #23232a",
+          padding: "1.2em",
+          whiteSpace: "pre-wrap",
+          wordBreak: "break-word",
+        }}
+        showLineNumbers={false}
+      >
+        {code}
+      </SyntaxHighlighter>
+    );
+    lastIndex = codeBlockRegex.lastIndex;
+  }
+  if (lastIndex < text.length) {
+    result.push(...parseLinesWithHeadings(text.slice(lastIndex)));
+  }
+  return result;
+}
+
+function parseLinesWithHeadings(text: string): React.ReactNode[] {
+  const lines = text.split("\n");
+  const result: React.ReactNode[] = [];
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (/^# (.+)/.test(line)) {
+      const headingText = line.replace(/^# /, "");
+      result.push(
+        <div key={`heading-${i}`} className="font-bold text-xl mb-1">
+          {headingText}
+        </div>
+      );
+    } else {
+      result.push(
+        <div key={`line-${i}`} className="mb-0.5">
+          {parseInlineFormatting(line)}
+        </div>
+      );
+    }
+  }
+  return result;
+}
+
+function parseInlineFormatting(text: string): React.ReactNode[] {
+  // Inline formatting: spoiler, code, underline, strikethrough, bold, italic
+  const result: React.ReactNode[] = [];
+  let lastIndex = 0;
+  const regex =
+    /\|\|([^|]+)\|\||`([^`]+)`|__([^_]+)__|~~([^~]+)~~|\*\*([^*]+)\*\*|\*([^*]+)\*/g;
+  let match;
+  let spoilerKey = 0;
   while ((match = regex.exec(text)) !== null) {
     if (match.index > lastIndex) {
       result.push(text.slice(lastIndex, match.index));
     }
     if (match[1]) {
+      // Spoiler
+      result.push(
+        <Spoiler key={"spoiler-" + spoilerKey++}>{match[1]}</Spoiler>
+      );
+    } else if (match[2]) {
+      // Inline code
+      result.push(
+        <code
+          key={match.index}
+          className="inline-code bg-[#23232a] text-[#e0e0e0] rounded px-2 py-0.5 mx-1 text-[0.97em]"
+        >
+          {match[2]}
+        </code>
+      );
+    } else if (match[3]) {
+      // Underline
+      result.push(
+        <span key={match.index} className="underline text-white">
+          {match[3]}
+        </span>
+      );
+    } else if (match[4]) {
+      // Strikethrough
+      result.push(
+        <span
+          key={match.index}
+          className="line-through decoration-[0.13em] decoration-gray-400 text-white align-middle"
+        >
+          {match[4]}
+        </span>
+      );
+    } else if (match[5]) {
       // Bold
       result.push(
         <span key={match.index} className="font-bold text-white">
-          {match[1]}
+          {match[5]}
         </span>
       );
-    } else if (match[2]) {
+    } else if (match[6]) {
       // Italic
       result.push(
         <span key={match.index} className="italic text-gray-300">
-          {match[2]}
+          {match[6]}
         </span>
       );
     }
@@ -69,12 +169,253 @@ function parseMessageFormatting(text: string): React.ReactNode[] {
   return result;
 }
 
+function parseMessage(message: string): React.ReactNode[] {
+  // Split into lines and handle block-level formats
+  const lines = message.split(/\r?\n/);
+  return lines.map((line, idx) => {
+    // Blockquote: '> ...' (allow leading spaces)
+    if (/^\s*> /.test(line)) {
+      return (
+        <blockquote
+          key={idx}
+          className="border-l-4 border-white pl-3 ml-2 text-gray-300 italic py-1 rounded"
+        >
+          {parseInlineFormatting(line.replace(/^\s*> /, ""))}
+        </blockquote>
+      );
+    }
+    // Bullet point: '- ...' (allow leading spaces)
+    if (/^\s*- /.test(line)) {
+      return (
+        <div key={idx} className="flex items-center gap-1">
+          <span className="text-lg text-gray-200">•</span>
+          <span>{parseInlineFormatting(line.replace(/^\s*- /, ""))}</span>
+        </div>
+      );
+    }
+    // Numbered list: '1. ...'
+    const numberedListMatch = line.match(/^(\d+)\.\s(.*)$/);
+    if (numberedListMatch) {
+      return (
+        <div key={idx} className="flex items-center gap-1">
+          <span className="text-gray-200 font-semibold">
+            {numberedListMatch[1] + "."}
+          </span>
+          <span>{parseInlineFormatting(numberedListMatch[2])}</span>
+        </div>
+      );
+    }
+    // Normal line
+    return <span key={idx}>{parseInlineFormatting(line)}</span>;
+  });
+}
+
+function parseFullMessage(message: string): React.ReactNode[] {
+  // Split into code blocks and non-code blocks
+  const codeBlockRegex = /```([a-zA-Z0-9]*)[ \t]*\n?([\s\S]*?)```/g;
+  let lastIndex = 0;
+  let match;
+  let result: React.ReactNode[] = [];
+  let blockIdx = 0;
+  while ((match = codeBlockRegex.exec(message)) !== null) {
+    if (match.index > lastIndex) {
+      // Handle non-code block segment
+      result = result.concat(
+        parseBlockLines(message.slice(lastIndex, match.index), blockIdx)
+      );
+      blockIdx++;
+    }
+    // Handle code block
+    const lang = match[1] || "text";
+    const code = match[2];
+    result.push(
+      <SyntaxHighlighter
+        key={`codeblock-${blockIdx}`}
+        language={lang}
+        style={atomDark}
+        customStyle={{
+          borderRadius: "0.5rem",
+          fontSize: "0.97em",
+          margin: "0.5em 0",
+          background: "#23232a",
+          border: "1px solid #23232a",
+          padding: "1.2em",
+          whiteSpace: "pre-wrap",
+          wordBreak: "break-word",
+        }}
+        showLineNumbers={false}
+      >
+        {code}
+      </SyntaxHighlighter>
+    );
+    lastIndex = codeBlockRegex.lastIndex;
+    blockIdx++;
+  }
+  if (lastIndex < message.length) {
+    result = result.concat(parseBlockLines(message.slice(lastIndex), blockIdx));
+  }
+  return result;
+}
+
+function parseBlockLines(text: string, blockIdx: number): React.ReactNode[] {
+  // Split into lines and handle block-level formats
+  const lines = text.split(/\r?\n/);
+  const result: React.ReactNode[] = [];
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i];
+    // Heading: '# ...'
+    if (/^# (.+)/.test(line)) {
+      const headingText = line.replace(/^# /, "");
+      result.push(
+        <div
+          key={`heading-${blockIdx}-${i}`}
+          className="font-bold text-xl mb-1"
+        >
+          {headingText}
+        </div>
+      );
+      // Insert vertical gap if next line is empty
+      if (lines[i + 1] !== undefined && /^\s*$/.test(lines[i + 1])) {
+        result.push(
+          <div
+            key={`empty-after-heading-${blockIdx}-${i}`}
+            style={{ height: "0.5em" }}
+          />
+        );
+      }
+      continue;
+    }
+    // Blockquote: '> ...' (allow leading spaces)
+    if (/^\s*> /.test(line)) {
+      const content = line.replace(/^\s*> /, "");
+      result.push(
+        <blockquote
+          key={`bq-${blockIdx}-${i}`}
+          className="border-l-4 border-white pl-3 ml-2 text-gray-300 italic py-1 rounded"
+        >
+          {parseInlineFormatting(content)}
+        </blockquote>
+      );
+      // Insert vertical gap if next line is empty or if content is empty
+      if (
+        content.trim() === "" ||
+        (lines[i + 1] !== undefined && /^\s*$/.test(lines[i + 1]))
+      ) {
+        result.push(
+          <div
+            key={`empty-after-bq-${blockIdx}-${i}`}
+            style={{ height: "0.5em" }}
+          />
+        );
+      }
+      continue;
+    }
+    // Bullet point: '- ...' (allow leading spaces)
+    if (/^\s*- /.test(line)) {
+      const content = line.replace(/^\s*- /, "");
+      result.push(
+        <div
+          key={`bullet-${blockIdx}-${i}`}
+          className="flex items-center gap-1"
+        >
+          <span className="text-lg text-gray-200">•</span>
+          <span>{parseInlineFormatting(content)}</span>
+        </div>
+      );
+      if (
+        content.trim() === "" ||
+        (lines[i + 1] !== undefined && /^\s*$/.test(lines[i + 1]))
+      ) {
+        result.push(
+          <div
+            key={`empty-after-bullet-${blockIdx}-${i}`}
+            style={{ height: "0.5em" }}
+          />
+        );
+      }
+      continue;
+    }
+    // Numbered list: '1. ...'
+    const numberedListMatch = line.match(/^(\d+)\.\s(.*)$/);
+    if (numberedListMatch) {
+      const content = numberedListMatch[2];
+      result.push(
+        <div
+          key={`numlist-${blockIdx}-${i}`}
+          className="flex items-center gap-1"
+        >
+          <span className="text-gray-200 font-semibold">
+            {numberedListMatch[1] + "."}
+          </span>
+          <span>{parseInlineFormatting(content)}</span>
+        </div>
+      );
+      if (
+        content.trim() === "" ||
+        (lines[i + 1] !== undefined && /^\s*$/.test(lines[i + 1]))
+      ) {
+        result.push(
+          <div
+            key={`empty-after-numlist-${blockIdx}-${i}`}
+            style={{ height: "0.5em" }}
+          />
+        );
+      }
+      continue;
+    }
+    // Preserve empty lines as vertical space
+    if (/^\s*$/.test(line)) {
+      result.push(
+        <div key={`empty-${blockIdx}-${i}`} style={{ height: "0.5em" }} />
+      );
+      continue;
+    }
+    // Normal line (render as <div> for line break)
+    result.push(
+      <div key={`line-${blockIdx}-${i}`}>{parseInlineFormatting(line)}</div>
+    );
+  }
+  return result;
+}
+
+// Spoiler component
+function Spoiler({ children }: { children: React.ReactNode }) {
+  const [revealed, setRevealed] = useState(false);
+  return (
+    <span
+      onClick={(e) => {
+        e.stopPropagation();
+        setRevealed(true);
+      }}
+      className={`inline-block cursor-pointer transition-all px-2 py-1 rounded bg-black ${
+        revealed ? "text-white" : "text-black select-none"
+      }`}
+      style={{
+        background: revealed ? "#555" : "#08080a",
+        color: revealed ? undefined : "transparent",
+        boxShadow: revealed ? undefined : "0 0 0 1px #333",
+      }}
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if ((e.key === "Enter" || e.key === " ") && !revealed)
+          setRevealed(true);
+      }}
+      aria-label={revealed ? undefined : "Spoiler: click to reveal"}
+    >
+      {children}
+    </span>
+  );
+}
+
 const MessageBox = (props: Props) => {
   const [senderInfo, setSenderInfo] = useState<Sender | null>(null);
   const [editing, setEditing] = useState(false);
   const [repliedContent, setMsgRepliedContent] = useState<string | null>(null);
   const [repliedUsername, setRepliedUsername] = useState<string | null>(null);
   const [repliedPfp, setRepliedPfp] = useState<string | null>(null);
+  const [repliedDisplayName, setRepliedDisplayName] = useState<string | null>(
+    null
+  );
   const [imageDims, setImageDims] = useState<{
     [key: number]: { width: number; height: number };
   }>({});
@@ -103,6 +444,7 @@ const MessageBox = (props: Props) => {
         setMsgRepliedContent(response.data.repliedContent);
         setRepliedUsername(response.data.repliedUsername);
         setRepliedPfp(response.data.repliedPfp);
+        setRepliedDisplayName(response.data.repliedDisplayName);
       }
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
@@ -224,23 +566,31 @@ const MessageBox = (props: Props) => {
                     ? `${BACKEND_URL}${repliedPfp}`
                     : repliedPfp
                 }
-                alt={repliedUsername || "User"}
+                alt={repliedDisplayName || repliedUsername || "User"}
                 className="w-6 h-6 rounded-full object-cover border border-indigo-400/40 shadow"
               />
             ) : (
               <div className="w-6 h-6 bg-gradient-to-br from-gray-800 to-gray-900 rounded-full flex items-center justify-center text-xs font-bold text-white shadow">
-                {(repliedUsername || "?").charAt(0).toUpperCase()}
+                {(repliedDisplayName || repliedUsername || "?")
+                  .charAt(0)
+                  .toUpperCase()}
               </div>
             )}
             <span
               className="text-xs font-semibold text-indigo-300 truncate max-w-[100px]"
-              title={repliedUsername || undefined}
+              title={repliedDisplayName || repliedUsername || undefined}
             >
-              {repliedUsername || "User"}
+              {repliedDisplayName || repliedUsername || "User"}
             </span>
             <span
               className="text-xs text-indigo-200 italic opacity-90 flex-1 min-w-0 truncate"
               title={repliedContent || undefined}
+              style={{
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                display: "block",
+              }}
             >
               {repliedContent || ""}
             </span>
@@ -254,40 +604,38 @@ const MessageBox = (props: Props) => {
         style={{ lineHeight: "1.2" }}
       >
         {/* Action bar on hover */}
-        {!props.grouped && (
-          <div className="absolute right-2 top-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex gap-1 bg-black/60 backdrop-blur-md rounded-xl shadow-lg p-1 border border-gray-800">
-            <button
-              className="p-1 hover:bg-indigo-700/70 rounded-lg transition-colors"
-              title="Reply"
-              onClick={() => {
-                props.setRepliedTo(props.id);
-                props.setRepliedContent(props.message);
-                if (props.setRepliedSenderType)
-                  props.setRepliedSenderType(senderInfo?.type || null);
-              }}
-            >
-              <img src={replyIcon} alt="Reply" className="w-5 h-5" />
-            </button>
-            {props.userId === props.user && (
-              <>
-                <button
-                  className="p-1 hover:bg-indigo-700/70 rounded-lg transition-colors"
-                  title="Edit"
-                  onClick={() => setEditing(true)}
-                >
-                  <img src={editIcon} alt="Edit" className="w-5 h-5" />
-                </button>
-                <button
-                  className="p-1 hover:bg-red-700/70 rounded-lg transition-colors"
-                  title="Delete"
-                  onClick={onDelete}
-                >
-                  <img src={deleteIcon} alt="Delete" className="w-5 h-5" />
-                </button>
-              </>
-            )}
-          </div>
-        )}
+        <div className="absolute right-2 top-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex gap-1 bg-black/60 backdrop-blur-md rounded-xl shadow-lg p-1 border border-gray-800">
+          <button
+            className="p-1 hover:bg-indigo-700/70 rounded-lg transition-colors"
+            title="Reply"
+            onClick={() => {
+              props.setRepliedTo(props.id);
+              props.setRepliedContent(props.message);
+              if (props.setRepliedSenderType)
+                props.setRepliedSenderType(senderInfo?.type || null);
+            }}
+          >
+            <img src={replyIcon} alt="Reply" className="w-5 h-5" />
+          </button>
+          {props.userId === props.user && (
+            <>
+              <button
+                className="p-1 hover:bg-indigo-700/70 rounded-lg transition-colors"
+                title="Edit"
+                onClick={() => setEditing(true)}
+              >
+                <img src={editIcon} alt="Edit" className="w-5 h-5" />
+              </button>
+              <button
+                className="p-1 hover:bg-red-700/70 rounded-lg transition-colors"
+                title="Delete"
+                onClick={onDelete}
+              >
+                <img src={deleteIcon} alt="Delete" className="w-5 h-5" />
+              </button>
+            </>
+          )}
+        </div>
         {!props.grouped ? (
           senderInfo?.pfp ? (
             <div
@@ -355,7 +703,7 @@ const MessageBox = (props: Props) => {
             ) : (
               <>
                 <div className="max-w-full sm:max-w-[75%] text-sm text-gray-200 whitespace-pre-wrap break-words overflow-x-hidden">
-                  {parseMessageFormatting(props.message)}
+                  {parseFullMessage(props.message)}
                   {props.edited && (
                     <span className="text-gray-400 text-xs ml-1">(edited)</span>
                   )}

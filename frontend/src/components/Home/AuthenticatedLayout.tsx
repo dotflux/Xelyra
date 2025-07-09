@@ -1,12 +1,15 @@
 import { Outlet, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { UserContext, type User } from "./UserContext";
+import { io, Socket } from "socket.io-client";
+import LoadingScreen from "./LoadingScreen";
 
 const AuthenticatedLayout = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
+  const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -31,7 +34,27 @@ const AuthenticatedLayout = () => {
     checkAuth();
   }, []);
 
-  if (loading) return <>Loading...</>;
+  useEffect(() => {
+    if (!user) return;
+    socketRef.current = io("http://localhost:3000/messages", {
+      withCredentials: true,
+    });
+    socketRef.current.emit("joinUser", user.id);
+    socketRef.current.on(
+      "userUpdated",
+      (data: { userId: string; userData: User }) => {
+        if (data.userId === user.id) {
+          setUser((prev) => ({ ...prev, ...data.userData }));
+        }
+      }
+    );
+    return () => {
+      socketRef.current?.disconnect();
+      socketRef.current = null;
+    };
+  }, [user]);
+
+  if (loading) return <LoadingScreen />;
   if (!user) return null;
 
   return (

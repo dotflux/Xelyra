@@ -10,9 +10,18 @@ interface RequestInfo {
   pfp: string;
 }
 
-const RequestsList = () => {
+interface RequestsListProps {
+  onRequestsCountChange?: (count: number) => void;
+}
+
+const RequestsList = ({ onRequestsCountChange }: RequestsListProps) => {
   const [requests, setRequests] = useState<RequestInfo[]>([]);
   const [error, setError] = useState("");
+
+  const updateRequests = (newRequests: RequestInfo[]) => {
+    setRequests(newRequests);
+    if (onRequestsCountChange) onRequestsCountChange(newRequests.length);
+  };
 
   const onMount = async () => {
     try {
@@ -24,7 +33,7 @@ const RequestsList = () => {
         }
       );
       if (response.data.valid) {
-        setRequests(response.data.requests);
+        updateRequests(response.data.requests);
       }
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
@@ -37,6 +46,7 @@ const RequestsList = () => {
 
   useEffect(() => {
     onMount();
+    // eslint-disable-next-line
   }, []);
 
   const handleAccept = async (id: string) => {
@@ -50,7 +60,7 @@ const RequestsList = () => {
       if (!response.data.valid) {
         setError(response.data.message || "Unknown error");
       } else {
-        setRequests(requests.filter((r) => r.id !== id));
+        updateRequests(requests.filter((r) => r.id !== id));
       }
     } catch (err: any) {
       if (axios.isAxiosError(err) && err.response) {
@@ -73,7 +83,7 @@ const RequestsList = () => {
       if (!response.data.valid) {
         setError(response.data.message || "Unknown error");
       } else {
-        setRequests(requests.filter((r) => r.id !== id));
+        updateRequests(requests.filter((r) => r.id !== id));
       }
     } catch (err: any) {
       if (axios.isAxiosError(err) && err.response) {

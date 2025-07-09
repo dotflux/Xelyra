@@ -20,7 +20,7 @@ const DevSidebar = () => {
               navigate(`/developer/development/${tab.key}`);
             }}
             className={`block w-full text-left px-4 py-2 rounded-lg font-medium transition ${
-              location.pathname.startsWith(`/developer/${tab.key}`)
+              location.pathname.startsWith(`/developer/development/${tab.key}`)
                 ? "bg-[#1e1f22] text-white shadow-inner"
                 : "text-gray-400 hover:bg-[#3a3b3e] hover:text-white"
             }

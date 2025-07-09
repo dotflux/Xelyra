@@ -22,7 +22,7 @@ export async function handleValidateCommandLogic(
 
   const appId = bot[0].app_id;
 
-  const command = await slashService.findCommand(appId, payload.command);
+  let command = await slashService.findCommand(appId, payload.command);
   const newOptions = JSON.stringify(payload.options);
   if (command.length === 0) {
     try {
@@ -32,6 +32,13 @@ export async function handleValidateCommandLogic(
         payload.description as string,
         newOptions,
       );
+      // Re-fetch the command after creation
+      command = await slashService.findCommand(appId, payload.command);
+      if (command.length === 0) {
+        return client.emit('error', {
+          reason: `Failed to create command ${payload.command}`,
+        });
+      }
     } catch (err) {
       return client.emit('error', {
         reason: `Failed to create command ${payload.command}`,

@@ -8,8 +8,8 @@ export class BotMessage {
     private client: XelyraClient
   ) {}
 
-  public edit(newContent: string): Promise<void> {
-    return this.client.editMessage(this.id, newContent);
+  public edit(newContent: string, embeds?: any[] | null): Promise<void> {
+    return this.client.editMessage(this.id, newContent, embeds);
   }
 
   public delete(): Promise<void> {

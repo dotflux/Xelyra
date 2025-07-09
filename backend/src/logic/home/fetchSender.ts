@@ -67,23 +67,20 @@ export const fetchSender = async (
     let repliedContent = null;
     let repliedUsername: string | null = null;
     let repliedPfp: string | null = null;
+    let repliedDisplayName: string | null = null;
 
     if (reply_to) {
-      // Fetch the replied message by its timeuuid
       const repliedMsg = await messagesService.findByTimeId(reply_to);
       if (repliedMsg.length > 0) {
         repliedContent = repliedMsg[0].message;
-
-        // Try user first
         const repliedUser = await usersService.findById(repliedMsg[0].user);
         if (repliedUser.length > 0) {
           repliedUsername = repliedUser[0].username;
           repliedPfp = repliedUser[0].pfp;
+          repliedDisplayName = repliedUser[0].display_name;
         } else {
-          // Try bot
           const repliedBot = await botsService.findById(repliedMsg[0].user);
           if (repliedBot.length > 0) {
-            // Get app name for bot display
             let botDisplayName = repliedBot[0].name || null;
             if (repliedBot[0].app_id) {
               const botApp = await appService.findById(repliedBot[0].app_id);
@@ -93,12 +90,24 @@ export const fetchSender = async (
             }
             repliedUsername = botDisplayName || 'Bot';
             repliedPfp = repliedBot[0].pfp || null;
+            repliedDisplayName = null;
           } else {
             repliedUsername = null;
             repliedPfp = null;
+            repliedDisplayName = null;
           }
         }
+      } else {
+        repliedUsername = null;
+        repliedPfp = null;
+        repliedDisplayName = null;
+        repliedContent = null;
       }
+    } else {
+      repliedUsername = null;
+      repliedPfp = null;
+      repliedDisplayName = null;
+      repliedContent = null;
     }
 
     const senderInfo: SenderInfo = {
@@ -119,6 +128,7 @@ export const fetchSender = async (
       repliedContent,
       repliedUsername,
       repliedPfp,
+      repliedDisplayName,
     };
   } catch (error) {
     if (

@@ -66,6 +66,7 @@ export const fetchReciever = async (
         recieverData: {
           id: otherRows[0].id,
           username: otherRows[0].username,
+          displayName: otherRows[0].display_name,
           type: 'dm',
           pfp: otherRows[0].pfp,
         },

@@ -4,12 +4,14 @@ import * as dotenv from 'dotenv';
 import { Request } from 'express';
 import { UsersService } from 'src/services/users.service';
 import { File as MulterFile } from 'multer';
+import { MessagesGateway } from 'src/gateways/messages.gateway';
 
 dotenv.config();
 
 export const changePfp = async (
   req: Request,
   usersService: UsersService,
+  messagesGateway: MessagesGateway,
   file?: MulterFile, // for manual/AI file upload
   aiImageUrl?: string, // for AI-generated image URL
   generatedImage?: { buffer: Buffer; ext: string }, // for AI-generated image buffer
@@ -24,10 +26,18 @@ export const changePfp = async (
     if (!decoded?.id) throw new UnauthorizedException('Invalid token');
 
     const user = await usersService.findById(decoded?.id);
-    if (user.length === 0)
+    if (!user || user.length === 0)
       throw new UnauthorizedException('No such user in database');
 
     let pfpUrl = '';
+    console.log(
+      'file:',
+      file,
+      'aiImageUrl:',
+      aiImageUrl,
+      'generatedImage:',
+      generatedImage,
+    );
 
     // Manual or AI file upload
     if (file) {
@@ -38,6 +48,11 @@ export const changePfp = async (
     // AI-generated image buffer
     else if (generatedImage) {
       const { buffer, ext } = generatedImage;
+      if (!buffer) {
+        throw new BadRequestException(
+          'No image buffer provided for AI-generated image',
+        );
+      }
       const filename = `pfp_${user[0].id}_${Date.now()}.${ext}`;
       const fs = require('fs');
       const path = require('path');
@@ -62,6 +77,10 @@ export const changePfp = async (
 
     await usersService.updatePfp(user[0].id, pfpUrl);
     console.log('[changePfp] Updated user pfp in DB to:', pfpUrl);
+
+    messagesGateway.emitUserUpdate(user[0].id, {
+      pfp: pfpUrl,
+    });
 
     return {
       valid: true,

@@ -6,6 +6,7 @@ import { Request } from 'express';
 import { UsersService } from 'src/services/users.service';
 import { v4 as uuidv4 } from 'uuid';
 import { ApplicationsService } from 'src/services/applications.service';
+import { MessagesGateway } from 'src/gateways/messages.gateway';
 
 dotenv.config();
 
@@ -15,6 +16,7 @@ export const createApplication = async (
   description: string,
   usersService: UsersService,
   appService: ApplicationsService,
+  messagesGateway: MessagesGateway,
 ) => {
   try {
     const token = req.cookies?.user_token;
@@ -53,6 +55,8 @@ export const createApplication = async (
       appService.createApplication(newId, user[0].id, name, description),
       usersService.appendApplication(newId, user[0].id),
     ]);
+
+    messagesGateway.emitAppCreated(user[0].id);
 
     return {
       valid: true,

@@ -104,7 +104,12 @@ export class GenAiController {
       const match = response.match(/CHANGE_DISPLAYNAME:.*$/m);
       if (match) {
         const newName = match[0].replace('CHANGE_DISPLAYNAME:', '').trim();
-        const result = await changeDisplayName(req, newName, this.usersService);
+        const result = await changeDisplayName(
+          req,
+          newName,
+          this.usersService,
+          this.messagesGateway,
+        );
         response = 'Display name changed to ' + newName;
       }
     }
@@ -130,6 +135,7 @@ export class GenAiController {
             const changeResult = await changePfp(
               req,
               this.usersService,
+              this.messagesGateway,
               undefined,
               undefined,
               generatedImage,
@@ -150,7 +156,14 @@ export class GenAiController {
               files.find((f) => f.type && f.type.startsWith('image/')) ||
               files[0];
             if (imageFile && imageFile.url) {
-              await changePfp(req, this.usersService, undefined, imageFile.url);
+              await changePfp(
+                req,
+                this.usersService,
+                this.messagesGateway,
+                undefined,
+                imageFile.url, // <-- pass as aiImageUrl
+                undefined,
+              );
               response = 'Profile picture changed to your last uploaded image.';
             } else {
               response = 'No valid image file found in the files array.';
@@ -159,7 +172,13 @@ export class GenAiController {
             response = 'No image file found in the files array.';
           }
         } else if (/^https?:\/\//.test(pfpValue)) {
-          await changePfp(req, this.usersService, undefined, pfpValue);
+          await changePfp(
+            req,
+            this.usersService,
+            this.messagesGateway,
+            undefined,
+            pfpValue,
+          );
           response = 'Profile picture changed.';
         } else {
           response = 'Invalid image URL or command for profile picture.';

@@ -56,7 +56,7 @@ const Embed: React.FC<EmbedProps> = ({
 }) => {
   return (
     <div
-      className="my-1 rounded-lg shadow border border-[#23232a] bg-[#18191c] overflow-hidden flex flex-col max-w-xl w-full"
+      className="my-1 rounded-lg shadow border border-[#23232a] bg-[#18191c] overflow-hidden flex flex-col max-w-xl min-w-[180px] w-fit"
       style={{ borderLeft: `6px solid ${color}` }}
     >
       <div className="p-3 flex flex-col gap-1">
@@ -64,12 +64,16 @@ const Embed: React.FC<EmbedProps> = ({
           <div
             className="text-base font-bold text-white mb-0.5 truncate"
             title={title}
+            style={{ wordBreak: "break-word", whiteSpace: "pre-line" }}
           >
             {title}
           </div>
         )}
         {description && (
-          <div className="text-gray-200 whitespace-pre-line text-xs mb-1">
+          <div
+            className="text-gray-200 whitespace-pre-line text-xs mb-1"
+            style={{ wordBreak: "break-word" }}
+          >
             {parseMessageFormatting(description)}
           </div>
         )}
@@ -80,10 +84,14 @@ const Embed: React.FC<EmbedProps> = ({
                 <span
                   className="text-xs font-bold text-white mb-0.5 truncate"
                   title={field.name}
+                  style={{ wordBreak: "break-word" }}
                 >
                   {field.name}
                 </span>
-                <span className="text-gray-300 text-xs whitespace-pre-line">
+                <span
+                  className="text-gray-300 text-xs whitespace-pre-line"
+                  style={{ wordBreak: "break-word" }}
+                >
                   {parseMessageFormatting(field.value)}
                 </span>
               </div>

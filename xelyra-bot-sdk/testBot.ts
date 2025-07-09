@@ -2,7 +2,7 @@ import { XelyraClient } from "../xelyra-bot-sdk/src/client";
 
 const bot = new XelyraClient({
   token:
-    "6e75c183-60c8-4838-8ba8-839ab7db2d62.0779012d6382319da9abaa0cc43be2b4392f343ee46bbd4dfeac8d72cd631979",
+    "c8bdb1c6-b695-4929-9978-da14473eceed.93b4f8a1c4e8d64e51debd6f2c126b6004ead00c836626bc9e9e6951368d1080",
   gatewayUrl: "http://localhost:3000/bot",
 });
 
@@ -36,7 +36,7 @@ bot.command("test", async (ctx) => {
 });
 
 bot.command("embedtest", async (ctx) => {
-  await ctx.send("Here is a sample embed!", [
+  const msg = await ctx.send("Here is a sample embed!", [
     {
       title: "Welcome to Xelyra!",
       description:
@@ -47,6 +47,14 @@ bot.command("embedtest", async (ctx) => {
         { name: "Field 1", value: "Some value" },
         { name: "Field 2", value: "Another value" },
       ],
+    },
+  ]);
+  await new Promise((resolve) => setTimeout(resolve, 3000));
+  await msg.edit("Here is an edited embed!", [
+    {
+      title: "Edited",
+      description: "It got edited!",
+      color: "#5865F2",
     },
   ]);
 });

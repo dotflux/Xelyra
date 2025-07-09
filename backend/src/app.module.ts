@@ -24,6 +24,7 @@ import { ServerAppsModule } from './modules/serverApps.module';
 import { BotsGatewayModule } from './modules/botsGateway.module';
 import { DeveloperModule } from './modules/developer.module';
 import { GenAIModule } from './modules/genai.module';
+import { MetricsController } from './controllers/metrics.controller';
 
 @Module({
   imports: [
@@ -53,5 +54,6 @@ import { GenAIModule } from './modules/genai.module';
     DeveloperModule,
     GenAIModule,
   ],
+  controllers: [MetricsController],
 })
 export class AppModule {}

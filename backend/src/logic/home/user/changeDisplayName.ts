@@ -4,6 +4,7 @@ import * as jwt from 'jsonwebtoken';
 import * as dotenv from 'dotenv';
 import { Request } from 'express';
 import { UsersService } from 'src/services/users.service';
+import { MessagesGateway } from 'src/gateways/messages.gateway';
 
 dotenv.config();
 
@@ -11,6 +12,7 @@ export const changeDisplayName = async (
   req: Request,
   newName: string,
   usersService: UsersService,
+  messagesGateway: MessagesGateway,
 ) => {
   try {
     const token = req.cookies?.user_token;
@@ -38,6 +40,9 @@ export const changeDisplayName = async (
     }
 
     await usersService.updateDisplayName(user[0].id, newName);
+    messagesGateway.emitUserUpdate(user[0].id, {
+      displayName: newName,
+    });
 
     return {
       valid: true,

@@ -149,11 +149,18 @@ const ChatWindow = (props: Props) => {
       );
     });
 
-    socketRef.current.on("commandEdited", ({ messageId, message, edited }) => {
-      setMessages((prev) =>
-        prev.map((m) => (m.id === messageId ? { ...m, message, edited } : m))
-      );
-    });
+    socketRef.current.on(
+      "commandEdited",
+      ({ messageId, message, edited, embeds }) => {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === messageId
+              ? { ...m, message, edited, embeds: embeds ?? m.embeds }
+              : m
+          )
+        );
+      }
+    );
 
     socketRef.current.on("messageDeleted", ({ messageId }) => {
       setMessages((prev) => prev.filter((m) => m.id !== messageId));

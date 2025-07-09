@@ -11,6 +11,7 @@ import Xyn from "./Xyn";
 import CreateServer from "./Servers/CreateServer";
 import CreateCategory from "./Servers/CreateCategory";
 import CreateChannel from "./Servers/CreateChannel";
+import LoadingScreen from "./LoadingScreen";
 
 const Home = () => {
   const [searchParams] = useSearchParams();
@@ -23,7 +24,7 @@ const Home = () => {
   const channel = searchParams.get("channel");
   const { user } = useUser();
 
-  if (!user) return "Loading..";
+  if (!user) return <LoadingScreen />;
 
   return (
     <div className="relative h-screen w-screen overflow-hidden">

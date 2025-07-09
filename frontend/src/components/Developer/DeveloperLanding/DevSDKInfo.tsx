@@ -9,7 +9,7 @@ const sdkCode = `import { XelyraClient } from 'xelyra-bot-sdk';
 const client = new XelyraClient({ token: 'YOUR_BOT_TOKEN' });
 
 client.command('hello', (ctx) => {
-  ctx.reply('Hello, world!');
+  ctx.send('Hello, world!');
 });
 
 client.login();`;

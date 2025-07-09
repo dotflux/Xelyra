@@ -1,0 +1,184 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": null,
+  "iteration": 162,
+  "links": [],
+  "panels": [
+    {
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "id": 1,
+      "options": {},
+      "targets": [
+        {
+          "expr": "process_cpu_user_seconds_total",
+          "interval": "",
+          "legendFormat": "User CPU",
+          "refId": "A"
+        },
+        {
+          "expr": "process_cpu_system_seconds_total",
+          "interval": "",
+          "legendFormat": "System CPU",
+          "refId": "B"
+        }
+      ],
+      "title": "CPU Usage (seconds)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "id": 2,
+      "options": {},
+      "targets": [
+        {
+          "expr": "process_resident_memory_bytes",
+          "interval": "",
+          "legendFormat": "Resident Memory",
+          "refId": "A"
+        },
+        {
+          "expr": "process_virtual_memory_bytes",
+          "interval": "",
+          "legendFormat": "Virtual Memory",
+          "refId": "B"
+        },
+        {
+          "expr": "process_heap_bytes",
+          "interval": "",
+          "legendFormat": "Heap Memory",
+          "refId": "C"
+        }
+      ],
+      "title": "Memory Usage (bytes)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "id": 3,
+      "options": {},
+      "targets": [
+        {
+          "expr": "nodejs_eventloop_lag_seconds",
+          "interval": "",
+          "legendFormat": "Event Loop Lag",
+          "refId": "A"
+        }
+      ],
+      "title": "Event Loop Lag (seconds)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "id": 4,
+      "options": {},
+      "targets": [
+        {
+          "expr": "nodejs_gc_runs_total",
+          "interval": "",
+          "legendFormat": "GC Runs",
+          "refId": "A"
+        },
+        {
+          "expr": "nodejs_gc_duration_seconds_sum",
+          "interval": "",
+          "legendFormat": "GC Duration Sum",
+          "refId": "B"
+        }
+      ],
+      "title": "Garbage Collection",
+      "type": "timeseries"
+    },
+    {
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 16 },
+      "id": 5,
+      "options": {},
+      "targets": [
+        {
+          "expr": "process_open_fds",
+          "interval": "",
+          "legendFormat": "Open File Descriptors",
+          "refId": "A"
+        }
+      ],
+      "title": "Open File Descriptors",
+      "type": "timeseries"
+    },
+    {
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 24 },
+      "id": 6,
+      "options": {},
+      "targets": [
+        {
+          "expr": "process_start_time_seconds",
+          "interval": "",
+          "legendFormat": "Start Time",
+          "refId": "A"
+        }
+      ],
+      "title": "Process Start Time",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 37,
+  "style": "dark",
+  "tags": ["nodejs", "prometheus"],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Node.js Backend Performance",
+  "uid": null,
+  "version": 1,
+  "weekStart": ""
+}

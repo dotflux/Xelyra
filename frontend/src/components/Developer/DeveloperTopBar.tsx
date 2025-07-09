@@ -2,6 +2,7 @@ interface User {
   username: string;
   id: string;
   pfp?: string;
+  displayName?: string;
 }
 
 interface Props {
@@ -9,6 +10,7 @@ interface Props {
 }
 
 const DeveloperTopBar = (props: Props) => {
+  const displayName = props.user.displayName || props.user.username;
   return (
     <header
       className="h-14 bg-[#141516] border-b border-gray-300/50 px-6 flex items-center justify-between shadow-sm"
@@ -35,10 +37,10 @@ const DeveloperTopBar = (props: Props) => {
               />
             ) : (
               <div className="h-8 w-8 bg-blue-700 rounded-full flex items-center justify-center text-white font-medium">
-                {props.user.username.charAt(0).toUpperCase()}
+                {displayName.charAt(0).toUpperCase()}
               </div>
             )}
-            <span className="text-sm text-white">{props.user.username}</span>
+            <span className="text-sm text-white">{displayName}</span>
           </div>
         )}
       </div>

@@ -62,6 +62,7 @@ export class DeveloperService {
       description,
       this.usersService,
       this.appService,
+      this.messagesGateway,
     );
   }
 

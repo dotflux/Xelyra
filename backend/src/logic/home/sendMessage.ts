@@ -80,7 +80,6 @@ export const sendMessage = async (
     const repliedMessage = replyTo
       ? await messagesService.findByTimeId(replyTo)
       : [];
-    console.log(repliedMessage);
 
     const messageId = uuidv4();
 
@@ -131,6 +130,11 @@ export const sendMessage = async (
       files: saved.files || [],
     });
 
+    messagesGateway.emitConvUpdate(
+      conversation,
+      new Date(saved.created_timestamp),
+    );
+
     return {
       valid: true,
       message: 'Message sent.',
@@ -144,7 +148,10 @@ export const sendMessage = async (
     ) {
       throw error;
     }
-    console.log('Error in sending message: ', error);
+    console.error(
+      'Error in sending message:',
+      error && error.stack ? error.stack : error,
+    );
     throw new BadRequestException({
       valid: false,
       error: 'Internal Server Error',

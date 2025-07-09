@@ -64,6 +64,7 @@ export const fetchConversations = async (
         return {
           id: convId,
           reciever: otherUser.username,
+          displayName: otherUser.display_name,
           recieverPfp: otherUser.pfp,
           type: 'dm' as const,
           unreadCount,

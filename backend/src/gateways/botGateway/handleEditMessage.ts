@@ -4,7 +4,7 @@ import { MessagesGateway } from '../messages.gateway';
 
 export async function handleEditMessageLogic(
   client: Socket,
-  payload: { messageId: string; content: string },
+  payload: { messageId: string; content: string; embeds?: any[] | null },
   messagesService: MessagesService,
   messagesGateway: MessagesGateway,
 ) {
@@ -36,6 +36,7 @@ export async function handleEditMessageLogic(
       commandLookup[0].conversation.toString(),
       commandLookup[0].created_at,
       payload.content,
+      payload.embeds ?? null,
     );
 
     messagesGateway.emitCommandEdit(
@@ -43,6 +44,7 @@ export async function handleEditMessageLogic(
       payload.messageId,
       payload.content,
       true,
+      payload.embeds ?? null,
     );
 
     client.emit('messageUpdate', {

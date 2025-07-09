@@ -143,13 +143,20 @@ export class XelyraClient extends EventEmitter<XelyraEvents> {
     });
   }
 
-  public editMessage(messageId: string, content: string): Promise<void> {
+  /**
+   * Edit a message by its ID. Optionally update embeds (set to null to remove embeds).
+   */
+  public editMessage(
+    messageId: string,
+    content: string,
+    embeds?: any[] | null
+  ): Promise<void> {
     return new Promise((resolve, reject) => {
       if (!this.socket.connected) {
         return reject(new Error("Socket not connected"));
       }
 
-      this.socket.emit("updateMessage", { messageId, content });
+      this.socket.emit("updateMessage", { messageId, content, embeds });
 
       const onAck = (ack: { id: string; created_at: string }) => {
         resolve();

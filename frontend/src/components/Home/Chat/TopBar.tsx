@@ -9,6 +9,7 @@ interface Reciever {
   username: string;
   type: string;
   pfp?: string;
+  displayName?: string;
 }
 
 interface Props {
@@ -113,12 +114,14 @@ const TopBar = (props: Props) => {
               ? recieverInfo.pfp
               : `http://localhost:3000/uploads/${recieverInfo.pfp}`
           }
-          alt={recieverInfo.username}
+          alt={recieverInfo.displayName || recieverInfo.username}
           className="h-8 w-8 rounded-full object-cover shadow-md mr-2"
         />
       ) : (
         <div className="h-8 w-8 bg-gradient-to-br from-gray-800 to-gray-900 rounded-full flex items-center justify-center text-base font-bold text-white shadow-md mr-2">
-          {recieverInfo?.username.charAt(0).toUpperCase() || "?"}
+          {(recieverInfo?.displayName || recieverInfo?.username || "?")
+            .charAt(0)
+            .toUpperCase()}
         </div>
       )}
 
@@ -127,7 +130,9 @@ const TopBar = (props: Props) => {
         <h1 className="text-white font-bold text-[15px] leading-tight">
           {serverId && channelInfo
             ? channelInfo.name
-            : recieverInfo?.username || "Loading..."}
+            : recieverInfo?.displayName ||
+              recieverInfo?.username ||
+              "Loading..."}
         </h1>
         <span className="text-gray-400 text-xs leading-tight">
           {serverId && channelInfo

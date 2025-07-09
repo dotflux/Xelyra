@@ -12,6 +12,7 @@ import ApplicationSettings from "./components/Developer/ApplicationSettings/Appl
 import AppOverview from "./components/Developer/ApplicationSettings/AppOverview";
 import AppBot from "./components/Developer/ApplicationSettings/AppBot";
 import DeveloperLanding from "./components/Developer/DeveloperLanding/DeveloperLanding";
+import Documentation from "./components/Developer/Documentation";
 
 function App() {
   const router = createBrowserRouter([
@@ -56,6 +57,10 @@ function App() {
         {
           path: "applications",
           element: <ApplicationsList />,
+        },
+        {
+          path: "documentation",
+          element: <Documentation />,
         },
         {
           path: "applications/:id",

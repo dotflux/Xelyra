@@ -116,9 +116,25 @@ export class MessagesService {
     }
   }
 
-  async editCommand(conversation: string, created_at: string, newText: string) {
-    const query = `UPDATE xelyra.commands SET message = ?,edited = true WHERE conversation = ? AND created_at = ?`;
-    const params = [newText, conversation, created_at];
+  async editCommand(
+    conversation: string,
+    created_at: string,
+    newText: string,
+    embeds?: any[] | null,
+  ) {
+    let query: string;
+    let params: any[];
+    if (embeds === undefined) {
+      query = `UPDATE xelyra.commands SET message = ?,edited = true WHERE conversation = ? AND created_at = ?`;
+      params = [newText, conversation, created_at];
+    } else {
+      // Serialize embeds as JSON strings
+      const embedsValue = Array.isArray(embeds)
+        ? embeds.map((e) => (typeof e === 'string' ? e : JSON.stringify(e)))
+        : [];
+      query = `UPDATE xelyra.commands SET message = ?,edited = true, embeds = ? WHERE conversation = ? AND created_at = ?`;
+      params = [newText, embedsValue, conversation, created_at];
+    }
     try {
       const results = await this.scyllaService.execute(query, params);
       return results.rows;
