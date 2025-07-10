@@ -165,36 +165,6 @@ bot.login();
 - **Vite** - Lightning-fast build tool
 - **GSAP** - Smooth animations and transitions
 
-**Database Schema:**
-
-```sql
--- Optimized for high-performance messaging
-CREATE TABLE messages (
-  id UUID,
-  message TEXT,
-  user UUID,
-  conversation UUID,
-  files LIST<FROZEN<file_info>>,
-  embeds LIST<TEXT>,
-  is_read BOOLEAN,
-  edited BOOLEAN,
-  created_at TIMEUUID,
-  reply_to TIMEUUID,
-  PRIMARY KEY ((conversation), created_at)
-);
-
--- Role-based permissions system
-CREATE TABLE roles (
-  server_id UUID,
-  role_id UUID,
-  name TEXT,
-  level INT,
-  color TEXT,
-  permissions SET<TEXT>,
-  PRIMARY KEY ((server_id), role_id)
-);
-```
-
 ### 🎮 **Server Management & Social Features**
 
 **Server Creation:**
@@ -209,11 +179,47 @@ _Add friends and grow your network with a simple, intuitive interface._
 
 **Advanced Features:**
 
-- **Role-based permissions** with granular control
+- **Role AND channels based permissions** with granular control
 - **Channel categories** for organized communication
 - **Server member management** with invite systems
 - **File sharing** with support for multiple formats
 - **Voice channel support** (coming soon)
+
+## 📊 Automated Load Testing & System Benchmarks
+
+To ensure Xelyra's backend and frontend can handle real-world scale, we conducted extensive automated load testing and system monitoring. Here’s what we did:
+
+### What We Automated
+
+- **Simulated ~500 users**: Automated account creation, login, friend requests, group/server/DM creation, and app/bot registration.
+- **Massive message load**: Used custom scripts to send messages, reaching up to **3 million messages** in the database.
+- **Full workflow automation**: Users performed all major actions—creating apps, servers, groups, DMs, sending/accepting friend requests, and logging in—mirroring real user behavior.
+- **SDK and load-testing scripts**: All automation was performed using our SDK and dedicated load-testing scripts.
+
+### Test Environment
+
+- **Hardware**: Intel i5 3rd Gen CPU
+- **Order of tests**:
+  1. Event loop monitoring
+  2. CPU and memory usage
+  3. Open file descriptors
+
+### System Monitoring Results
+
+#### 1. Event Loop Latency
+
+![Event Loop Latency](frontend/src/assets/event_loop.png)
+_Tracks Node.js event loop lag under heavy load._
+
+#### 2. CPU and Memory Usage
+
+![CPU and Memory Usage](frontend/src/assets/cpu_usage_intel_i5_3rd.png)
+_Resource consumption during peak automation on an Intel i5 3rd Gen._
+
+#### 3. Open File Descriptors
+
+![Open File Descriptors](frontend/src/assets/open_file_deceptors.png)
+_Monitors the number of open files/sockets during stress tests._
 
 ## 🚀 **Getting Started**
 
@@ -284,6 +290,14 @@ Run the CQL scripts in order:
 
 ## 🔧 **Development & Architecture**
 
+## 🗄️ Database Schema Overview
+
+Below is a comprehensive diagram of the Xelyra database schema, showing how all major tables (users, servers, channels, roles, messaging, bots, etc.) are related. The diagram is grouped by feature area for clarity, making it easy to understand how different parts of the system connect:
+
+![Xelyra Database Schema](frontend/src/assets/schema.png)
+
+_This schema illustrates the relationships between users, servers, channels, roles, permissions, messaging, bots, applications, and more, as implemented in ScyllaDB. Each group of tables (users/auth, servers/structure, messaging, bots/apps, etc.) is visually clustered to highlight their connections and responsibilities within the platform._
+
 ### **Project Structure**
 
 ```
@@ -299,7 +313,6 @@ Xelyra/
 │   ├── src/
 │   │   ├── components/     # Modular React components
 │   │   ├── assets/         # Images, GIFs, icons
-│   │   └── hooks/          # Custom React hooks
 └── xelyra-bot-sdk/         # Extensible Bot SDK
     ├── src/
     │   ├── client.ts       # Main SDK client
@@ -337,10 +350,6 @@ Xelyra/
 - **Redis** for caching and session management
 - **WebSocket clustering** for horizontal scaling
 - **Optimized queries** with proper indexing
-
-## 🤝 **Contributing**
-
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
 
 ### **Development Setup**
 
