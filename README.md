@@ -3,6 +3,7 @@
 > **The Next-Generation Communication Platform** - A modern, Discord-inspired chat application with cutting-edge AI integration, real-time messaging, and an extensible bot SDK.
 
 ![Xelyra Landing Page](frontend/src/assets/landing_page.gif)
+
 _Welcome to Xelyra: Modern, sleek, and built for the future of communication._
 
 ## 🌟 **Revolutionary Features**
@@ -17,21 +18,25 @@ Meet **Xyn**, your intelligent AI companion integrated directly into Xelyra. Xyn
 - **Provide contextual assistance** across the platform
 
 ![Meet Xyn](frontend/src/assets/meet_xyn.png)
+
 _Meet Xyn: Your friendly, always-available AI assistant in Xelyra._
 
 **AI-Generated Profile Pictures:**
 
 ![AI Profile Picture Generation](frontend/src/assets/xyn_changes_generated_pfp.gif)
+
 _Watch as Xyn generates a unique profile picture for you using AI, based on your description!_
 
 **File-Based Profile Updates:**
 
 ![File-Based Profile Updates](frontend/src/assets/xyn_changes_byfile.png)
+
 _Easily update your profile picture by uploading an image file—Xyn handles the rest._
 
 **Natural Language Account Management:**
 
 ![Natural Language Account Management](frontend/src/assets/xyn_changes_name.gif)
+
 _Change your display name and other details just by chatting with Xyn—no forms required!_
 
 ### 🔧 **Advanced Bot SDK & Developer Tools**
@@ -39,16 +44,19 @@ _Change your display name and other details just by chatting with Xyn—no forms
 **Developer Portal:**
 
 ![Developer Portal](frontend/src/assets/developer_page.gif)
+
 _Powerful developer dashboard for managing your applications, bots, and integrations._
 
 **Comprehensive SDK Documentation:**
 
 ![SDK Documentation](frontend/src/assets/sdk_documentation.gif)
+
 _In-depth, interactive SDK documentation to help you build bots and integrations quickly._
 
 **Rich Message Formats & Embeds:**
 
 ![Message Formats and Embeds](frontend/src/assets/formats_and_embed.gif)
+
 _Send messages with rich embeds, formatting, and media for a dynamic chat experience._
 
 #### **🚀 Xelyra Bot SDK - The Most Advanced Bot Framework**
@@ -366,3 +374,79 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 **Built with ❤️ using cutting-edge technologies for the future of communication.**
+
+## 🔗 API Endpoints
+
+Below is a summary of the main backend API endpoints exposed by Xelyra. These endpoints power all major user actions in the frontend (via axios/fetch), including authentication, messaging, server/group management, developer features, and more.
+
+| Endpoint (Path)                                                 | Method | Description                   |
+| --------------------------------------------------------------- | ------ | ----------------------------- |
+| `/signup`                                                       | POST   | Register a new user           |
+| `/signup/otp`                                                   | POST   | Request OTP for signup        |
+| `/signup/auth`                                                  | POST   | Authenticate signup OTP       |
+| `/login`                                                        | POST   | User login                    |
+| `/login/auth`                                                   | POST   | Authenticate login            |
+| `/home/auth`                                                    | POST   | Home authentication           |
+| `/home/friends`                                                 | POST   | Fetch friends list            |
+| `/home/conversations`                                           | POST   | Fetch conversations           |
+| `/home/servers`                                                 | POST   | Fetch servers                 |
+| `/home/dm`                                                      | POST   | Create DM                     |
+| `/home/recieverInfo`                                            | POST   | Get receiver info             |
+| `/home/messages`                                                | POST   | Fetch messages                |
+| `/home/messages/send`                                           | POST   | Send message                  |
+| `/home/messages/edit`                                           | POST   | Edit message                  |
+| `/home/messages/delete`                                         | POST   | Delete message                |
+| `/home/senderInfo`                                              | POST   | Get sender info               |
+| `/home/groups/create`                                           | POST   | Create group                  |
+| `/home/groups/fetch/info`                                       | POST   | Fetch group info              |
+| `/home/groups/add`                                              | POST   | Add to group                  |
+| `/home/groups/kick`                                             | POST   | Kick from group               |
+| `/home/groups/leave`                                            | POST   | Leave group                   |
+| `/home/groups/participants`                                     | POST   | List group participants       |
+| `/home/servers/create`                                          | POST   | Create server                 |
+| `/home/pfp`                                                     | POST   | Update profile picture        |
+| `/home/groups/pfp`                                              | POST   | Update group picture          |
+| `/home/groups/name`                                             | POST   | Change group name             |
+| `/home/requests`                                                | POST   | Fetch friend requests         |
+| `/home/requests/send`                                           | POST   | Send friend request           |
+| `/home/requests/accept`                                         | POST   | Accept friend request         |
+| `/home/requests/reject`                                         | POST   | Reject friend request         |
+| `/home/requests/cancel`                                         | POST   | Cancel friend request         |
+| `/home/requests/sent`                                           | POST   | Fetch sent requests           |
+| `/home/popupInfo`                                               | POST   | Fetch popup info              |
+| `/servers/:id`                                                  | POST   | Fetch server info             |
+| `/servers/:id/channels`                                         | POST   | List channels in server       |
+| `/servers/:id/category/create`                                  | POST   | Create category               |
+| `/servers/:id/channels/create`                                  | POST   | Create channel                |
+| `/servers/:id/roles/create`                                     | POST   | Create role                   |
+| `/servers/:id/roles/fetch`                                      | POST   | Fetch roles                   |
+| `/servers/:id/roles/assign`                                     | POST   | Assign role                   |
+| `/servers/:id/roles/remove`                                     | POST   | Remove role                   |
+| `/servers/:id/channels/:channel/permissions/assign`             | POST   | Assign channel permissions    |
+| `/servers/:id/channels/:channel/permissions/new`                | POST   | Assign new channel permission |
+| `/servers/:id/channels/:channel/settings/fetch`                 | POST   | Fetch channel settings        |
+| `/servers/:id/add`                                              | POST   | Add to server                 |
+| `/servers/:id/roles/rename`                                     | POST   | Rename role                   |
+| `/servers/:id/roles/color`                                      | POST   | Change role color             |
+| `/servers/:id/roles/permissions`                                | POST   | Update role permissions       |
+| `/servers/:id/update`                                           | POST   | Update server info            |
+| `/servers/:id/pfp`                                              | POST   | Update server picture         |
+| `/developer/auth`                                               | POST   | Developer authentication      |
+| `/developer/applications/create`                                | POST   | Create application            |
+| `/developer/applications/fetch`                                 | POST   | Fetch applications            |
+| `/developer/applications/:id/fetch/overview`                    | POST   | Fetch app overview            |
+| `/developer/applications/:id/fetch/bot`                         | POST   | Fetch app bot                 |
+| `/developer/applications/:id/auth`                              | POST   | App authentication            |
+| `/developer/applications/:id/update/overview`                   | POST   | Update app overview           |
+| `/developer/applications/:id/bots/create`                       | POST   | Create bot                    |
+| `/developer/applications/:id/bots/fetchToken`                   | POST   | Fetch bot token               |
+| `/developer/applications/:id/commands/create`                   | POST   | Create command                |
+| `/developer/applications/:id/commands/dispatch`                 | POST   | Dispatch command              |
+| `/developer/applications/:id/add/:server`                       | POST   | Add app to server             |
+| `/developer/servers/:id/`                                       | POST   | Developer server endpoint     |
+| `/developer/commands/:id/conversation/:conversation/fetch/info` | POST   | Fetch command info            |
+| `/developer/applications/:id/update/pfp`                        | POST   | Update app picture            |
+| `/genai/message`                                                | POST   | Send message to GenAI         |
+| `/metrics`                                                      | GET    | Fetch metrics                 |
+
+_The frontend calls these endpoints using axios from React components to power all user and developer features._
