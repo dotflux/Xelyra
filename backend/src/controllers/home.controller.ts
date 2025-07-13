@@ -13,6 +13,8 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { Multer } from 'multer';
 import { diskStorage } from 'multer';
 import { extname, join, resolve } from 'path';
+import { changePfp } from 'src/logic/home/user/changePfp';
+import { changeBannerTheme } from '../logic/home/user/changeBannerTheme';
 
 @Controller('home')
 export class HomeController {
@@ -196,7 +198,7 @@ export class HomeController {
     @UploadedFiles() uploadedFiles?: { pfp?: Multer.File[] },
     @Body('aiImageUrl') aiImageUrl?: string,
   ) {
-    const { changePfp } = await import('src/logic/home/user/changePfp');
+    console.log('uploadedFiles:', uploadedFiles);
     const file =
       uploadedFiles?.pfp && uploadedFiles.pfp.length > 0
         ? uploadedFiles.pfp[0]
@@ -204,6 +206,7 @@ export class HomeController {
     return await changePfp(
       req,
       this.homeService['usersService'],
+      this.homeService['messagesGateway'],
       file,
       aiImageUrl,
     );
@@ -285,5 +288,75 @@ export class HomeController {
     @Body('userToFetch') userToFetch: string,
   ) {
     return await this.homeService.fetchPopupInfo(req, userToFetch);
+  }
+
+  @Post('user/changeDisplayName')
+  async changeDisplayName(
+    @Req() req: Request,
+    @Body('displayName') displayName: string,
+  ) {
+    return await this.homeService.changeDisplayName(req, displayName);
+  }
+
+  @Post('user/changeBio')
+  async changeBio(@Req() req: Request, @Body('bio') bio: string) {
+    return await this.homeService.changeBio(req, bio);
+  }
+
+  @Post('user/changeUsername')
+  async changeUsername(
+    @Req() req: Request,
+    @Body('newUsername') username: string,
+    @Body('password') password: string,
+  ) {
+    return await this.homeService.changeUsername(req, username, password);
+  }
+
+  @Post('user/changePassword')
+  async changePassword(
+    @Req() req: Request,
+    @Body('newPassword') password: string,
+    @Body('currentPassword') currentPassword: string,
+    @Body('confirmPassword') confirmPassword: string,
+  ) {
+    return await this.homeService.changePassword(
+      req,
+      password,
+      currentPassword,
+      confirmPassword,
+    );
+  }
+
+  @Post('user/changeBannerTheme')
+  @UseInterceptors(
+    FileFieldsInterceptor([{ name: 'banner', maxCount: 1 }], {
+      storage: diskStorage({
+        destination: resolve(__dirname, '../../uploads'),
+        filename: (req, file, cb) => {
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(null, uniqueSuffix + extname(file.originalname));
+        },
+      }),
+    }),
+  )
+  async changeBannerTheme(
+    @Req() req: Request,
+    @UploadedFiles() uploadedFiles?: { banner?: Multer.File[] },
+    @Body('primary_theme') primary_theme?: string,
+    @Body('secondary_theme') secondary_theme?: string,
+  ) {
+    const file =
+      uploadedFiles?.banner && uploadedFiles.banner.length > 0
+        ? uploadedFiles.banner[0]
+        : undefined;
+    return await changeBannerTheme(
+      req,
+      this.homeService['usersService'],
+      this.homeService['messagesGateway'],
+      file,
+      primary_theme,
+      secondary_theme,
+    );
   }
 }

@@ -3,23 +3,24 @@ import axios from "axios";
 
 interface Props {
   channelId: string;
-  messageId: string; // your created_at or id, depending on endpoint
+  messageId: string;
   initialText: string;
-  onCancel: () => void; // to exit edit mode
-  onEdited: () => void; // callback after successful edit to refresh UI
+  onCancel: () => void;
+  onEdited: () => void;
 }
 
 const EditMessage = (props: Props) => {
   const [text, setText] = useState(props.initialText);
+  const [error, setError] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // focus & select all text on mount
   useEffect(() => {
     textareaRef.current?.focus();
     textareaRef.current?.select();
   }, []);
 
   const submitEdit = async () => {
+    setError(null);
     try {
       if (!props.channelId) return;
       const response = await axios.post(
@@ -36,15 +37,14 @@ const EditMessage = (props: Props) => {
           },
         }
       );
-
       if (response.data.valid) {
         props.onEdited();
       }
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
-        console.log(error.response.data.message);
+        setError(error.response.data.message);
       } else {
-        console.log("Network Error:", error);
+        setError("Network Error");
       }
     }
   };
@@ -61,21 +61,30 @@ const EditMessage = (props: Props) => {
   };
 
   return (
-    <div className="w-full bg-[#191a1d] px-3 py-2 rounded-md">
+    <div className="w-full max-w-2xl mx-auto bg-[#23232a] border border-[#36373a] shadow-xl rounded-2xl p-4 flex flex-col items-stretch">
       <textarea
         ref={textareaRef}
         value={text}
         onChange={(e) => setText(e.target.value)}
         onKeyDown={onKeyDown}
-        rows={2}
-        className="w-full resize-none bg-transparent text-sm text-white placeholder-gray-500 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+        rows={3}
+        className="w-full resize-none bg-[#191a1d] text-sm text-white placeholder-gray-500 rounded-xl px-4 py-3 border border-[#36373a] focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all min-h-[60px]"
       />
-
-      <div className="mt-2 flex space-x-4">
+      <div className="text-xs text-gray-400 mt-2 mb-1 select-none">
+        Press <span className="font-semibold text-indigo-300">Enter</span> to
+        save, <span className="font-semibold text-indigo-300">Esc</span> to
+        cancel
+      </div>
+      {error && (
+        <div className="bg-red-900/20 border border-red-500/30 text-red-400 px-4 py-2 rounded-lg mb-2 text-sm">
+          {error}
+        </div>
+      )}
+      <div className="mt-2 flex gap-3 justify-end">
         <button
           type="button"
           onClick={props.onCancel}
-          className="text-sm text-blue-500 hover:underline"
+          className="px-5 py-2 rounded-full bg-[#36373a] text-gray-200 font-semibold hover:bg-[#23232a] transition-colors text-sm"
         >
           Cancel
         </button>
@@ -83,7 +92,7 @@ const EditMessage = (props: Props) => {
           type="button"
           onClick={submitEdit}
           disabled={!text.trim()}
-          className="text-sm text-blue-500 hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-5 py-2 rounded-full bg-indigo-600 text-white font-semibold hover:bg-indigo-700 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Save
         </button>

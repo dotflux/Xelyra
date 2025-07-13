@@ -15,6 +15,9 @@ export interface SenderInfo {
   displayName: string;
   type: string;
   pfp: string;
+  banner: string;
+  primary_theme: string;
+  secondary_theme: string;
 }
 
 export const fetchSender = async (
@@ -119,6 +122,9 @@ export const fetchSender = async (
           ? 'ai'
           : 'bot',
       pfp: isUser ? senderRow[0].pfp : appPfp,
+      banner: isUser ? senderRow[0].banner : null,
+      primary_theme: isUser ? senderRow[0].primary_theme : null,
+      secondary_theme: isUser ? senderRow[0].secondary_theme : null,
     };
 
     return {

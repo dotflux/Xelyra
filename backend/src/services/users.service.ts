@@ -157,6 +157,42 @@ export class UsersService {
     }
   }
 
+  async updateBio(id: string, bio: string) {
+    const query = `UPDATE xelyra.users SET bio = ? WHERE id = ?`;
+    const params = [bio, id];
+    try {
+      const results = await this.scyllaService.execute(query, params);
+      return results.rows;
+    } catch (err) {
+      console.error('Error updating bio:', err);
+      throw err;
+    }
+  }
+
+  async updateUsername(id: string, username: string) {
+    const query = `UPDATE xelyra.users SET username = ? WHERE id = ?`;
+    const params = [username, id];
+    try {
+      const results = await this.scyllaService.execute(query, params);
+      return results.rows;
+    } catch (err) {
+      console.error('Error updating username:', err);
+      throw err;
+    }
+  }
+
+  async updatePassword(id: string, password: string) {
+    const query = `UPDATE xelyra.users SET password = ? WHERE id = ?`;
+    const params = [password, id];
+    try {
+      const results = await this.scyllaService.execute(query, params);
+      return results.rows;
+    } catch (err) {
+      console.error('Error updating password:', err);
+      throw err;
+    }
+  }
+
   async setXynId(id: string, userId: string) {
     const query = `UPDATE xelyra.users SET xyn_id = ? WHERE id = ?`;
     const params = [id, userId];
@@ -271,17 +307,31 @@ export class UsersService {
     return Array.isArray(user[0].friends) && user[0].friends.includes(friendId);
   }
 
-  // Get all sender_ids for a reciever (incoming requests)
   async getRequestsByRecieverId(recieverId: string): Promise<string[]> {
     const query = `SELECT sender_id FROM xelyra.requests WHERE reciever_id = ?`;
     const results = await this.scyllaService.execute(query, [recieverId]);
     return results.rows ? results.rows.map((row) => row.sender_id) : [];
   }
 
-  // Get all reciever_ids for a sender (sent requests)
   async getRequestsSentBySenderId(senderId: string): Promise<string[]> {
     const query = `SELECT reciever_id FROM xelyra.requests_sent WHERE sender_id = ?`;
     const results = await this.scyllaService.execute(query, [senderId]);
     return results.rows ? results.rows.map((row) => row.reciever_id) : [];
+  }
+
+  async updateBannerTheme(
+    id: string,
+    banner: string | null,
+    primary_theme?: string,
+    secondary_theme?: string,
+  ) {
+    const query = `UPDATE xelyra.users SET banner = ?, primary_theme = ?, secondary_theme = ? WHERE id = ?`;
+    const params = [banner, primary_theme, secondary_theme, id];
+    try {
+      const results = await this.scyllaService.execute(query, params);
+      return results.rows;
+    } catch (err) {
+      throw err;
+    }
   }
 }

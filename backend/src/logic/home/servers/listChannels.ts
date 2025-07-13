@@ -70,7 +70,6 @@ export const listChannels = async (
       throw new BadRequestException('You are not a member');
     }
 
-    // Get all categories and channels in parallel for maximum speed
     const [categories, allChannels] = await Promise.all([
       channelsService.findAllCategories(server[0].id),
       channelsService.findAllChannels(server[0].id),
@@ -91,12 +90,12 @@ export const listChannels = async (
     });
 
     const permissionChecks = allChannels.map(async (channel) => {
-      // const canView = await permissionsService.canView(
-      //   id,
-      //   channel.id,
-      //   user[0].id,
-      //   channel.isPrivate,
-      // );
+      const canView = await permissionsService.canView(
+        id,
+        channel.id,
+        user[0].id,
+        channel.isPrivate,
+      );
 
       if (channelsByCategory.has(String(channel.category))) {
         const unreadCounter = await conversationsService.findUnreadCounter(
@@ -117,7 +116,6 @@ export const listChannels = async (
 
     await Promise.all(permissionChecks);
 
-    // Build the final result structure
     const channelsData: CategoryWithChannels[] = categories.map((category) => ({
       categoryName: category.name,
       category: String(category.id),

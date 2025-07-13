@@ -16,7 +16,6 @@ export class PermissionsService {
     userId: string,
     isPrivate: boolean,
   ) {
-    // 1) Default: public channels are viewable
     let effective = !isPrivate;
 
     // 2) Load the user’s roles

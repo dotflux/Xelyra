@@ -16,6 +16,9 @@ export interface SenderInfo {
   type: string;
   pfp: string;
   description: string;
+  banner: string;
+  primary_theme: string;
+  secondary_theme: string;
 }
 
 export const fetchPopupInfo = async (
@@ -76,6 +79,9 @@ export const fetchPopupInfo = async (
           : 'bot',
       pfp: isUser ? senderRow[0].pfp : appPfp,
       description: isUser ? senderRow[0].bio : appDescription,
+      banner: isUser ? senderRow[0].banner : null,
+      primary_theme: isUser ? senderRow[0].primary_theme : null,
+      secondary_theme: isUser ? senderRow[0].secondary_theme : null,
     };
 
     return {

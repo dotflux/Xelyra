@@ -13,6 +13,7 @@ export interface User {
   conversations: string[];
   pfp?: string;
   displayName?: string;
+  bio?: string;
   xyn_id?: string;
 }
 

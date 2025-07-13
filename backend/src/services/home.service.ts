@@ -37,6 +37,10 @@ import { rejectRequest } from 'src/logic/home/user/rejectRequest';
 import { cancelRequest } from 'src/logic/home/user/cancelRequest';
 import { listSentRequests } from 'src/logic/home/user/listSentRequests';
 import { fetchPopupInfo } from 'src/logic/home/fetchPopupInfo';
+import { changeDisplayName } from 'src/logic/home/user/changeDisplayName';
+import { changeBio } from 'src/logic/home/user/changeBio';
+import { changeUsername } from 'src/logic/home/user/changeUsername';
+import { changePassword } from 'src/logic/home/user/changePassword';
 
 @Injectable()
 export class HomeService {
@@ -314,6 +318,45 @@ export class HomeService {
       this.botsService,
       this.appService,
       this.messagesService,
+    );
+  }
+
+  async changeDisplayName(req: Request, displayName: string) {
+    return await changeDisplayName(
+      req,
+      displayName,
+      this.usersService,
+      this.messagesGateway,
+    );
+  }
+
+  async changeBio(req: Request, bio: string) {
+    return await changeBio(req, bio, this.usersService, this.messagesGateway);
+  }
+
+  async changeUsername(req: Request, username: string, password: string) {
+    return await changeUsername(
+      req,
+      username,
+      password,
+      this.usersService,
+      this.messagesGateway,
+    );
+  }
+
+  async changePassword(
+    req: Request,
+    newPassword: string,
+    currentPassword: string,
+    confirmPassword: string,
+  ) {
+    return await changePassword(
+      req,
+      newPassword,
+      currentPassword,
+      confirmPassword,
+      this.usersService,
+      this.messagesGateway,
     );
   }
 }

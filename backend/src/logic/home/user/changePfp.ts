@@ -29,6 +29,17 @@ export const changePfp = async (
     if (!user || user.length === 0)
       throw new UnauthorizedException('No such user in database');
 
+    // Avatar removal support
+    if (req.body && req.body.remove) {
+      await usersService.updatePfp(user[0].id, '');
+      messagesGateway.emitUserUpdate(user[0].id, { pfp: null });
+      return {
+        valid: true,
+        message: 'Pfp removed.',
+        pfp: null,
+      };
+    }
+
     let pfpUrl = '';
     console.log(
       'file:',
