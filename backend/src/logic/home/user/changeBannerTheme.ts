@@ -14,6 +14,8 @@ export const changeBannerTheme = async (
   file?: MulterFile,
   primary_theme?: string,
   secondary_theme?: string,
+  aiImageUrl?: string,
+  generatedImage?: { buffer: Buffer; ext: string },
 ) => {
   const token = req.cookies?.user_token;
   if (!token) throw new UnauthorizedException('No token provided');
@@ -31,6 +33,17 @@ export const changeBannerTheme = async (
     if (file.size > 5 * 1024 * 1024)
       throw new BadRequestException('File too large');
     bannerUrl = `/uploads/${file.filename}`;
+  } else if (generatedImage) {
+    const { buffer, ext } = generatedImage;
+    if (!buffer) throw new BadRequestException('No image buffer provided');
+    const filename = `banner_${user[0].id}_${Date.now()}.${ext}`;
+    const fs = require('fs');
+    const path = require('path');
+    const uploadPath = path.join(process.cwd(), 'uploads', filename);
+    fs.writeFileSync(uploadPath, buffer);
+    bannerUrl = `/uploads/${filename}`;
+  } else if (aiImageUrl) {
+    bannerUrl = aiImageUrl;
   } else if (req.body.removeBanner) {
     bannerUrl = null;
   } else {
