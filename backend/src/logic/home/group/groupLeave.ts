@@ -6,6 +6,7 @@ import { Request } from 'express';
 import { UsersService } from 'src/services/users.service';
 import { MessagesService } from 'src/services/messages.service';
 import { GroupsService } from 'src/services/groups.service';
+import { MessagesGateway } from 'src/gateways/messages.gateway';
 
 dotenv.config();
 
@@ -15,6 +16,7 @@ export const groupLeave = async (
   usersService: UsersService,
   messagesService: MessagesService,
   groupsService: GroupsService,
+  messagesGateway: MessagesGateway,
 ) => {
   try {
     const token = req.cookies?.user_token;
@@ -65,6 +67,8 @@ export const groupLeave = async (
     if (otherParticipants.length === 0) {
       await groupsService.deleteGroup(group);
     }
+
+    messagesGateway.emitMemberChange(group);
 
     return {
       valid: true,

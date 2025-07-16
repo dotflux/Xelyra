@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import closeSidebarIcon from "../../../../assets/closeSidebar.svg";
 import plusIcon from "../../../../assets/plus.svg";
@@ -6,6 +6,7 @@ import gearIcon from "../../../../assets/cog.svg";
 import kickIcon from "../../../../assets/userRemove.svg";
 import GroupAdd from "./GroupAdd";
 import GroupSettingsModal from "./GroupSettingsModal";
+import { io, Socket } from "socket.io-client";
 
 interface Props {
   showPanel: boolean;
@@ -23,6 +24,7 @@ const GroupPanel = (props: Props) => {
   const [partInfo, setPartInfo] = useState<Participant[] | null>(null);
   const [showAdd, setShowAdd] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const socketRef = useRef<Socket | null>(null);
 
   const onMount = async () => {
     try {
@@ -37,7 +39,6 @@ const GroupPanel = (props: Props) => {
           },
         }
       );
-
       if (response.data.valid) {
         setPartInfo(response.data.partData);
       }
@@ -52,6 +53,17 @@ const GroupPanel = (props: Props) => {
 
   useEffect(() => {
     onMount();
+    socketRef.current = io("http://localhost:3000/messages", {
+      withCredentials: true,
+    });
+    socketRef.current.emit("joinUser", props.channel);
+    socketRef.current.on("memberChange", () => {
+      onMount();
+    });
+    return () => {
+      socketRef.current?.disconnect();
+      socketRef.current = null;
+    };
   }, [props.channel]);
 
   const onKick = async (participant: string) => {

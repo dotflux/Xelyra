@@ -40,6 +40,20 @@ export class MessagesGateway implements OnGatewayInit {
     });
   }
 
+  @SubscribeMessage('groupPanel')
+  handleGroupPanel(
+    @MessageBody() conversationId: string,
+    @ConnectedSocket() socket: Socket,
+  ) {
+    socket.join(conversationId);
+  }
+
+  emitMemberChange(conversationId: string) {
+    this.server.to(conversationId).emit('memberChange', {
+      conversationId,
+    });
+  }
+
   // client emits "joinConversation"
   @SubscribeMessage('joinConversation')
   handleJoin(

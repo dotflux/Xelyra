@@ -214,6 +214,7 @@ export class HomeService {
       this.usersService,
       this.messagesService,
       this.groupsService,
+      this.messagesGateway,
     );
   }
 
@@ -225,6 +226,7 @@ export class HomeService {
       this.usersService,
       this.messagesService,
       this.groupsService,
+      this.messagesGateway,
     );
   }
 
@@ -235,6 +237,7 @@ export class HomeService {
       this.usersService,
       this.messagesService,
       this.groupsService,
+      this.messagesGateway,
     );
   }
 

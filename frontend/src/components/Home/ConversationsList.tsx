@@ -67,47 +67,7 @@ const ConversationsList = () => {
     socketRef.current = io("http://localhost:3000/messages", {
       withCredentials: true,
     });
-    // Listen for convAdded event
-    socketRef.current.on(
-      "convAdded",
-      async (data: { userId1: string; userId2: string; convId: string }) => {
-        // Only handle if current user is involved
-        if (!user || (user.id !== data.userId1 && user.id !== data.userId2))
-          return;
-        if (
-          !conversationInfo ||
-          conversationInfo.some((c) => c.id === data.convId)
-        )
-          return;
-        // Determine receiver (not current user)
-        let receiverId = data.userId1 === user.id ? data.userId2 : data.userId1;
-        try {
-          // Fetch receiver info (assuming endpoint exists)
-          const res = await axios.post(
-            "http://localhost:3000/home/userinfo",
-            { userId: receiverId },
-            {
-              withCredentials: true,
-              headers: { "Content-Type": "application/json" },
-            }
-          );
-          if (res.data.valid) {
-            const newConv: ConvInfo = {
-              reciever: res.data.username,
-              id: data.convId,
-              recieverPfp: res.data.pfp,
-              type: "dm",
-              unreadCount: 0,
-              last_message_timestamp: null,
-              displayName: res.data.displayName || res.data.username, // Set displayName
-            };
-            setConvInfo((prev) => (prev ? [newConv, ...prev] : [newConv]));
-          }
-        } catch (err) {
-          console.error("Failed to fetch receiver info", err);
-        }
-      }
-    );
+
     // Listen for newMessage event
     socketRef.current.on(
       "newMessage",

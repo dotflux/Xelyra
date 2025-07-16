@@ -45,10 +45,7 @@ export const fetchGroupInfo = async (
     if (groupRow.length === 0) {
       throw new BadRequestException('No such conversation');
     }
-    const isOwner = groupRow[0].owner.equals(user[0].id);
-    if (!isOwner) {
-      throw new BadRequestException('You are not the owner');
-    }
+
     if (
       !groupRow[0].participants
         .map((m) => m.toString())

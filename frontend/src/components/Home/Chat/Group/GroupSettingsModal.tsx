@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 interface Props {
   isOpen: boolean;
@@ -19,6 +20,7 @@ const GroupSettingsModal: React.FC<Props> = ({ isOpen, onClose, groupId }) => {
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const onMount = async () => {
     try {
@@ -105,6 +107,29 @@ const GroupSettingsModal: React.FC<Props> = ({ isOpen, onClose, groupId }) => {
       setError("Failed to update group name");
     }
     setSaving(false);
+  };
+
+  const handleLeaveGroup = async () => {
+    if (!groupId) return;
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/home/groups/leave",
+        { group: groupId },
+        { withCredentials: true }
+      );
+      if (response.data.valid) {
+        navigate("/home");
+        onClose();
+      } else {
+        setError(response.data.message || "Failed to leave group");
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        setError(error.response.data.message);
+      } else {
+        setError("Failed to leave group");
+      }
+    }
   };
 
   if (!isOpen) return null;
@@ -207,7 +232,10 @@ const GroupSettingsModal: React.FC<Props> = ({ isOpen, onClose, groupId }) => {
           <div className="text-red-500 text-sm mt-2 text-center">{error}</div>
         )}
         {/* Leave Group */}
-        <button className="w-full py-2 mt-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold transition-colors">
+        <button
+          className="w-full py-2 mt-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold transition-colors"
+          onClick={handleLeaveGroup}
+        >
           Leave Group
         </button>
       </div>

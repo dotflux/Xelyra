@@ -6,6 +6,8 @@ import axios from "axios";
 interface Friend {
   username: string;
   id: string;
+  pfp?: string;
+  displayName?: string;
 }
 
 interface Props {
@@ -132,12 +134,29 @@ const GroupAdd = (props: Props) => {
               <div className="flex flex-wrap gap-2">
                 {participants.map((id) => {
                   const friend = friends && friends.find((f) => f.id === id);
+                  const displayName =
+                    friend?.displayName || friend?.username || id;
                   return (
                     <span
                       key={id}
                       className="flex items-center bg-gradient-to-r from-indigo-500 to-indigo-600 text-white px-3 py-2 rounded-full text-sm font-medium shadow-lg"
                     >
-                      {friend?.username || id}
+                      {friend?.pfp ? (
+                        <img
+                          src={
+                            friend.pfp.startsWith("/uploads/")
+                              ? `http://localhost:3000${friend.pfp}`
+                              : friend.pfp
+                          }
+                          alt={displayName}
+                          className="h-6 w-6 rounded-full object-cover border border-gray-700 shadow mr-2"
+                        />
+                      ) : (
+                        <span className="h-6 w-6 bg-gradient-to-br from-gray-800 to-gray-900 rounded-full flex items-center justify-center text-xs font-bold text-white shadow mr-2">
+                          {displayName.charAt(0).toUpperCase()}
+                        </span>
+                      )}
+                      {displayName}
                       <button
                         onClick={() => toggleParticipant(id)}
                         className="ml-2 hover:text-gray-200 transition-colors duration-200"
@@ -170,24 +189,39 @@ const GroupAdd = (props: Props) => {
             </label>
             <div className="max-h-48 overflow-y-auto border border-[#3a3b3e] rounded-lg p-3 bg-[#191a1d] scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent">
               {friends &&
-                friends.map((f) => (
-                  <div
-                    key={f.id}
-                    onClick={() => toggleParticipant(f.id)}
-                    className={`cursor-pointer px-4 py-3 mb-2 rounded-lg transition-all duration-200 hover:scale-[1.02] ${
-                      participants.includes(f.id)
-                        ? "bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-lg"
-                        : "bg-[#2a2b2e] text-gray-300 hover:bg-[#3a3b3e]"
-                    }`}
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div className="h-10 w-10 bg-gradient-to-br from-gray-800 to-gray-900 rounded-full flex items-center justify-center text-lg font-bold text-white shadow-md mr-3">
-                        {f.username.charAt(0).toUpperCase()}
+                friends.map((f) => {
+                  const displayName = f.displayName || f.username;
+                  return (
+                    <div
+                      key={f.id}
+                      onClick={() => toggleParticipant(f.id)}
+                      className={`cursor-pointer px-4 py-3 mb-2 rounded-lg transition-all duration-200 hover:scale-[1.02] ${
+                        participants.includes(f.id)
+                          ? "bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-lg"
+                          : "bg-[#2a2b2e] text-gray-300 hover:bg-[#3a3b3e]"
+                      }`}
+                    >
+                      <div className="flex items-center space-x-3">
+                        {f.pfp ? (
+                          <img
+                            src={
+                              f.pfp.startsWith("/uploads/")
+                                ? `http://localhost:3000${f.pfp}`
+                                : f.pfp
+                            }
+                            alt={displayName}
+                            className="h-10 w-10 rounded-full object-cover border border-gray-700 shadow-md mr-3"
+                          />
+                        ) : (
+                          <div className="h-10 w-10 bg-gradient-to-br from-gray-800 to-gray-900 rounded-full flex items-center justify-center text-lg font-bold text-white shadow-md mr-3">
+                            {displayName.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                        <span className="font-medium">{displayName}</span>
                       </div>
-                      <span className="font-medium">{f.username}</span>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
             </div>
           </div>
 
