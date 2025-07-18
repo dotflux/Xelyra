@@ -69,8 +69,10 @@ export function parseLinesWithHeadings(text: string): React.ReactNode[] {
 export function parseInlineFormatting(text: string): React.ReactNode[] {
   const result: React.ReactNode[] = [];
   let lastIndex = 0;
+  const urlRegex =
+    /(https?:\/\/[\w\-._~:/?#[\]@!$&'()*+,;=%]+)(?![^<]*>|[^&];)/g;
   const regex =
-    /\|\|([^|]+)\|\||`([^`]+)`|__([^_]+)__|~~([^~]+)~~|\*\*([^*]+)\*\*|\*([^*]+)\*/g;
+    /\|\|([^|]+)\|\||`([^`]+)`|__([^_]+)__|~~([^~]+)~~|\*\*([^*]+)\*\*|\*([^*]+)\*|https?:\/\/[\w\-._~:/?#[\]@!$&'()*+,;=%]+(?![^<]*>|[^&];)/g;
   let match;
   let spoilerKey = 0;
   while ((match = regex.exec(text)) !== null) {
@@ -116,6 +118,18 @@ export function parseInlineFormatting(text: string): React.ReactNode[] {
         <span key={match.index} className="italic text-gray-300">
           {match[6]}
         </span>
+      );
+    } else if (match[0] && urlRegex.test(match[0])) {
+      result.push(
+        <a
+          key={match.index}
+          href={match[0]}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-400 underline"
+        >
+          {match[0]}
+        </a>
       );
     }
     lastIndex = regex.lastIndex;
@@ -226,96 +240,44 @@ export function parseBlockLines(
       );
       if (lines[i + 1] !== undefined && /^\s*$/.test(lines[i + 1])) {
         result.push(
-          <div
-            key={`empty-after-heading-${blockIdx}-${i}`}
-            style={{ height: "0.5em" }}
-          />
-        );
-      }
-      continue;
-    }
-    if (/^\s*> /.test(line)) {
-      const content = line.replace(/^\s*> /, "");
-      result.push(
-        <blockquote
-          key={`bq-${blockIdx}-${i}`}
-          className="border-l-4 border-white pl-3 ml-2 text-gray-300 italic py-1 rounded"
-        >
-          {parseInlineFormatting(content)}
-        </blockquote>
-      );
-      if (
-        content.trim() === "" ||
-        (lines[i + 1] !== undefined && /^\s*$/.test(lines[i + 1]))
-      ) {
-        result.push(
-          <div
-            key={`empty-after-bq-${blockIdx}-${i}`}
-            style={{ height: "0.5em" }}
-          />
+          <div key={`empty-after-heading-${blockIdx}-${i}`} className="h-0.5" />
         );
       }
       continue;
     }
     if (/^\s*- /.test(line)) {
-      const content = line.replace(/^\s*- /, "");
       result.push(
         <div
           key={`bullet-${blockIdx}-${i}`}
           className="flex items-center gap-1"
         >
           <span className="text-lg text-gray-200">•</span>
-          <span>{parseInlineFormatting(content)}</span>
+          <span>{parseInlineFormatting(line.replace(/^\s*- /, ""))}</span>
         </div>
       );
-      if (
-        content.trim() === "" ||
-        (lines[i + 1] !== undefined && /^\s*$/.test(lines[i + 1]))
-      ) {
-        result.push(
-          <div
-            key={`empty-after-bullet-${blockIdx}-${i}`}
-            style={{ height: "0.5em" }}
-          />
-        );
-      }
       continue;
     }
-    const numberedListMatch = line.match(/^(\d+)\.\s(.*)$/);
-    if (numberedListMatch) {
-      const content = numberedListMatch[2];
-      result.push(
-        <div
-          key={`numlist-${blockIdx}-${i}`}
-          className="flex items-center gap-1"
-        >
-          <span className="text-gray-200 font-semibold">
-            {numberedListMatch[1] + "."}
-          </span>
-          <span>{parseInlineFormatting(content)}</span>
-        </div>
-      );
-      if (
-        content.trim() === "" ||
-        (lines[i + 1] !== undefined && /^\s*$/.test(lines[i + 1]))
-      ) {
+    if (/^\d+\.\s/.test(line)) {
+      const numberedListMatch = line.match(/^(\d+)\.\s(.*)$/);
+      if (numberedListMatch) {
         result.push(
           <div
-            key={`empty-after-numlist-${blockIdx}-${i}`}
-            style={{ height: "0.5em" }}
-          />
+            key={`numlist-${blockIdx}-${i}`}
+            className="flex items-center gap-1"
+          >
+            <span className="text-gray-200 font-semibold">
+              {numberedListMatch[1] + "."}
+            </span>
+            <span>{parseInlineFormatting(numberedListMatch[2])}</span>
+          </div>
         );
       }
-      continue;
-    }
-    if (/^\s*$/.test(line)) {
-      result.push(
-        <div key={`empty-${blockIdx}-${i}`} style={{ height: "0.5em" }} />
-      );
       continue;
     }
     result.push(
-      <div key={`line-${blockIdx}-${i}`}>{parseInlineFormatting(line)}</div>
+      <div key={`line-${blockIdx}-${i}`} className="mb-0.5">
+        {parseInlineFormatting(line)}
+      </div>
     );
   }
   return result;

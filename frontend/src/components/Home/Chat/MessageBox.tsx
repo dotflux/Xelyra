@@ -1,25 +1,14 @@
 import { useState, useEffect, useRef } from "react";
-import editIcon from "../../../assets/edit.svg";
-import deleteIcon from "../../../assets/trash.svg";
+
 import axios from "axios";
 import EditMessage from "./EditMessage";
-import replyIcon from "../../../assets/reply.svg";
-import Embed from "./Embed";
+
 import UserPopup from "./UserPopup";
 import UserAvatar from "./Message/UserAvatar";
 import ReplyBar from "./Message/ReplyBar";
 import MessageActions from "./Message/MessageActions";
 import MessageContent from "./Message/MessageContent";
 import TimestampLabel from "./Message/TimestampLabel";
-import {
-  parseMessageFormatting,
-  parseLinesWithHeadings,
-  parseInlineFormatting,
-  parseMessage,
-  parseFullMessage,
-  parseBlockLines,
-  Spoiler,
-} from "../../../utils/messageFormatting";
 
 interface Sender {
   username: string;
@@ -45,8 +34,6 @@ interface Props {
   setRepliedSenderType?: React.Dispatch<React.SetStateAction<string | null>>;
   embeds?: string[] | object[];
 }
-
-const BACKEND_URL = "http://localhost:3000";
 
 const MessageBox = (props: Props) => {
   const [senderInfo, setSenderInfo] = useState<Sender | null>(null);
@@ -167,6 +154,31 @@ const MessageBox = (props: Props) => {
     }
   };
 
+  const tenorRegex = /https?:\/\/tenor\.com\/view\/.*-(\d+)/;
+  const match = props.message.match(tenorRegex);
+  const [tenorGifUrl, setTenorGifUrl] = useState<string | null>(null);
+  useEffect(() => {
+    setTenorGifUrl(null);
+    if (match) {
+      const gifId = match[1];
+      axios
+        .post(`http://localhost:3000/home/api/tenor/${gifId}`)
+        .then((res) => {
+          const data = res.data;
+          if (
+            data &&
+            data.results &&
+            data.results[0] &&
+            data.results[0].media_formats &&
+            data.results[0].media_formats.gif &&
+            data.results[0].media_formats.gif.url
+          ) {
+            setTenorGifUrl(data.results[0].media_formats.gif.url);
+          }
+        });
+    }
+  }, [props.message]);
+
   return (
     <>
       {/* User Info Popup */}
@@ -251,14 +263,29 @@ const MessageBox = (props: Props) => {
                 onEdited={() => setEditing(false)}
               />
             ) : (
-              <MessageContent
-                message={props.message}
-                edited={props.edited}
-                files={props.files}
-                embeds={props.embeds}
-                imageDims={imageDims}
-                setImageDims={setImageDims}
-              />
+              <>
+                <MessageContent
+                  message={
+                    tenorGifUrl
+                      ? props.message.replace(tenorRegex, "").trim() // Remove Tenor link and trim whitespace
+                      : props.message
+                  }
+                  edited={props.edited}
+                  files={props.files}
+                  embeds={props.embeds}
+                  imageDims={imageDims}
+                  setImageDims={setImageDims}
+                />
+                {tenorGifUrl && (
+                  <div className="mt-2">
+                    <img
+                      src={tenorGifUrl}
+                      alt="GIF"
+                      className="rounded-lg max-w-xs"
+                    />
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>

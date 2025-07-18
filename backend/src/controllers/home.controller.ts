@@ -6,6 +6,7 @@ import {
   Req,
   UseInterceptors,
   UploadedFiles,
+  Param,
 } from '@nestjs/common';
 import { HomeService } from 'src/services/home.service';
 import { Request, Response } from 'express';
@@ -15,6 +16,7 @@ import { diskStorage } from 'multer';
 import { extname, join, resolve } from 'path';
 import { changePfp } from 'src/logic/home/user/changePfp';
 import { changeBannerTheme } from '../logic/home/user/changeBannerTheme';
+import axios from 'axios';
 
 @Controller('home')
 export class HomeController {
@@ -358,5 +360,37 @@ export class HomeController {
       primary_theme,
       secondary_theme,
     );
+  }
+
+  @Post('api/tenor/:id')
+  async getGif(@Param('id') id: string) {
+    const apiKey = process.env.TENOR_API;
+    const url = `https://tenor.googleapis.com/v2/posts?ids=${id}&key=${apiKey}`;
+    const response = await axios.get(url);
+    return response.data;
+  }
+
+  @Post('api/tenorsearch')
+  async searchGif(@Body('query') query: string) {
+    const apiKey = process.env.TENOR_API;
+    const url = `https://tenor.googleapis.com/v2/search?q=${query}&key=${apiKey}`;
+    const response = await axios.get(url);
+    return response.data;
+  }
+
+  @Post('api/tenortrending')
+  async trendingGifs() {
+    const apiKey = process.env.TENOR_API;
+    const url = `https://tenor.googleapis.com/v2/featured?key=${apiKey}&limit=24`;
+    const response = await axios.get(url);
+    return response.data;
+  }
+
+  @Post('api/tenorcategories')
+  async gifCategories() {
+    const apiKey = process.env.TENOR_API;
+    const url = `https://tenor.googleapis.com/v2/categories?key=${apiKey}`;
+    const response = await axios.get(url);
+    return response.data;
   }
 }

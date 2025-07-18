@@ -1,4 +1,4 @@
-import { useState, type KeyboardEvent, type FormEvent, useRef } from "react";
+import { useState, type KeyboardEvent, useRef } from "react";
 import sendIcon from "../../../assets/angleRight.svg";
 import fileIcon from "../../../assets/file.svg";
 import axios from "axios";
@@ -7,6 +7,7 @@ import SlashAutocomplete, {
   isOpen as isAutocompleteOpen,
   handleKey as handleAutocompleteKey,
 } from "./SlashAutoComplete";
+import GifModal from "./GifModal";
 
 interface Props {
   channelId: string | null;
@@ -27,6 +28,7 @@ const Typer = (props: Props) => {
   const [thinking, setThinking] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showGifModal, setShowGifModal] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -269,6 +271,15 @@ const Typer = (props: Props) => {
         style={{ display: "none" }}
         onChange={handleFileChange}
       />
+      {/* GIF Button and Modal */}
+      <GifModal
+        isOpen={showGifModal}
+        onClose={() => setShowGifModal(false)}
+        onSelectGif={(url) => {
+          setText(text + ` ${url}`);
+          setShowGifModal(false);
+        }}
+      />
       <div className="flex items-center gap-2">
         <button
           type="button"
@@ -277,6 +288,14 @@ const Typer = (props: Props) => {
           title="Attach file"
         >
           <img src={fileIcon} alt="Attach" className="w-5 h-5" />
+        </button>
+        <button
+          type="button"
+          className="bg-[#44454a] text-white rounded-md px-3 py-1 font-bold text-xs hover:bg-[#5a5b60] transition"
+          onClick={() => setShowGifModal(true)}
+          style={{ minWidth: 40, minHeight: 40 }}
+        >
+          GIF
         </button>
         <textarea
           ref={taRef}
