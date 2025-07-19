@@ -211,10 +211,11 @@ export class ServersFunctionService {
     );
   }
 
-  async addToServer(req: Request, id: string) {
+  async addToServer(req: Request, id: string, inviteId: string) {
     return await addToServer(
       req,
       id,
+      inviteId,
       this.usersService,
       this.messagesService,
       this.serversService,

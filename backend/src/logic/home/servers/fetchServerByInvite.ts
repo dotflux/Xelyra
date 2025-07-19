@@ -5,16 +5,20 @@ import * as dotenv from 'dotenv';
 import { Request } from 'express';
 import { UsersService } from 'src/services/users.service';
 import { MessagesService } from 'src/services/messages.service';
-import { v4 as uuidv4 } from 'uuid';
 import { ServersService } from 'src/services/servers.service';
 import { ServerMembersService } from 'src/services/serverMembers.service';
 import { ChannelsService } from 'src/services/channels.service';
 
 dotenv.config();
 
-export const addToServer = async (
+export interface InviteInfo {
+  server_name: string;
+  server_pfp: string;
+  server_member: boolean;
+}
+
+export const fetchServerByInvite = async (
   req: Request,
-  serverId: string,
   inviteId: string,
   usersService: UsersService,
   messagesService: MessagesService,
@@ -41,34 +45,29 @@ export const addToServer = async (
     if (user.length === 0) {
       throw new UnauthorizedException('No such user in database');
     }
-    const server = await serversService.findById(serverId);
+
+    const invite = await serversService.findInviteLookup(inviteId);
+    if (invite.length === 0) {
+      throw new BadRequestException('No such invite');
+    }
+    const server = await serversService.findById(invite[0].server_id);
     if (server.length === 0) {
       throw new BadRequestException('No such server');
     }
     const serverMember = await serverMembersService.findById(
-      serverId,
+      server[0].id,
       user[0].id,
     );
-    if (serverMember.length > 0) {
-      throw new BadRequestException('Already in the server');
-    }
-    const isValidInvite = await serversService.findInviteById(
-      serverId,
-      inviteId,
-    );
-    if (isValidInvite.length === 0) {
-      throw new BadRequestException('No such invite');
-    }
-
-    await Promise.all([
-      serverMembersService.createServerMember(serverId, user[0].id, []),
-      usersService.appendServer(serverId, user[0].id),
-    ]);
+    const inviteInfo: InviteInfo = {
+      server_name: server[0].name,
+      server_pfp: server[0].pfp,
+      server_member: serverMember.length > 0,
+    };
 
     return {
       valid: true,
-      message: 'Added To Server.',
-      serverId,
+      message: 'Found Invite.',
+      inviteInfo,
     };
   } catch (error) {
     if (

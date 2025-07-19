@@ -21,6 +21,79 @@ export class ServersService {
     }
   }
 
+  async createInvite(serverId: string, inviteId: string, createdBy: string) {
+    const createdAt = new Date();
+    const query = `
+      INSERT INTO xelyra.server_invites (server_id, invite_id, created_by, created_at)
+      VALUES (?, ?, ?, ?)
+    `;
+    const params = [serverId, inviteId, createdBy, createdAt];
+    try {
+      const results = await this.scyllaService.execute(query, params);
+      return results.rows;
+    } catch (err) {
+      console.error('Error creating invite:', err);
+      throw err;
+    }
+  }
+
+  async createInviteLookup(
+    serverId: string,
+    inviteId: string,
+    createdBy: string,
+  ) {
+    const query = `
+      INSERT INTO xelyra.server_invite_lookup (server_id, invite_id, created_by)
+      VALUES (?, ?, ?)
+    `;
+    const params = [serverId, inviteId, createdBy];
+    try {
+      const results = await this.scyllaService.execute(query, params);
+      return results.rows;
+    } catch (err) {
+      console.error('Error creating invite lookup:', err);
+      throw err;
+    }
+  }
+
+  async findInviteLookup(invite_id: string) {
+    const query = `
+      SELECT * FROM xelyra.server_invite_lookup WHERE invite_id = ?
+    `;
+    const params = [invite_id];
+    try {
+      const results = await this.scyllaService.execute(query, params);
+      return results.rows;
+    } catch (err) {
+      console.error('Error finding invite lookup:', err);
+      throw err;
+    }
+  }
+
+  async findInviteByUser(serverId: string, createdBy: string) {
+    const query = `SELECT * FROM xelyra.server_invites WHERE server_id = ? AND created_by = ?`;
+    const params = [serverId, createdBy];
+    try {
+      const results = await this.scyllaService.execute(query, params);
+      return results.rows;
+    } catch (err) {
+      console.error('Error finding invite by user:', err);
+      throw err;
+    }
+  }
+
+  async findInviteById(serverId: string, inviteId: string) {
+    const query = `SELECT * FROM xelyra.server_invites WHERE server_id = ? AND invite_id = ?`;
+    const params = [serverId, inviteId];
+    try {
+      const results = await this.scyllaService.execute(query, params);
+      return results.rows;
+    } catch (err) {
+      console.error('Error finding invite by id:', err);
+      throw err;
+    }
+  }
+
   async findById(id: string) {
     const query = `SELECT * FROM xelyra.servers WHERE id = ?`;
     const params = [id];

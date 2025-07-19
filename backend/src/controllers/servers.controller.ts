@@ -144,8 +144,12 @@ export class ServerController {
   }
 
   @Post('add')
-  async addToServer(@Req() req: Request, @Param('id') id: string) {
-    return await this.serverFservice.addToServer(req, id);
+  async addToServer(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Body('inviteId') inviteId: string,
+  ) {
+    return await this.serverFservice.addToServer(req, id, inviteId);
   }
 
   @Post('roles/rename')

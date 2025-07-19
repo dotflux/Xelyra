@@ -12,10 +12,9 @@ import { ChannelsService } from 'src/services/channels.service';
 
 dotenv.config();
 
-export const addToServer = async (
+export const createInvite = async (
   req: Request,
   serverId: string,
-  inviteId: string,
   usersService: UsersService,
   messagesService: MessagesService,
   serversService: ServersService,
@@ -49,26 +48,18 @@ export const addToServer = async (
       serverId,
       user[0].id,
     );
-    if (serverMember.length > 0) {
-      throw new BadRequestException('Already in the server');
-    }
-    const isValidInvite = await serversService.findInviteById(
-      serverId,
-      inviteId,
-    );
-    if (isValidInvite.length === 0) {
-      throw new BadRequestException('No such invite');
+    if (serverMember.length === 0) {
+      throw new BadRequestException('Not a member');
     }
 
-    await Promise.all([
-      serverMembersService.createServerMember(serverId, user[0].id, []),
-      usersService.appendServer(serverId, user[0].id),
-    ]);
+    const newId = uuidv4();
+
+    await serversService.createInvite(serverId, newId, user[0].id);
 
     return {
       valid: true,
-      message: 'Added To Server.',
-      serverId,
+      message: 'Crated Server Invite.',
+      newId,
     };
   } catch (error) {
     if (

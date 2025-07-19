@@ -5,17 +5,15 @@ import * as dotenv from 'dotenv';
 import { Request } from 'express';
 import { UsersService } from 'src/services/users.service';
 import { MessagesService } from 'src/services/messages.service';
-import { v4 as uuidv4 } from 'uuid';
 import { ServersService } from 'src/services/servers.service';
 import { ServerMembersService } from 'src/services/serverMembers.service';
 import { ChannelsService } from 'src/services/channels.service';
 
 dotenv.config();
 
-export const addToServer = async (
+export const findInvite = async (
   req: Request,
   serverId: string,
-  inviteId: string,
   usersService: UsersService,
   messagesService: MessagesService,
   serversService: ServersService,
@@ -49,26 +47,19 @@ export const addToServer = async (
       serverId,
       user[0].id,
     );
-    if (serverMember.length > 0) {
-      throw new BadRequestException('Already in the server');
-    }
-    const isValidInvite = await serversService.findInviteById(
-      serverId,
-      inviteId,
-    );
-    if (isValidInvite.length === 0) {
-      throw new BadRequestException('No such invite');
+    if (serverMember.length === 0) {
+      throw new BadRequestException('Not a member');
     }
 
-    await Promise.all([
-      serverMembersService.createServerMember(serverId, user[0].id, []),
-      usersService.appendServer(serverId, user[0].id),
-    ]);
+    const invite = await serversService.findInviteByUser(serverId, user[0].id);
+    if (invite.length === 0) {
+      throw new BadRequestException('No current invites.');
+    }
 
     return {
       valid: true,
-      message: 'Added To Server.',
-      serverId,
+      message: 'Found Invite.',
+      inviteId: invite[0].invite_id,
     };
   } catch (error) {
     if (
