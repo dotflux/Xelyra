@@ -71,4 +71,16 @@ export class ServerMembersService {
       throw err;
     }
   }
+
+  async removeMember(server: string, member: string) {
+    const query = `DELETE * FROM xelyra.server_members WHERE server_id = ? AND user_id = ?`;
+    const params = [server, member];
+    try {
+      const results = await this.scyllaService.execute(query, params);
+      return results.rows;
+    } catch (err) {
+      console.error('Error removing member from server:', err);
+      throw err;
+    }
+  }
 }

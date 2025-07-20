@@ -11,6 +11,7 @@ import { MessagesGateway } from 'src/gateways/messages.gateway';
 import { GroupsService } from 'src/services/groups.service';
 import { ChannelsService } from 'src/services/channels.service';
 import { types } from 'cassandra-driver';
+import { ServerMembersService } from 'src/services/serverMembers.service';
 
 dotenv.config();
 
@@ -24,6 +25,7 @@ export const sendMessage = async (
   messagesGateway: MessagesGateway,
   groupsService: GroupsService,
   channelsService: ChannelsService,
+  serverMembersService: ServerMembersService,
   replyTo?: string,
   files?: any[],
 ) => {
@@ -62,13 +64,18 @@ export const sendMessage = async (
     const isGroup = groupRow.length > 0;
     const isChannel = channelRow.length > 0;
     const userId = user[0].id.toString();
+
+    const isMember = isChannel
+      ? await serverMembersService.findById(channelRow[0].server_id, user[0].id)
+      : [];
     if (
       (isDm &&
         !conversationRow[0].participants
           .map((p) => p.toString())
           .includes(userId)) ||
       (isGroup &&
-        !groupRow[0].participants.map((m) => m.toString()).includes(userId))
+        !groupRow[0].participants.map((m) => m.toString()).includes(userId)) ||
+      (isChannel && isMember.length === 0)
     ) {
       throw new BadRequestException('Not a member');
     }

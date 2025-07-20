@@ -145,6 +145,7 @@ export class HomeService {
       this.messagesGateway,
       this.groupsService,
       this.channelsService,
+      this.serverMembersService,
       replyTo,
       files,
     );
