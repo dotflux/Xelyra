@@ -73,7 +73,7 @@ export class ServerMembersService {
   }
 
   async removeMember(server: string, member: string) {
-    const query = `DELETE * FROM xelyra.server_members WHERE server_id = ? AND user_id = ?`;
+    const query = `DELETE FROM xelyra.server_members WHERE server_id = ? AND user_id = ?`;
     const params = [server, member];
     try {
       const results = await this.scyllaService.execute(query, params);

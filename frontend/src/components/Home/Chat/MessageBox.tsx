@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 
 import axios from "axios";
 import EditMessage from "./EditMessage";
@@ -36,6 +37,7 @@ interface Props {
 }
 
 const MessageBox = (props: Props) => {
+  const navigate = useNavigate();
   const [senderInfo, setSenderInfo] = useState<Sender | null>(null);
   const [editing, setEditing] = useState(false);
   const [repliedContent, setMsgRepliedContent] = useState<string | null>(null);
@@ -52,6 +54,7 @@ const MessageBox = (props: Props) => {
   const pfpRef = useRef<HTMLDivElement>(
     null
   ) as React.RefObject<HTMLDivElement>;
+  const [isMember, setIsMember] = useState(false);
 
   const fetchSender = async () => {
     try {
@@ -179,6 +182,109 @@ const MessageBox = (props: Props) => {
     }
   }, [props.message]);
 
+  const inviteRegex = /xelyra\.invite\/([0-9a-fA-F-]{36})/;
+  const [inviteInfo, setInviteInfo] = useState<null | {
+    server_name: string;
+    server_pfp: string;
+    server_member: boolean;
+    server_id: string;
+  }>(null);
+  const [inviteId, setInviteId] = useState<string | null>(null);
+  const [inviteError, setInviteError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setInviteInfo(null);
+    setInviteError(null);
+    setIsMember(false);
+    const match = props.message.match(inviteRegex);
+    if (!match) return;
+    const id = match[1];
+    setInviteId(id);
+    const fetchInvite = async () => {
+      try {
+        const res = await axios.post(
+          "http://localhost:3000/home/servers/invites/fetch",
+          { inviteId: id },
+          {
+            withCredentials: true,
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+        if (!res.data.valid) {
+          setInviteError("Invalid Invite");
+          return;
+        }
+        setInviteInfo(res.data.inviteInfo);
+        setIsMember(res.data.inviteInfo.server_member);
+      } catch (error) {
+        setInviteError("Invalid Invite");
+        if (axios.isAxiosError(error) && error.response) {
+          console.log(error.response.data.message);
+        } else {
+          console.log("Network Error:", error);
+        }
+      }
+    };
+    fetchInvite();
+  }, [props.message]);
+
+  const joinServer = async () => {
+    if (!inviteInfo || !inviteId || !inviteInfo.server_id) return;
+    try {
+      const req = await axios.post(
+        `http://localhost:3000/servers/${inviteInfo.server_id}/add`,
+        { inviteId },
+        {
+          withCredentials: true,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      if (req.data.valid) {
+        setIsMember(true);
+        navigate(`/home/servers/${inviteInfo.server_id}`);
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        console.log(error.response.data.message);
+      } else {
+        console.log("Network Error:", error);
+      }
+    }
+  };
+
+  const renderMessageWithInviteLink = () => {
+    if (!props.message) return null;
+    const parts = props.message.split(inviteRegex);
+    if (parts.length < 2)
+      return (
+        <MessageContent
+          message={
+            tenorGifUrl
+              ? props.message.replace(tenorRegex, "").trim()
+              : props.message.trim()
+          }
+          edited={props.edited}
+          files={props.files}
+          embeds={props.embeds}
+          imageDims={imageDims}
+          setImageDims={setImageDims}
+        />
+      );
+    const elements = [];
+    for (let i = 0; i < parts.length; i++) {
+      if (i % 2 === 0) {
+        if (parts[i]) elements.push(<span key={i}>{parts[i]}</span>);
+      } else {
+        elements.push(
+          <span key={i} className="text-blue-500 underline break-all">
+            xelyra.invite/{parts[i]}
+          </span>
+        );
+      }
+    }
+    return <span className="whitespace-pre-wrap break-words">{elements}</span>;
+  };
+
   return (
     <>
       {/* User Info Popup */}
@@ -264,18 +370,90 @@ const MessageBox = (props: Props) => {
               />
             ) : (
               <>
-                <MessageContent
-                  message={
-                    tenorGifUrl
-                      ? props.message.replace(tenorRegex, "").trim() // Remove Tenor link and trim whitespace
-                      : props.message
-                  }
-                  edited={props.edited}
-                  files={props.files}
-                  embeds={props.embeds}
-                  imageDims={imageDims}
-                  setImageDims={setImageDims}
-                />
+                {renderMessageWithInviteLink()}
+                {inviteInfo && inviteId && (
+                  <div className="flex flex-col items-start border border-[#23232a] rounded-2xl bg-[#23232a] p-4 mb-2 w-full max-w-lg min-w-[320px]">
+                    <span className="text-xs font-bold text-gray-300 mb-2 tracking-wide">
+                      {props.userId === props.user
+                        ? "YOU SENT AN INVITE TO JOIN A SERVER"
+                        : "YOU WERE INVITED TO JOIN A SERVER"}
+                    </span>
+                    <div className="flex items-center w-full mb-2">
+                      {inviteInfo.server_pfp ? (
+                        <img
+                          src={
+                            inviteInfo.server_pfp.startsWith("/uploads/")
+                              ? `http://localhost:3000${inviteInfo.server_pfp}`
+                              : inviteInfo.server_pfp
+                          }
+                          alt={inviteInfo.server_name}
+                          className="h-12 w-12 rounded-xl object-cover bg-gray-700 border border-gray-800 shadow-md flex-none"
+                        />
+                      ) : (
+                        <div className="h-12 w-12 bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl flex items-center justify-center text-xl font-bold text-white shadow-md flex-none">
+                          {inviteInfo.server_name.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      <div className="flex flex-col ml-4 flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg font-bold text-white truncate max-w-[180px]">
+                            {inviteInfo.server_name}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex w-full mt-2">
+                      {isMember ? (
+                        <button
+                          className="w-full text-base font-bold px-3 py-2 rounded-lg bg-gray-700 text-gray-400 cursor-not-allowed opacity-70"
+                          disabled
+                        >
+                          Joined
+                        </button>
+                      ) : (
+                        <button
+                          className="w-full text-base font-bold px-3 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white transition-colors duration-150"
+                          onClick={joinServer}
+                        >
+                          Join
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+                {inviteError && inviteId && (
+                  <div className="flex flex-col items-start border border-[#23232a] rounded-2xl bg-[#23232a] p-4 mb-2 w-full max-w-lg min-w-[320px]">
+                    <span className="text-xs font-bold text-gray-300 mb-2 tracking-wide">
+                      {props.userId === props.user
+                        ? "You Sent An Invite, But..."
+                        : "You Were Invited, But..."}
+                    </span>
+                    <div className="flex items-center gap-4 mb-2">
+                      <div className="h-12 w-12 bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl flex items-center justify-center text-3xl text-gray-400">
+                        <svg
+                          width="40"
+                          height="40"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M12 2C6.48 2 2 6.48 2 12c0 5.52 4.48 10 10 10s10-4.48 10-10c0-5.52-4.48-10-10-10zm0 18c-4.41 0-8-3.59-8-8 0-1.85.63-3.55 1.69-4.9l11.21 11.21C15.55 19.37 13.85 20 12 20zm6.31-3.1L7.1 4.69C8.45 3.63 10.15 3 12 3c4.41 0 8 3.59 8 8 0 1.85-.63 3.55-1.69 4.9z" />
+                        </svg>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-lg font-bold text-red-500">
+                          Invalid Invite
+                        </span>
+                        <span className="text-xs text-gray-400">
+                          Try sending a new invite!
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 {tenorGifUrl && (
                   <div className="mt-2">
                     <img

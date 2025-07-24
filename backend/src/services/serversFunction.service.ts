@@ -28,6 +28,8 @@ import { renameRole } from 'src/logic/home/servers/roles/renameRole';
 import { changeRoleColor } from 'src/logic/home/servers/roles/changeRoleColor';
 import { updateRolePermissions } from 'src/logic/home/servers/roles/updateRolePermissions';
 import { updateServerInfo } from 'src/logic/home/servers/updateServerInfo';
+import { createInvite } from 'src/logic/home/servers/createInvite';
+import { leaveServer } from 'src/logic/home/servers/leaveServer';
 
 @Injectable()
 export class ServersFunctionService {
@@ -224,6 +226,18 @@ export class ServersFunctionService {
     );
   }
 
+  async leaveServer(req: Request, id: string) {
+    return await leaveServer(
+      req,
+      id,
+      this.usersService,
+      this.messagesService,
+      this.serversService,
+      this.serverMembersService,
+      this.channelsService,
+    );
+  }
+
   async renameRole(serverId: string, roleId: string, newName: string) {
     return await renameRole(serverId, roleId, newName, this.rolesService);
   }
@@ -250,5 +264,17 @@ export class ServersFunctionService {
     updates: { name?: string; pfp?: string },
   ) {
     return await updateServerInfo(serverId, updates, this.serversService);
+  }
+
+  async createInvite(req: Request, id: string) {
+    return await createInvite(
+      req,
+      id,
+      this.usersService,
+      this.messagesService,
+      this.serversService,
+      this.serverMembersService,
+      this.channelsService,
+    );
   }
 }

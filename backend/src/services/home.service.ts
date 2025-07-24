@@ -41,6 +41,7 @@ import { changeDisplayName } from 'src/logic/home/user/changeDisplayName';
 import { changeBio } from 'src/logic/home/user/changeBio';
 import { changeUsername } from 'src/logic/home/user/changeUsername';
 import { changePassword } from 'src/logic/home/user/changePassword';
+import { fetchServerByInvite } from 'src/logic/home/servers/fetchServerByInvite';
 
 @Injectable()
 export class HomeService {
@@ -361,6 +362,18 @@ export class HomeService {
       confirmPassword,
       this.usersService,
       this.messagesGateway,
+    );
+  }
+
+  async fetchInviteInfo(req: Request, inviteId: string) {
+    return await fetchServerByInvite(
+      req,
+      inviteId,
+      this.usersService,
+      this.messagesService,
+      this.serversService,
+      this.serverMembersService,
+      this.channelsService,
     );
   }
 }

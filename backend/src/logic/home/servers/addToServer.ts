@@ -52,9 +52,17 @@ export const addToServer = async (
     if (serverMember.length > 0) {
       throw new BadRequestException('Already in the server');
     }
+    const inviteLookup = await serversService.findInviteLookup(inviteId);
+    if (inviteLookup.length === 0) {
+      throw new BadRequestException('No such invite');
+    }
+    if (inviteLookup[0].server_id.toString() !== serverId.toString()) {
+      throw new BadRequestException('Invalid invite');
+    }
     const isValidInvite = await serversService.findInviteById(
       serverId,
       inviteId,
+      inviteLookup[0].created_by,
     );
     if (isValidInvite.length === 0) {
       throw new BadRequestException('No such invite');

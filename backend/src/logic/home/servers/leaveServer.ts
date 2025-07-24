@@ -12,7 +12,7 @@ import { ChannelsService } from 'src/services/channels.service';
 
 dotenv.config();
 
-export const removeFromServer = async (
+export const leaveServer = async (
   req: Request,
   serverId: string,
   usersService: UsersService,

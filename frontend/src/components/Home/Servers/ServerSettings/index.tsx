@@ -10,12 +10,18 @@ interface ServerSettingsProps {
   onClose: () => void;
 }
 
+export interface ServerInfo {
+  id: string;
+  name: string;
+  pfp: string | null;
+}
+
 const ServerSettings: React.FC<ServerSettingsProps> = ({
   serverId,
   onClose,
 }) => {
   const [activeTab, setActiveTab] = useState("overview");
-  const [serverInfo, setServerInfo] = useState<any>(null);
+  const [serverInfo, setServerInfo] = useState<ServerInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,17 +37,21 @@ const ServerSettings: React.FC<ServerSettingsProps> = ({
     setError(null);
     try {
       const res = await axios.post(
-        `http://localhost:3000/servers/${serverId}/fetch`,
+        `http://localhost:3000/servers/${serverId}`,
         {},
         { withCredentials: true }
       );
-      setServerInfo(res.data.server || res.data);
-    } catch (err: any) {
-      setError(
-        err?.response?.data?.error ||
-          err?.response?.data?.message ||
-          "Failed to fetch server information."
-      );
+      if (res.data.valid) {
+        setServerInfo(res.data.serverInfo);
+      }
+    } catch (err) {
+      if (axios.isAxiosError(err) && err.response) {
+        console.log(err.response.data.message);
+        setError(err.response.data.message);
+      } else {
+        console.log("Network Error:", err);
+        setError("Internal Server Error");
+      }
     } finally {
       setLoading(false);
     }

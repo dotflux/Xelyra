@@ -152,6 +152,11 @@ export class ServerController {
     return await this.serverFservice.addToServer(req, id, inviteId);
   }
 
+  @Post('leave')
+  async leaveServer(@Req() req: Request, @Param('id') id: string) {
+    return await this.serverFservice.leaveServer(req, id);
+  }
+
   @Post('roles/rename')
   async renameRole(
     @Param('id') id: string,
@@ -206,5 +211,10 @@ export class ServerController {
       this.usersService,
       this.serversService,
     );
+  }
+
+  @Post('invites/create')
+  async createInvite(@Req() req: Request, @Param('id') id: string) {
+    return await this.serverFservice.createInvite(req, id);
   }
 }

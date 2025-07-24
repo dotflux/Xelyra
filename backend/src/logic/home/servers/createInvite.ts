@@ -54,7 +54,10 @@ export const createInvite = async (
 
     const newId = uuidv4();
 
-    await serversService.createInvite(serverId, newId, user[0].id);
+    await Promise.all([
+      serversService.createInvite(serverId, newId, user[0].id),
+      serversService.createInviteLookup(serverId, newId, user[0].id),
+    ]);
 
     return {
       valid: true,

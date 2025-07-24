@@ -15,6 +15,7 @@ export interface InviteInfo {
   server_name: string;
   server_pfp: string;
   server_member: boolean;
+  server_id: string;
 }
 
 export const fetchServerByInvite = async (
@@ -62,6 +63,7 @@ export const fetchServerByInvite = async (
       server_name: server[0].name,
       server_pfp: server[0].pfp,
       server_member: serverMember.length > 0,
+      server_id: server[0].id,
     };
 
     return {

@@ -3,12 +3,11 @@ import axios from "axios";
 import { useParams, useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import plusIcon from "../../../assets/plus.svg";
-import CreateChannel from "./CreateChannel";
 import cogIcon from "../../../assets/cog.svg";
-import vcIcon from "../../../assets/vc.svg";
-import CreateCategory from "./CreateCategory";
 import { FaChevronDown } from "react-icons/fa";
 import { FaHashtag, FaVolumeUp } from "react-icons/fa";
+import leaveIcon from "../../../assets/leave.svg";
+import ConfirmServerLeave from "./ConfirmServerLeave";
 
 interface ChannelInfo {
   name: string;
@@ -44,6 +43,7 @@ const ChannelsList = (props: Props) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [collapsed, setCollapsed] = useState<{ [cat: string]: boolean }>({});
+  const [leaveModalOpen, setLeaveModalOpen] = useState(false);
 
   // Get selected channel from URL
   const searchParams = new URLSearchParams(location.search);
@@ -123,7 +123,7 @@ const ChannelsList = (props: Props) => {
           {dropdownOpen && (
             <div className="absolute right-0 mt-2 w-44 bg-[#23232a] border border-gray-800 rounded shadow-lg z-50 animate-fade-in">
               <button
-                className="w-full text-left px-4 py-2 text-gray-100 hover:bg-[#23232a]/80 rounded transition font-semibold border-b border-[#23232a]"
+                className="w-full text-left px-4 py-2 text-gray-100 hover:bg-[#23232a]/80 rounded transition font-semibold border-b border-[#23232a] flex items-center gap-2 cursor-pointer"
                 onClick={() => {
                   setDropdownOpen(false);
                   props.onOpenServerSettings();
@@ -132,13 +132,23 @@ const ChannelsList = (props: Props) => {
                 Server Settings
               </button>
               <button
-                className="w-full text-left px-4 py-2 text-gray-100 hover:bg-[#23232a]/80 rounded transition"
+                className="w-full text-left px-4 py-2 text-gray-100 hover:bg-[#23232a]/80 rounded transition font-semibold border-b border-[#23232a] flex items-center gap-2 cursor-pointer"
                 onClick={() => {
                   setDropdownOpen(false);
                   props.onOpenCreateCategory();
                 }}
               >
                 + Create Category
+              </button>
+              <button
+                className="w-full text-left px-4 py-2 text-red-400 hover:bg-[#23232a]/80 rounded transition font-semibold flex items-center gap-2 cursor-pointer"
+                onClick={() => {
+                  setDropdownOpen(false);
+                  setLeaveModalOpen(true);
+                }}
+              >
+                <img src={leaveIcon} alt="Leave" className="w-4 h-4 mr-2" />{" "}
+                Leave Server
               </button>
             </div>
           )}
@@ -232,6 +242,12 @@ const ChannelsList = (props: Props) => {
           </li>
         ))}
       </ul>
+      <ConfirmServerLeave
+        isOpen={leaveModalOpen}
+        onClose={() => setLeaveModalOpen(false)}
+        serverId={id || ""}
+        serverName={props.serverName}
+      />
     </nav>
   );
 };

@@ -82,9 +82,9 @@ export class ServersService {
     }
   }
 
-  async findInviteById(serverId: string, inviteId: string) {
-    const query = `SELECT * FROM xelyra.server_invites WHERE server_id = ? AND invite_id = ?`;
-    const params = [serverId, inviteId];
+  async findInviteById(serverId: string, inviteId: string, createdBy: string) {
+    const query = `SELECT * FROM xelyra.server_invites WHERE server_id = ? AND invite_id = ? AND created_by = ?`;
+    const params = [serverId, inviteId, createdBy];
     try {
       const results = await this.scyllaService.execute(query, params);
       return results.rows;

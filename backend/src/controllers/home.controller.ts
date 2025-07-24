@@ -393,4 +393,12 @@ export class HomeController {
     const response = await axios.get(url);
     return response.data;
   }
+
+  @Post('servers/invites/fetch')
+  async fetchInviteInfo(
+    @Req() req: Request,
+    @Body('inviteId') inviteId: string,
+  ) {
+    return await this.homeService.fetchInviteInfo(req, inviteId);
+  }
 }
