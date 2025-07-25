@@ -8,6 +8,7 @@ import { MessagesService } from 'src/services/messages.service';
 import { ServersService } from 'src/services/servers.service';
 import { ServerMembersService } from 'src/services/serverMembers.service';
 import { ChannelsService } from 'src/services/channels.service';
+import { createInvite } from './createInvite';
 
 dotenv.config();
 
@@ -52,14 +53,28 @@ export const findInvite = async (
     }
 
     const invite = await serversService.findInviteByUser(serverId, user[0].id);
-    if (invite.length === 0) {
-      throw new BadRequestException('No current invites.');
+    if (invite.length > 0) {
+      return {
+        valid: true,
+        message: 'Found Invite.',
+        inviteId: invite[0].invite_id,
+      };
     }
+
+    const { newId } = await createInvite(
+      req,
+      serverId,
+      usersService,
+      messagesService,
+      serversService,
+      serverMembersService,
+      channelsService,
+    );
 
     return {
       valid: true,
       message: 'Found Invite.',
-      inviteId: invite[0].invite_id,
+      inviteId: newId,
     };
   } catch (error) {
     if (

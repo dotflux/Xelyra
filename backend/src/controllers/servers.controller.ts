@@ -217,4 +217,9 @@ export class ServerController {
   async createInvite(@Req() req: Request, @Param('id') id: string) {
     return await this.serverFservice.createInvite(req, id);
   }
+
+  @Post('invites/find')
+  async findInvite(@Req() req: Request, @Param('id') id: string) {
+    return await this.serverFservice.findInvite(req, id);
+  }
 }

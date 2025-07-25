@@ -8,6 +8,8 @@ import { FaChevronDown } from "react-icons/fa";
 import { FaHashtag, FaVolumeUp } from "react-icons/fa";
 import leaveIcon from "../../../assets/leave.svg";
 import ConfirmServerLeave from "./ConfirmServerLeave";
+import inviteIcon from "../../../assets/friends.svg";
+import InviteModal from "./InviteModal";
 
 interface ChannelInfo {
   name: string;
@@ -44,6 +46,7 @@ const ChannelsList = (props: Props) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [collapsed, setCollapsed] = useState<{ [cat: string]: boolean }>({});
   const [leaveModalOpen, setLeaveModalOpen] = useState(false);
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
 
   // Get selected channel from URL
   const searchParams = new URLSearchParams(location.search);
@@ -139,6 +142,17 @@ const ChannelsList = (props: Props) => {
                 }}
               >
                 + Create Category
+              </button>
+              <button
+                className="w-full text-left px-4 py-2 text-green-400 hover:bg-[#23232a]/80 rounded transition font-semibold flex items-center gap-2 cursor-pointer"
+                onClick={() => {
+                  setDropdownOpen(false);
+
+                  setInviteModalOpen(true);
+                }}
+              >
+                <img src={inviteIcon} alt="Invite" className="w-4 h-4 mr-2" />{" "}
+                Invite
               </button>
               <button
                 className="w-full text-left px-4 py-2 text-red-400 hover:bg-[#23232a]/80 rounded transition font-semibold flex items-center gap-2 cursor-pointer"
@@ -247,6 +261,11 @@ const ChannelsList = (props: Props) => {
         onClose={() => setLeaveModalOpen(false)}
         serverId={id || ""}
         serverName={props.serverName}
+      />
+      <InviteModal
+        isOpen={inviteModalOpen}
+        onClose={() => setInviteModalOpen(false)}
+        serverId={id || ""}
       />
     </nav>
   );

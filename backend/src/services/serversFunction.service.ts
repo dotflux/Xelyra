@@ -30,6 +30,7 @@ import { updateRolePermissions } from 'src/logic/home/servers/roles/updateRolePe
 import { updateServerInfo } from 'src/logic/home/servers/updateServerInfo';
 import { createInvite } from 'src/logic/home/servers/createInvite';
 import { leaveServer } from 'src/logic/home/servers/leaveServer';
+import { findInvite } from 'src/logic/home/servers/findInvite';
 
 @Injectable()
 export class ServersFunctionService {
@@ -268,6 +269,18 @@ export class ServersFunctionService {
 
   async createInvite(req: Request, id: string) {
     return await createInvite(
+      req,
+      id,
+      this.usersService,
+      this.messagesService,
+      this.serversService,
+      this.serverMembersService,
+      this.channelsService,
+    );
+  }
+
+  async findInvite(req: Request, id: string) {
+    return await findInvite(
       req,
       id,
       this.usersService,
