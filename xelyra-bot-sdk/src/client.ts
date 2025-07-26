@@ -1,7 +1,7 @@
 import io from "socket.io-client";
 import { Socket } from "socket.io-client";
 import EventEmitter from "eventemitter3";
-import { XelyraEvents, UUID, InteractionContext } from "./types";
+import { XelyraEvents, UUID, InteractionContext, Button, Embed } from "./types";
 import { BotMessage } from "./structures/botMessage";
 
 export interface ClientOptions {
@@ -15,11 +15,15 @@ export class XelyraClient extends EventEmitter<XelyraEvents> {
   private readonly gatewayUrl: string;
   private commands: Map<string, (ctx: InteractionContext) => void> = new Map();
   private pendingValidations: Map<string, any[]> = new Map();
+  private buttonCallbacks: Map<string, (ctx: InteractionContext) => void> =
+    new Map();
 
   constructor(options: ClientOptions) {
     super();
     this.token = options.token;
     this.gatewayUrl = options.gatewayUrl ?? "http://localhost:3000/bot";
+    this.socket = undefined as any;
+    this.buttonCallbacks = new Map();
   }
 
   // Connects to the Socket.IO gateway and emits "ready" on success
@@ -74,19 +78,78 @@ export class XelyraClient extends EventEmitter<XelyraEvents> {
             data: { content, ephemeral },
           });
         },
-        send: (message: string, embeds?: any[]) => {
+        send: (message: string, embeds?: Embed[], buttons?: Button[]) => {
           return this.sendMessage(
             raw.channelId,
             message,
             raw.command,
             raw.userId,
-            embeds
+            embeds,
+            buttons
           );
+        },
+        getMessage: () => {
+          throw new Error("getMessage is not available in command interactions");
         },
       };
 
       handler(ctx);
     });
+
+    this.socket.on(
+      "buttonClicked",
+      (data: {
+        customId: string;
+        appId: string;
+        botId: string;
+        command: string;
+        channelId: string;
+        userId: string;
+        messageId: string;
+      }) => {
+        console.log("buttonClicked", data);
+        console.log(
+          "Available callbacks:",
+          Array.from(this.buttonCallbacks.keys())
+        );
+        const cb = this.buttonCallbacks.get(data.customId);
+        console.log("Found callback for", data.customId, ":", !!cb);
+        if (!cb) return;
+
+        const ctx: InteractionContext = {
+          channelId: data.channelId,
+          userId: data.userId,
+          command: data.command,
+          appId: data.appId,
+          botId: data.botId,
+          token: this.token,
+          args: {},
+          respond: (content: string, ephemeral?: boolean) => {
+            return this.sendMessage(
+              data.channelId,
+              content,
+              data.command,
+              data.userId
+            );
+          },
+          send: (message: string, embeds?: Embed[], buttons?: Button[]) => {
+            return this.sendMessage(
+              data.channelId,
+              message,
+              data.command,
+              data.userId,
+              embeds,
+              buttons
+            );
+          },
+          getMessage: () => {
+            return new BotMessage(data.messageId, data.channelId, this);
+          },
+        };
+
+        cb(ctx);
+      }
+    );
   }
 
   public command(
@@ -108,17 +171,25 @@ export class XelyraClient extends EventEmitter<XelyraEvents> {
     }
   }
 
+  public registerButtonCallback(
+    commandName: string,
+    customId: string,
+    callback: (ctx: InteractionContext) => void
+  ): void {
+    this.buttonCallbacks.set(customId, callback);
+  }
+
   public sendMessage(
     channelId: string,
     message: string,
     command: string,
     user: string,
-    embeds?: any[]
+    embeds?: Embed[],
+    buttons?: Button[]
   ): Promise<BotMessage> {
     return new Promise((resolve, reject) => {
-      if (!this.socket.connected) {
+      if (!this.socket.connected)
         return reject(new Error("Socket not connected"));
-      }
 
       this.socket.emit("sendMessage", {
         channelId,
@@ -126,16 +197,14 @@ export class XelyraClient extends EventEmitter<XelyraEvents> {
         command,
         user,
         embeds,
+        buttons,
       });
-
       const onAck = (ack: { id: UUID; created_at: string }) => {
         const botMsg = new BotMessage(ack.id, channelId, this);
         resolve(botMsg);
         this.socket.off("messageSent", onAck);
       };
-
       this.socket.on("messageSent", onAck);
-
       setTimeout(() => {
         this.socket.off("messageSent", onAck);
         reject(new Error("sendMessage timeout"));
@@ -143,20 +212,23 @@ export class XelyraClient extends EventEmitter<XelyraEvents> {
     });
   }
 
-  /**
-   * Edit a message by its ID. Optionally update embeds (set to null to remove embeds).
-   */
   public editMessage(
     messageId: string,
     content: string,
-    embeds?: any[] | null
+    embeds?: Embed[] | null,
+    buttons?: Button[] | null
   ): Promise<void> {
     return new Promise((resolve, reject) => {
       if (!this.socket.connected) {
         return reject(new Error("Socket not connected"));
       }
 
-      this.socket.emit("updateMessage", { messageId, content, embeds });
+      this.socket.emit("updateMessage", {
+        messageId,
+        content,
+        embeds,
+        buttons,
+      });
 
       const onAck = (ack: { id: string; created_at: string }) => {
         resolve();

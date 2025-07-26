@@ -3,6 +3,7 @@ import {
   WebSocketGateway,
   WebSocketServer,
   OnGatewayConnection,
+  OnGatewayInit,
   SubscribeMessage,
   MessageBody,
   ConnectedSocket,
@@ -21,8 +22,9 @@ import { handleRemoveMessageLogic } from './botGateway/handleRemoveMessage';
   namespace: '/bot',
   cors: { origin: 'http://localhost:5173', credentials: true },
 })
-export class BotsGateway implements OnGatewayConnection {
+export class BotsGateway implements OnGatewayConnection, OnGatewayInit {
   @WebSocketServer() server: Server;
+  static server: Server;
 
   constructor(
     private botsService: BotsService,
@@ -30,6 +32,10 @@ export class BotsGateway implements OnGatewayConnection {
     private messagesGateway: MessagesGateway,
     private slashService: SlashCommandsService,
   ) {}
+
+  afterInit(server: Server) {
+    BotsGateway.server = server;
+  }
 
   async handleConnection(client: Socket) {
     const token = client.handshake.auth?.token;
@@ -116,6 +122,7 @@ export class BotsGateway implements OnGatewayConnection {
     token: string;
   }) {
     // send only to sockets in the room for that app
+    console.log('dispatched app id: ', interaction.appId);
     this.server
       .to(`app:${interaction.appId}`)
       .emit('interactionCreate', interaction);

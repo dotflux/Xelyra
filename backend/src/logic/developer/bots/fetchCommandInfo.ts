@@ -24,6 +24,8 @@ export interface CommandInfo {
   sender_username: string;
   sender_pfp: string;
   sender_display_name: string;
+  app_id: string;
+  bot_id: string;
 }
 
 export const fetchCommandInfo = async (
@@ -97,6 +99,8 @@ export const fetchCommandInfo = async (
       sender_username: sender[0].username,
       sender_pfp: sender[0].pfp,
       sender_display_name: sender[0].display_name,
+      app_id: bot[0].app_id,
+      bot_id: bot[0].bot_id,
     };
 
     return {

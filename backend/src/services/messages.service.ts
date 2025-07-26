@@ -235,27 +235,34 @@ LIMIT ?;`;
     command: string,
     message: string,
     bot_id: string,
+    app_id: string,
     user: string,
     conversation: string,
     edited: boolean,
     embeds?: any[],
+    buttons?: any[],
   ) {
     const createdAt = uuidv1();
     const createdAtTs = new Date();
     const embedsValue = Array.isArray(embeds)
       ? embeds.map((e) => (typeof e === 'string' ? e : JSON.stringify(e)))
       : [];
-    const query = `INSERT INTO xelyra.commands (id, command, message, bot_id, user, conversation, edited, created_at, embeds) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    const buttonsValue = Array.isArray(buttons)
+      ? buttons.map((b) => (typeof b === 'string' ? b : JSON.stringify(b)))
+      : [];
+    const query = `INSERT INTO xelyra.commands (id, command, message, bot_id, app_id, user, conversation, edited, created_at, embeds, buttons) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
     const params = [
       id,
       command,
       message,
       bot_id,
+      app_id,
       user,
       conversation,
       edited,
       createdAt,
       embedsValue,
+      buttonsValue,
     ];
     try {
       await this.scyllaService.execute(query, params);
@@ -270,6 +277,7 @@ LIMIT ?;`;
         id,
         edited,
         embeds: embedsValue,
+        buttons: buttonsValue,
       };
     } catch (err) {
       console.error('Error creating command:', err);
@@ -278,7 +286,7 @@ LIMIT ?;`;
   }
 
   async getCommands(conversation: string, limit = 30) {
-    const query = `SELECT id, command, message, bot_id, user, conversation, edited, created_at, toTimestamp(created_at) AS created_timestamp, embeds
+    const query = `SELECT id, command, message, bot_id, app_id, user, conversation, edited, created_at, toTimestamp(created_at) AS created_timestamp, embeds, buttons
 FROM xelyra.commands
 WHERE conversation = ?
 ORDER BY created_at DESC

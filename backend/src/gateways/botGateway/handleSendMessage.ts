@@ -11,6 +11,7 @@ export async function handleSendMessageLogic(
     command: string;
     user: string;
     embeds?: any[];
+    buttons?: any[];
   },
   messagesService: MessagesService,
   messagesGateway: MessagesGateway,
@@ -32,10 +33,12 @@ export async function handleSendMessageLogic(
     payload.command,
     payload.message,
     botId,
+    appId,
     payload.user,
     payload.channelId,
     false,
     payload.embeds,
+    payload.buttons,
   );
 
   await messagesService.createCommandLookup(

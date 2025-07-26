@@ -1,4 +1,4 @@
-import { UUID } from "../types";
+import { UUID, Embed, Button } from "../types";
 import { XelyraClient } from "src/client";
 
 export class BotMessage {
@@ -8,8 +8,12 @@ export class BotMessage {
     private client: XelyraClient
   ) {}
 
-  public edit(newContent: string, embeds?: any[] | null): Promise<void> {
-    return this.client.editMessage(this.id, newContent, embeds);
+  public edit(
+    newContent: string,
+    embeds?: Embed[] | null,
+    buttons?: Button[]
+  ): Promise<void> {
+    return this.client.editMessage(this.id, newContent, embeds, buttons);
   }
 
   public delete(): Promise<void> {

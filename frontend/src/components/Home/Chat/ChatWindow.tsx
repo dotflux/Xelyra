@@ -21,8 +21,10 @@ interface Message {
   reply_to: string;
   command?: string;
   bot_id?: string;
+  app_id?: string;
   files?: string[];
   embeds?: string[];
+  buttons?: string[];
 }
 
 interface Props {
@@ -289,6 +291,8 @@ const ChatWindow = (props: Props) => {
                   id={msg.id}
                   edited={msg.edited}
                   embeds={msg.embeds}
+                  buttons={msg.buttons}
+                  app_id={msg.app_id || ""}
                 />
               );
             }

@@ -1,13 +1,10 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Embed from "./Embed";
-import {
-  parseMessageFormatting,
-  parseLinesWithHeadings,
-  parseInlineFormatting,
-  Spoiler,
-} from "../../../utils/messageFormatting";
+import { parseMessageFormatting } from "../../../utils/messageFormatting";
 import CommandAvatar from "./Message/CommandAvatar";
+import { io, Socket } from "socket.io-client";
+import { useUser } from "../UserContext";
 
 interface CommandBoxProps {
   botName: string;
@@ -20,11 +17,15 @@ interface CommandBoxProps {
   id: string;
   edited?: boolean;
   embeds?: string[] | object[];
+  buttons?: string[] | object[];
+  app_id: string;
 }
 
 interface CommandInfo {
   app_name: string;
   app_pfp: string;
+  app_id: string;
+  bot_id: string;
   command_name: string;
   sender_username: string;
   sender_pfp?: string;
@@ -42,10 +43,13 @@ const CommandBox: React.FC<CommandBoxProps> = ({
   id,
   edited = false,
   embeds,
+  buttons,
 }) => {
   const [commandInfo, setCommandInfo] = useState<CommandInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { user } = useUser();
+  const [socket, setSocket] = useState<Socket | null>(null);
 
   useEffect(() => {
     const fetchInfo = async () => {
@@ -69,6 +73,16 @@ const CommandBox: React.FC<CommandBoxProps> = ({
     };
     fetchInfo();
   }, [id, conversation]);
+
+  useEffect(() => {
+    const s = io("http://localhost:3000/bots-interactions", {
+      withCredentials: true,
+    });
+    setSocket(s);
+    return () => {
+      s.disconnect();
+    };
+  }, []);
 
   const msgDate = new Date(createdAtTimestamp);
   const time = msgDate.toLocaleTimeString([], {
@@ -196,6 +210,57 @@ const CommandBox: React.FC<CommandBoxProps> = ({
                   }
                   if (!parsed || typeof parsed !== "object") return null;
                   return <Embed key={idx} {...parsed} />;
+                })}
+              </div>
+            )}
+            {Array.isArray(buttons) && buttons.length > 0 && (
+              <div className="mt-2 flex flex-row gap-2">
+                {buttons.map((btn: string | object, idx: number) => {
+                  let parsed: any = btn;
+                  if (typeof btn === "string") {
+                    try {
+                      parsed = JSON.parse(btn);
+                    } catch {
+                      return null;
+                    }
+                  }
+                  if (!parsed || typeof parsed !== "object") return null;
+                  let colorClass = "bg-gray-700 text-white";
+                  if (parsed.color === "primary")
+                    colorClass = "bg-indigo-600 hover:bg-indigo-700 text-white";
+                  if (parsed.color === "secondary")
+                    colorClass = "bg-gray-600 hover:bg-gray-700 text-white";
+                  if (parsed.color === "success")
+                    colorClass = "bg-green-600 hover:bg-green-700 text-white";
+                  if (parsed.color === "danger")
+                    colorClass = "bg-red-600 hover:bg-red-700 text-white";
+                  return (
+                    <button
+                      key={parsed.customId || idx}
+                      className={`px-4 py-1 rounded font-semibold text-sm transition ${colorClass}`}
+                      style={{ minWidth: 80 }}
+                      onClick={() => {
+                        if (
+                          !socket ||
+                          !parsed.customId ||
+                          !commandInfo ||
+                          !user
+                        )
+                          return;
+                        socket.emit("buttonInteraction", {
+                          customId: parsed.customId,
+                          appId: commandInfo.app_id,
+                          botId: commandInfo.bot_id,
+                          command: commandInfo.command_name,
+                          channelId: conversation,
+                          userId: user.id,
+                          messageId: id,
+                        });
+                      }}
+                    >
+                      {parsed.name}
+                    </button>
+                  );
                 })}
               </div>
             )}

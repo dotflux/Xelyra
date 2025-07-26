@@ -25,6 +25,7 @@ import { BotsGatewayModule } from './modules/botsGateway.module';
 import { DeveloperModule } from './modules/developer.module';
 import { GenAIModule } from './modules/genai.module';
 import { MetricsController } from './controllers/metrics.controller';
+import { BotsInteractionsGatewayModule } from './modules/botsInteractionsGateway.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { MetricsController } from './controllers/metrics.controller';
     BotsGatewayModule,
     DeveloperModule,
     GenAIModule,
+    BotsInteractionsGatewayModule,
   ],
   controllers: [MetricsController],
 })

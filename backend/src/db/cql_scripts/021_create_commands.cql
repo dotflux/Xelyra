@@ -3,6 +3,8 @@ CREATE TABLE IF NOT EXISTS xelyra.commands (
   command TEXT,
   message TEXT,
   embeds LIST<TEXT>,
+  buttons LIST<TEXT>,
+  app_id UUID,
   bot_id UUID,
   user UUID,
   conversation UUID,
