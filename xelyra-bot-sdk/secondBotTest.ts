@@ -2,7 +2,7 @@ import { XelyraClient } from "../xelyra-bot-sdk/src/client";
 
 const bot = new XelyraClient({
   token:
-    "f960a071-94ef-4cc7-8fa6-78e76a89ce48.0d3d0805dfd8bad5c741807a508ba5f1b24e9d4d3e330664d6bd6c69e4c6aa5a",
+    "890e0b08-15d0-49c6-bda9-6fb7918a0976.6d311b7ebdef40593fa38410117988b53cf00381c1868156f509e8f2778b8ada",
   gatewayUrl: "http://localhost:3000/bot",
 });
 
@@ -46,8 +46,61 @@ bot.command(
   ]
 );
 
+bot.command("secondButton", async (ctx) => {
+  const msg = await ctx.send(
+    "Hello, world!",
+    [],
+    [
+      {
+        name: "Accept",
+        customId: "handler1",
+        color: "success",
+      },
+      {
+        name: "Decline",
+        customId: "handler2",
+        color: "danger",
+      },
+    ]
+  );
+  console.log(msg.id);
+  console.log(msg.channelId);
+});
+
 bot.command("ping", async (ctx) => {
   await ctx.send("You thought I was a bot?");
+});
+
+bot.registerButtonCallback("secondButton", "handler1", async (ctx) => {
+  await ctx.send("You accepted the offer!");
+  await new Promise((resolve) => setTimeout(resolve, 3000));
+  const msg = ctx.getMessage();
+  await msg.edit(
+    "You accepted the offer!",
+    [
+      {
+        title: "Accepted",
+        description: "You accepted the offer! There is no going back now",
+        color: "#00ff00",
+      },
+    ],
+    []
+  );
+});
+
+bot.registerButtonCallback("secondButton", "handler2", async (ctx) => {
+  const msg = ctx.getMessage();
+  await msg.edit(
+    "You declined the offer!, however its not accepted",
+    [
+      {
+        title: "Not allowed!",
+        description: "You are not allowed to decline this offer",
+        color: "#ff0000",
+      },
+    ],
+    [{ name: "Accept", color: "success", customId: "handler1" }]
+  );
 });
 
 bot.login();

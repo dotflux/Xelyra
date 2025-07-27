@@ -153,11 +153,17 @@ const ChatWindow = (props: Props) => {
 
     socketRef.current.on(
       "commandEdited",
-      ({ messageId, message, edited, embeds }) => {
+      ({ messageId, message, edited, embeds, buttons }) => {
         setMessages((prev) =>
           prev.map((m) =>
             m.id === messageId
-              ? { ...m, message, edited, embeds: embeds ?? m.embeds }
+              ? {
+                  ...m,
+                  message,
+                  edited,
+                  embeds: embeds ?? m.embeds,
+                  buttons: buttons ?? m.buttons,
+                }
               : m
           )
         );

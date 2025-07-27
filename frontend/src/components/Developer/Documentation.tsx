@@ -120,7 +120,7 @@ bot.on('ready', () => {
   token: string;
   args: Record<string, any>;
   respond: (content: string, ephemeral?: boolean) => void;
-  send: (message: string, embeds?: any[]) => Promise<BotMessage>;
+  send: (message: string, embeds?: Embed[], buttons?: Button[]) => Promise<BotMessage>;
 }`)}
       <div className="text-gray-400 text-sm mb-2">
         Use <span className="font-mono">ctx.respond()</span> for ephemeral
@@ -151,16 +151,16 @@ bot.on('ready', () => {
             <FaEdit /> Editing Messages
           </h3>
           {codeBlock(`await msg.edit('Updated content!');
-// Or update embeds:
+// Or update embeds and buttons:
 await msg.edit('Updated content!', [
   { title: 'New Embed', description: 'Updated embed!', color: '#5865F2' }
-]);`)}
+],[{name:"Button",color:"primary",customId:"handler1"}]);`)}
         </div>
-        <div className="bg-[#18191c] rounded-xl p-5 border border-[#23232a] shadow">
+        <div className="bg-[#18191c] rounded-xl p-5 border border-[#23232a] shadow flex flex-col justify-start self-start">
           <h3 className="font-bold text-indigo-300 mb-2 flex items-center gap-2">
             <FaTrash /> Deleting Messages
           </h3>
-          {codeBlock(`await msg.delete();`)}
+          <div className="mb-0">{codeBlock(`await msg.delete();`)}</div>
         </div>
         <div className="bg-[#18191c] rounded-xl p-5 border border-[#23232a] shadow">
           <h3 className="font-bold text-indigo-300 mb-2 flex items-center gap-2">
@@ -179,6 +179,58 @@ await msg.edit('Updated content!', [
   },
 ]);`)}
         </div>
+      </div>
+    </section>
+
+    <section className="mb-10">
+      <h2 className="text-2xl font-bold text-indigo-200 mb-2 flex items-center gap-2">
+        <FaCode /> Buttons & Interactions
+      </h2>
+      <p className="mb-2 text-gray-300">
+        You can add interactive buttons to your bot messages. Define buttons
+        when sending a message, and register their callbacks using{" "}
+        <span className="font-mono text-indigo-300">
+          registerButtonCallback
+        </span>
+        .
+      </p>
+      {codeBlock(`// Register a command with buttons
+bot.command("buttonTest", async (ctx) => {
+  await ctx.send("Click a button!", [/** leave empty if no embed **/], [
+    { name: "Primary", color: "primary", customId: "handler1" },
+    { name: "Secondary", color: "secondary", customId: "handler2" },
+  ]);
+});
+
+// Register button callbacks
+bot.registerButtonCallback("buttonTest", "handler1", async (ctx) => {
+  await ctx.send("Primary button clicked!");
+});
+bot.registerButtonCallback("buttonTest", "handler2", async (ctx) => {
+  await ctx.send("Secondary button clicked!");
+});
+`)}
+      <div className="text-gray-400 text-sm mb-2">
+        Button callbacks are registered separately from the command. The{" "}
+        <span className="font-mono">customId</span> must match between the
+        button definition and the callback registration.
+      </div>
+      <h3 className="font-bold text-indigo-300 mb-2 mt-6 flex items-center gap-2">
+        <FaEdit /> Editing & Deleting Messages from Button Callbacks
+      </h3>
+      <p className="mb-2 text-gray-300">
+        In a button callback, you can edit or delete the message that contains
+        the button using <span className="font-mono">ctx.getMessage()</span>:
+      </p>
+      {codeBlock(`bot.registerButtonCallback("buttonTest", "handler1", async (ctx) => {
+  const msg = ctx.getMessage();
+  await msg.edit("Button was clicked!");
+  // or do more stuff
+});`)}
+      <div className="text-gray-400 text-sm mb-2">
+        <span className="font-mono">ctx.getMessage()</span> returns a{" "}
+        <span className="font-mono">BotMessage</span> object for the message
+        containing the button.
       </div>
     </section>
 
@@ -210,14 +262,14 @@ await msg.edit('Updated content!', [
           </li>
           <li>
             <span className="font-mono">
-              sendMessage(channelId, message, command, user, embeds?)
+              sendMessage(channelId, message, command, user, embeds?,buttons?)
             </span>{" "}
             — Send a message (returns{" "}
             <span className="font-mono">BotMessage</span>)
           </li>
           <li>
             <span className="font-mono">
-              editMessage(messageId, content, embeds?)
+              editMessage(messageId, content, embeds?,buttons?)
             </span>{" "}
             — Edit a message
           </li>
@@ -244,8 +296,9 @@ await msg.edit('Updated content!', [
             Ephemeral reply
           </li>
           <li>
-            <span className="font-mono">send(message, embeds?)</span> — Send
-            message (returns <span className="font-mono">BotMessage</span>)
+            <span className="font-mono">send(message, embeds?, buttons?)</span>{" "}
+            — Send message (returns{" "}
+            <span className="font-mono">BotMessage</span>)
           </li>
         </ul>
       </div>
@@ -253,8 +306,10 @@ await msg.edit('Updated content!', [
         <h3 className="font-bold text-indigo-300 mb-2">BotMessage</h3>
         <ul className="list-disc ml-6 text-gray-300 text-base">
           <li>
-            <span className="font-mono">edit(newContent, embeds?)</span> — Edit
-            message
+            <span className="font-mono">
+              edit(newContent, embeds?, buttons?)
+            </span>{" "}
+            — Edit message
           </li>
           <li>
             <span className="font-mono">delete()</span> — Delete message
@@ -275,6 +330,12 @@ await msg.edit('Updated content!', [
         <ul className="list-disc ml-6 text-gray-300 text-base">
           <li>
             <span className="font-mono">UUID</span> — string
+          </li>
+          <li>
+            <span className="font-mono">Embed</span> — embed object
+          </li>
+          <li>
+            <span className="font-mono">Button</span> — button object
           </li>
         </ul>
       </div>

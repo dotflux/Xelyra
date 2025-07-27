@@ -87,12 +87,14 @@ export class MessagesGateway implements OnGatewayInit {
     newText: string,
     edited: boolean,
     embeds?: any[] | null,
+    buttons?: any[] | null,
   ) {
     this.server.to(channelId).emit('commandEdited', {
       messageId,
       message: newText,
       edited,
       embeds: embeds ?? null,
+      buttons: buttons ?? null,
     });
   }
 

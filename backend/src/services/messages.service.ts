@@ -121,26 +121,63 @@ export class MessagesService {
     created_at: string,
     newText: string,
     embeds?: any[] | null,
+    buttons?: any[] | null,
   ) {
-    let query: string;
-    let params: any[];
-    if (embeds === undefined) {
-      query = `UPDATE xelyra.commands SET message = ?,edited = true WHERE conversation = ? AND created_at = ?`;
-      params = [newText, conversation, created_at];
-    } else {
-      // Serialize embeds as JSON strings
-      const embedsValue = Array.isArray(embeds)
-        ? embeds.map((e) => (typeof e === 'string' ? e : JSON.stringify(e)))
-        : [];
-      query = `UPDATE xelyra.commands SET message = ?,edited = true, embeds = ? WHERE conversation = ? AND created_at = ?`;
-      params = [newText, embedsValue, conversation, created_at];
+    if (embeds === undefined && buttons === undefined) {
+      const query = `UPDATE xelyra.commands SET message = ?,edited = true WHERE conversation = ? AND created_at = ?`;
+      const params = [newText, conversation, created_at];
+      try {
+        const results = await this.scyllaService.execute(query, params);
+        return results.rows;
+      } catch (err) {
+        console.error('Error edit message by id:', err);
+        throw err;
+      }
     }
-    try {
-      const results = await this.scyllaService.execute(query, params);
-      return results.rows;
-    } catch (err) {
-      console.error('Error edit message by id:', err);
-      throw err;
+    const embedsValue = Array.isArray(embeds)
+      ? embeds.map((e) => (typeof e === 'string' ? e : JSON.stringify(e)))
+      : [];
+    const buttonsValue = Array.isArray(buttons)
+      ? buttons.map((b) => (typeof b === 'string' ? b : JSON.stringify(b)))
+      : [];
+    if (embeds !== undefined && buttons !== undefined) {
+      const query = `UPDATE xelyra.commands SET message = ?,edited = true, embeds = ?, buttons = ? WHERE conversation = ? AND created_at = ?`;
+      const params = [
+        newText,
+        embedsValue,
+        buttonsValue,
+        conversation,
+        created_at,
+      ];
+      try {
+        const results = await this.scyllaService.execute(query, params);
+        return results.rows;
+      } catch (err) {
+        console.error('Error edit message by id:', err);
+        throw err;
+      }
+    }
+    if (embeds !== undefined) {
+      const query = `UPDATE xelyra.commands SET message = ?,edited = true, embeds = ? WHERE conversation = ? AND created_at = ?`;
+      const params = [newText, embedsValue, conversation, created_at];
+      try {
+        const results = await this.scyllaService.execute(query, params);
+        return results.rows;
+      } catch (err) {
+        console.error('Error edit message by id:', err);
+        throw err;
+      }
+    }
+    if (buttons !== undefined) {
+      const query = `UPDATE xelyra.commands SET message = ?,edited = true, buttons = ? WHERE conversation = ? AND created_at = ?`;
+      const params = [newText, buttonsValue, conversation, created_at];
+      try {
+        const results = await this.scyllaService.execute(query, params);
+        return results.rows;
+      } catch (err) {
+        console.error('Error edit message by id:', err);
+        throw err;
+      }
     }
   }
 
