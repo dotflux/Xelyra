@@ -52,7 +52,10 @@ const AppBot = () => {
           <div>
             <h4 className="font-bold text-white text-sm mb-2">Bot User ID</h4>
             <p className="text-gray-400 text-sm mb-2">{botInfo.bot_id}</p>
-            <button className="text-white rounded bg-blue-700 shadow-sm transition-all px-4 py-1">
+            <button
+              className="text-white rounded bg-blue-700 shadow-sm transition-all px-4 py-1"
+              onClick={() => navigator.clipboard.writeText(botInfo.bot_id)}
+            >
               Copy
             </button>
           </div>
@@ -61,6 +64,12 @@ const AppBot = () => {
             {token ? (
               <div>
                 <p className="text-gray-400 text-sm mb-2">{token}</p>
+                <button
+                  className="text-white rounded bg-blue-700 shadow-sm transition-all px-4 py-1"
+                  onClick={() => navigator.clipboard.writeText(token)}
+                >
+                  Copy
+                </button>
               </div>
             ) : (
               <div>

@@ -149,7 +149,10 @@ const AppOverview = () => {
               Application ID
             </h4>
             <p className="text-gray-400 text-sm mb-2">{appInfo.app_id}</p>
-            <button className="text-white rounded bg-blue-700 shadow-sm transition-all px-4 py-1">
+            <button
+              className="text-white rounded bg-blue-700 shadow-sm transition-all px-4 py-1"
+              onClick={() => navigator.clipboard.writeText(appInfo.app_id)}
+            >
               Copy
             </button>
           </div>
