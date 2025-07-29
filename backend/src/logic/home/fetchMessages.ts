@@ -8,6 +8,7 @@ import { MessagesService } from 'src/services/messages.service';
 import { ConversationsService } from 'src/services/conversations.service';
 import { GroupsService } from 'src/services/groups.service';
 import { ChannelsService } from 'src/services/channels.service';
+import { PermissionsService } from 'src/services/permissions.service';
 
 dotenv.config();
 
@@ -19,6 +20,7 @@ export const fetchMessages = async (
   conversationsService: ConversationsService,
   groupsService: GroupsService,
   channelsService: ChannelsService,
+  permissionsService: PermissionsService,
   cursor?: string,
 ) => {
   try {
@@ -59,6 +61,14 @@ export const fetchMessages = async (
     const isDm = conversationRow.length > 0;
     const isGroup = groupRow.length > 0;
     const isChannel = channelRow.length > 0;
+    const canView =
+      isChannel &&
+      (await permissionsService.canView(
+        channelRow[0].server_id,
+        channelRow[0].id,
+        user[0].id,
+        channelRow[0].isPrivate,
+      ));
     const userId = user[0].id.toString();
     if (
       (isDm &&
@@ -66,7 +76,8 @@ export const fetchMessages = async (
           .map((p) => p.toString())
           .includes(userId)) ||
       (isGroup &&
-        !groupRow[0].participants.map((m) => m.toString()).includes(userId))
+        !groupRow[0].participants.map((m) => m.toString()).includes(userId)) ||
+      (isChannel && !canView)
     ) {
       throw new BadRequestException('Not a member');
     }

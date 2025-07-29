@@ -227,4 +227,13 @@ export class ServerController {
   async fetchMembers(@Req() req: Request, @Param('id') id: string) {
     return await this.serverFservice.fetchMembers(req, id);
   }
+
+  @Post('members/kick')
+  async kickMember(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Body('kickee') kickee: string,
+  ) {
+    return await this.serverFservice.kickMember(req, id, kickee);
+  }
 }

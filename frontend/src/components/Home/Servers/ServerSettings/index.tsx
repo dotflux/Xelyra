@@ -7,10 +7,13 @@ import Channels from "./Channels";
 import clipboardIcon from "../../../../assets/clipboard.svg";
 import rolesIcon from "../../../../assets/roles.svg";
 import userGroupIcon from "../../../../assets/userGroup.svg";
+import openSidebarIcon from "../../../../assets/openSidebar.svg";
+import closeSidebarIcon from "../../../../assets/closeSidebar.svg";
 
 interface ServerSettingsProps {
   serverId: string;
   onClose: () => void;
+  userId: string;
 }
 
 export interface ServerInfo {
@@ -22,11 +25,13 @@ export interface ServerInfo {
 const ServerSettings: React.FC<ServerSettingsProps> = ({
   serverId,
   onClose,
+  userId,
 }) => {
   const [activeTab, setActiveTab] = useState("overview");
   const [serverInfo, setServerInfo] = useState<ServerInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const tabs = [
     { id: "overview", name: "Overview", icon: clipboardIcon },
@@ -113,73 +118,115 @@ const ServerSettings: React.FC<ServerSettingsProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex bg-black/60 backdrop-blur-sm">
-      <div className="flex w-full h-full">
+      <div className="flex w-full h-full relative">
+        {/* Mobile Sidebar Toggle Button */}
+        <button
+          className="absolute top-4 left-4 z-50 sm:hidden bg-[#23232a] p-2 rounded-lg shadow-lg"
+          onClick={() => setSidebarOpen(true)}
+          style={{ display: sidebarOpen ? "none" : undefined }}
+        >
+          <img src={openSidebarIcon} alt="Open Sidebar" className="w-6 h-6" />
+        </button>
         {/* Sidebar */}
-        <div className="w-80 bg-[#1e1f22] border-r border-[#3a3b3e] flex flex-col">
-          <div className="p-6 border-b border-[#3a3b3e]">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-white">Server Settings</h2>
-              <button
-                onClick={onClose}
-                className="text-gray-400 hover:text-white p-2 rounded-full hover:bg-gray-700 transition-colors"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+        <div
+          className={`
+            fixed inset-0 z-40 bg-black/70 transition-opacity duration-200 sm:static sm:z-auto sm:bg-transparent
+            ${
+              sidebarOpen
+                ? "opacity-100 pointer-events-auto"
+                : "opacity-0 pointer-events-none"
+            } sm:opacity-100 sm:pointer-events-auto
+          `}
+          onClick={() => setSidebarOpen(false)}
+        >
+          <div
+            className={`
+              w-80 bg-[#1e1f22] border-r border-[#3a3b3e] flex flex-col h-full transition-transform duration-200
+              fixed left-0 top-0 z-50 sm:static sm:translate-x-0
+              ${
+                sidebarOpen ? "translate-x-0" : "-translate-x-full"
+              } sm:translate-x-0
+            `}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close button on mobile */}
+            <button
+              className="sm:hidden absolute top-4 right-4 bg-[#23232a] p-2 rounded-lg"
+              onClick={() => setSidebarOpen(false)}
+            >
+              <img
+                src={closeSidebarIcon}
+                alt="Close Sidebar"
+                className="w-6 h-6"
+              />
+            </button>
+            <div className="p-6 border-b border-[#3a3b3e]">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-white">
+                  Server Settings
+                </h2>
+                <button
+                  onClick={onClose}
+                  className="text-gray-400 hover:text-white p-2 rounded-full hover:bg-gray-700 transition-colors"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-[#2a2b2e] flex items-center justify-center border-2 border-[#3a3b3e] shadow-lg overflow-hidden">
-                {serverInfo?.pfp ? (
-                  <img
-                    src={serverInfo.pfp}
-                    alt="Server Icon"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <span className="text-2xl text-gray-500 font-bold">
-                    {serverInfo?.name?.[0]?.toUpperCase() || "?"}
-                  </span>
-                )}
-              </div>
-              <div>
-                <div className="text-white font-semibold">
-                  {serverInfo?.name}
-                </div>
-                <div className="text-sm text-gray-400">Server Settings</div>
-              </div>
-            </div>
-          </div>
-
-          <nav className="flex-1 p-4">
-            <ul className="space-y-2">
-              {tabs.map((tab) => (
-                <li key={tab.id}>
-                  <button
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-semibold transition-colors ${
-                      activeTab === tab.id
-                        ? "bg-indigo-600 text-white shadow-lg"
-                        : "text-gray-300 hover:bg-[#2a2b2e] hover:text-white"
-                    }`}
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
-                    <img src={tab.icon} alt={tab.name} className="w-6 h-6" />
-                    {tab.name}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </nav>
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-[#2a2b2e] flex items-center justify-center border-2 border-[#3a3b3e] shadow-lg overflow-hidden">
+                  {serverInfo?.pfp ? (
+                    <img
+                      src={serverInfo.pfp}
+                      alt="Server Icon"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-2xl text-gray-500 font-bold">
+                      {serverInfo?.name?.[0]?.toUpperCase() || "?"}
+                    </span>
+                  )}
+                </div>
+                <div>
+                  <div className="text-white font-semibold">
+                    {serverInfo?.name}
+                  </div>
+                  <div className="text-sm text-gray-400">Server Settings</div>
+                </div>
+              </div>
+            </div>
+
+            <nav className="flex-1 p-4">
+              <ul className="space-y-2">
+                {tabs.map((tab) => (
+                  <li key={tab.id}>
+                    <button
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-semibold transition-colors ${
+                        activeTab === tab.id
+                          ? "bg-indigo-600 text-white shadow-lg"
+                          : "text-gray-300 hover:bg-[#2a2b2e] hover:text-white"
+                      }`}
+                    >
+                      <img src={tab.icon} alt={tab.name} className="w-6 h-6" />
+                      {tab.name}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </div>
         </div>
 
         {/* Main Content */}
@@ -196,7 +243,11 @@ const ServerSettings: React.FC<ServerSettingsProps> = ({
               <Roles serverId={serverId} onUpdate={handleRefresh} />
             )}
             {activeTab === "members" && (
-              <Members serverId={serverId} onUpdate={handleRefresh} />
+              <Members
+                serverId={serverId}
+                onUpdate={handleRefresh}
+                userId={userId}
+              />
             )}
             {activeTab === "channels" && (
               <Channels serverId={serverId} onUpdate={handleRefresh} />

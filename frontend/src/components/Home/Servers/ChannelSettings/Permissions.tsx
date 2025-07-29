@@ -148,14 +148,6 @@ const Permissions = ({ channelId, permissions, roles }: Props) => {
     }
   };
 
-  if (!current) {
-    return (
-      <div className="flex-1 p-6 text-white">
-        <p>No role selected or found.</p>
-      </div>
-    );
-  }
-
   return (
     <div className="flex h-full">
       {/* Roles List */}
@@ -204,55 +196,68 @@ const Permissions = ({ channelId, permissions, roles }: Props) => {
         </div>
       </aside>
 
-      {/* Permissions Grid */}
-      <main className="flex-1 p-6 text-white overflow-auto">
-        <h3 className="mb-4 text-xl font-semibold">
-          Permissions for {current.targetName}
-        </h3>
-        <div className="flex flex-col gap-4">
-          {PERMISSIONS.map((perm) => {
-            const state = (current.allow || []).includes(perm)
-              ? "allow"
-              : (current.deny || []).includes(perm)
-              ? "deny"
-              : "neutral";
-            return (
-              <div key={perm} className="flex justify-between items-center p-3">
-                <span>{perm.replace("_", " ")}</span>
-                <div className="flex space-x-2">
-                  {/* Deny */}
-                  <button
-                    onClick={() => setPermission(perm, "deny")}
-                    className={`p-1 rounded ${
-                      state === "deny" ? "bg-red-600" : "hover:bg-gray-700"
-                    }`}
-                  >
-                    X
-                  </button>
-                  {/* Neutral */}
-                  <button
-                    onClick={() => setPermission(perm, "neutral")}
-                    className={`p-1 rounded ${
-                      state === "neutral" ? "bg-gray-600" : "hover:bg-gray-700"
-                    }`}
-                  >
-                    /
-                  </button>
-                  {/* Allow */}
-                  <button
-                    onClick={() => setPermission(perm, "allow")}
-                    className={`p-1 rounded ${
-                      state === "allow" ? "bg-green-600" : "hover:bg-gray-700"
-                    }`}
-                  >
-                    ✓
-                  </button>
+      {current ? (
+        <main className="flex-1 p-6 text-white overflow-auto">
+          <h3 className="mb-4 text-xl font-semibold">
+            Permissions for {current?.targetName}
+          </h3>
+          <div className="flex flex-col gap-4">
+            {PERMISSIONS.map((perm) => {
+              const state = (current?.allow || []).includes(perm)
+                ? "allow"
+                : (current?.deny || []).includes(perm)
+                ? "deny"
+                : "neutral";
+              return (
+                <div
+                  key={perm}
+                  className="flex justify-between items-center p-3"
+                >
+                  <span>{perm.replace("_", " ")}</span>
+                  <div className="flex space-x-2">
+                    {/* Deny */}
+                    <button
+                      onClick={() => setPermission(perm, "deny")}
+                      className={`p-1 rounded ${
+                        state === "deny" ? "bg-red-600" : "hover:bg-gray-700"
+                      }`}
+                    >
+                      X
+                    </button>
+                    {/* Neutral */}
+                    <button
+                      onClick={() => setPermission(perm, "neutral")}
+                      className={`p-1 rounded ${
+                        state === "neutral"
+                          ? "bg-gray-600"
+                          : "hover:bg-gray-700"
+                      }`}
+                    >
+                      /
+                    </button>
+                    {/* Allow */}
+                    <button
+                      onClick={() => setPermission(perm, "allow")}
+                      className={`p-1 rounded ${
+                        state === "allow" ? "bg-green-600" : "hover:bg-gray-700"
+                      }`}
+                    >
+                      ✓
+                    </button>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      </main>
+              );
+            })}
+          </div>
+        </main>
+      ) : (
+        <h1 className="text-white text-center text-2xl font-semibold m-auto">
+          No roles assigned to this channel
+        </h1>
+      )}
+
+      {/* Permissions Grid */}
+
       {isDirty && (
         <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 bg-[#2a2b2e] border border-[#3a3b3e] text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-4 max-w-xl w-[95%]">
           <span>Unsaved changes were detected</span>

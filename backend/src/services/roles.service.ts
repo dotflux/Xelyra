@@ -114,4 +114,21 @@ export class RolesService {
       throw err;
     }
   }
+
+  async getPermissionsForRoles(
+    serverId: string,
+    roleIds: string[],
+  ): Promise<Set<string>> {
+    if (!roleIds.length) return new Set();
+    const query = `SELECT permissions FROM xelyra.roles WHERE server_id = ? AND role_id IN ?`;
+    const params = [serverId, roleIds];
+    const results = await this.scyllaService.execute(query, params);
+    const perms = new Set<string>();
+    for (const row of results.rows) {
+      if (row.permissions) {
+        for (const perm of row.permissions) perms.add(perm);
+      }
+    }
+    return perms;
+  }
 }

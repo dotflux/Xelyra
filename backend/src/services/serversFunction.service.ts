@@ -32,6 +32,7 @@ import { createInvite } from 'src/logic/home/servers/createInvite';
 import { leaveServer } from 'src/logic/home/servers/leaveServer';
 import { findInvite } from 'src/logic/home/servers/findInvite';
 import { fetchMembers } from 'src/logic/home/servers/fetchMembers';
+import { kickMember } from 'src/logic/home/servers/kickMember';
 
 @Injectable()
 export class ServersFunctionService {
@@ -301,6 +302,20 @@ export class ServersFunctionService {
       this.serversService,
       this.serverMembersService,
       this.channelsService,
+    );
+  }
+
+  async kickMember(req: Request, id: string, kickee: string) {
+    return await kickMember(
+      req,
+      id,
+      kickee,
+      this.usersService,
+      this.messagesService,
+      this.serversService,
+      this.serverMembersService,
+      this.channelsService,
+      this.permissionsService,
     );
   }
 }

@@ -11,6 +11,7 @@ import { BotsModule } from './bots.module';
 import { ApplicationsModule } from './applications.module';
 import { ServerMembersModule } from './serverMembers.module';
 import { MessagesGatewayModule } from './msgGateway.module';
+import { PermissionsModule } from './permissions.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { MessagesGatewayModule } from './msgGateway.module';
     ApplicationsModule,
     ServerMembersModule,
     MessagesGatewayModule,
+    PermissionsModule,
   ],
   controllers: [HomeController],
   providers: [HomeService],

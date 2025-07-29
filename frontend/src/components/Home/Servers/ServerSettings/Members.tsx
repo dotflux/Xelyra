@@ -4,6 +4,7 @@ import axios from "axios";
 interface MembersProps {
   serverId: string;
   onUpdate: () => void;
+  userId: string;
 }
 
 interface Member {
@@ -20,7 +21,7 @@ interface Role {
   color: string;
 }
 
-const Members: React.FC<MembersProps> = ({ serverId, onUpdate }) => {
+const Members: React.FC<MembersProps> = ({ serverId, onUpdate, userId }) => {
   const [members, setMembers] = useState<Member[]>([]);
   const [loadingMembers, setLoadingMembers] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -182,6 +183,68 @@ const Members: React.FC<MembersProps> = ({ serverId, onUpdate }) => {
     }
   };
 
+  const handleKickMember = async (memberId: string) => {
+    if (!memberId) return;
+    try {
+      await axios.post(
+        `http://localhost:3000/servers/${serverId}/members/kick`,
+        {
+          kickee: memberId,
+        },
+        { withCredentials: true }
+      );
+      setMembers([]);
+      setHasMore(true);
+      fetchMembers();
+    } catch (err: any) {
+      if (axios.isAxiosError(err) && err.response) {
+        console.log(err.response.data);
+        setError(
+          err.response.data?.error ||
+            err.response.data?.message ||
+            err.response.data ||
+            JSON.stringify(err.response.data) ||
+            "Failed to kick member."
+        );
+      } else {
+        setError(
+          err?.message || JSON.stringify(err) || "Failed to kick member."
+        );
+      }
+    }
+  };
+
+  const handleBanMember = async (memberId: string) => {
+    if (!memberId) return;
+    try {
+      await axios.post(
+        `http://localhost:3000/servers/${serverId}/members/ban`,
+        {
+          banee: memberId,
+        },
+        { withCredentials: true }
+      );
+      setMembers([]);
+      setHasMore(true);
+      fetchMembers();
+    } catch (err: any) {
+      if (axios.isAxiosError(err) && err.response) {
+        console.log(err.response.data);
+        setError(
+          err.response.data?.error ||
+            err.response.data?.message ||
+            err.response.data ||
+            JSON.stringify(err.response.data) ||
+            "Failed to ban member."
+        );
+      } else {
+        setError(
+          err?.message || JSON.stringify(err) || "Failed to ban member."
+        );
+      }
+    }
+  };
+
   const lastMemberElementRef = useCallback(
     (node: HTMLDivElement | null) => {
       if (loadingMembers || fetchingMore || !hasMore) return;
@@ -234,7 +297,7 @@ const Members: React.FC<MembersProps> = ({ serverId, onUpdate }) => {
                   : null
               }
             >
-              <div className="w-10 h-10 rounded-full bg-[#2a2b2e] flex items-center justify-center border-2 border-[#3a3b3e]">
+              <div className="w-10 h-10 min-w-[2.5rem] min-h-[2.5rem] rounded-full bg-[#2a2b2e] flex items-center justify-center border-2 border-[#3a3b3e] flex-shrink-0">
                 {member.pfp ? (
                   <img
                     src={member.pfp}
@@ -285,12 +348,30 @@ const Members: React.FC<MembersProps> = ({ serverId, onUpdate }) => {
                   </div>
                 )}
               </div>
-              <button
-                className="px-3 py-1 bg-indigo-700 hover:bg-indigo-800 text-white rounded font-semibold text-xs shadow transition-colors"
-                onClick={() => setSelectedMember(member)}
-              >
-                Assign Role
-              </button>
+              <div className="flex gap-2 flex-col sm:flex-row flex-wrap">
+                <button
+                  className="px-3 py-1 bg-indigo-700 hover:bg-indigo-800 text-white rounded font-semibold text-xs shadow transition-colors"
+                  onClick={() => setSelectedMember(member)}
+                >
+                  Assign Role
+                </button>
+                {member.id !== userId && (
+                  <>
+                    <button
+                      className="px-3 py-1 bg-yellow-600 hover:bg-yellow-700 text-white rounded font-semibold text-xs shadow transition-colors"
+                      onClick={() => handleKickMember(member.id)}
+                    >
+                      Kick
+                    </button>
+                    <button
+                      className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded font-semibold text-xs shadow transition-colors"
+                      onClick={() => handleBanMember(member.id)}
+                    >
+                      Ban
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           ))}
         </div>

@@ -42,6 +42,7 @@ import { changeBio } from 'src/logic/home/user/changeBio';
 import { changeUsername } from 'src/logic/home/user/changeUsername';
 import { changePassword } from 'src/logic/home/user/changePassword';
 import { fetchServerByInvite } from 'src/logic/home/servers/fetchServerByInvite';
+import { PermissionsService } from './permissions.service';
 
 @Injectable()
 export class HomeService {
@@ -56,6 +57,7 @@ export class HomeService {
     private readonly botsService: BotsService,
     private readonly appService: ApplicationsService,
     private readonly serverMembersService: ServerMembersService,
+    private readonly permissionsService: PermissionsService,
   ) {}
 
   async verifyUser(req: Request) {
@@ -125,6 +127,7 @@ export class HomeService {
       this.conversationsService,
       this.groupsService,
       this.channelsService,
+      this.permissionsService,
       cursor,
     );
   }

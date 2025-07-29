@@ -155,6 +155,7 @@ const Server = () => {
           serverId={serverInfo.id}
           isOpen={showServerSettings}
           onClose={() => setShowServerSettings(false)}
+          userId={user.id}
         />
       )}
     </div>

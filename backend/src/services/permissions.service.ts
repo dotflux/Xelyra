@@ -2,12 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { Permission } from './roles.service';
 import { ServerMembersService } from './serverMembers.service';
 import { ChannelOverwritesService } from './channelOverwrites.service';
+import { RolesService } from './roles.service';
 
 @Injectable()
 export class PermissionsService {
   constructor(
     private readonly serverMemberService: ServerMembersService,
     private readonly channelOverService: ChannelOverwritesService,
+    private readonly rolesService: RolesService,
   ) {}
 
   async canView(
@@ -93,5 +95,17 @@ export class PermissionsService {
     }
 
     return effective;
+  }
+
+  async canDo(serverId: string, userId: string, permission: string) {
+    const userRow = await this.serverMemberService.findById(serverId, userId);
+    if (!userRow.length || !userRow[0].roles || !userRow[0].roles.length)
+      return false;
+    const roleIds = userRow[0].roles;
+    const perms = await this.rolesService.getPermissionsForRoles(
+      serverId,
+      roleIds,
+    );
+    return perms.has(permission);
   }
 }

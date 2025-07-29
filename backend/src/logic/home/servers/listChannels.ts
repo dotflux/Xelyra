@@ -97,7 +97,7 @@ export const listChannels = async (
         channel.isPrivate,
       );
 
-      if (channelsByCategory.has(String(channel.category))) {
+      if (canView && channelsByCategory.has(String(channel.category))) {
         const unreadCounter = await conversationsService.findUnreadCounter(
           channel.id,
           user[0].id.toString(),
