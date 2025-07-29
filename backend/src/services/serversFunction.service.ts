@@ -31,6 +31,7 @@ import { updateServerInfo } from 'src/logic/home/servers/updateServerInfo';
 import { createInvite } from 'src/logic/home/servers/createInvite';
 import { leaveServer } from 'src/logic/home/servers/leaveServer';
 import { findInvite } from 'src/logic/home/servers/findInvite';
+import { fetchMembers } from 'src/logic/home/servers/fetchMembers';
 
 @Injectable()
 export class ServersFunctionService {
@@ -281,6 +282,18 @@ export class ServersFunctionService {
 
   async findInvite(req: Request, id: string) {
     return await findInvite(
+      req,
+      id,
+      this.usersService,
+      this.messagesService,
+      this.serversService,
+      this.serverMembersService,
+      this.channelsService,
+    );
+  }
+
+  async fetchMembers(req: Request, id: string) {
+    return await fetchMembers(
       req,
       id,
       this.usersService,

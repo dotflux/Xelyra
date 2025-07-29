@@ -70,9 +70,20 @@ export const assignRole = async (
       throw new BadRequestException('You are not a member');
     }
 
+    console.log(isAssigneeMember[0].roles);
+
     const roleRow = await rolesService.findById(role);
     if (roleRow.length === 0) {
       throw new BadRequestException('No such role');
+    }
+
+    if (
+      isAssigneeMember[0].roles &&
+      isAssigneeMember[0].roles
+        .map((p) => p.toString())
+        .includes(roleRow[0].role_id.toString())
+    ) {
+      throw new BadRequestException('That member already has the role');
     }
 
     await serverMemberService.assignRole(

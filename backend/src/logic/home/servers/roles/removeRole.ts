@@ -75,6 +75,15 @@ export const removeRole = async (
       throw new BadRequestException('No such role');
     }
 
+    if (
+      isAssigneeMember[0].roles &&
+      !isAssigneeMember[0].roles
+        .map((p) => p.toString())
+        .includes(roleRow[0].role_id.toString())
+    ) {
+      throw new BadRequestException('That member does not have that role');
+    }
+
     await serverMemberService.removeRole(
       server[0].id,
       assignee[0].id,

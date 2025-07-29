@@ -83,4 +83,23 @@ export class ServerMembersService {
       throw err;
     }
   }
+
+  async fetchBatch(serverId: string, limit: number, afterId?: string) {
+    let query: string;
+    let params: any[];
+    if (afterId) {
+      query = `SELECT * FROM xelyra.server_members WHERE server_id = ? AND user_id > ? LIMIT ?`;
+      params = [serverId, afterId, limit];
+    } else {
+      query = `SELECT * FROM xelyra.server_members WHERE server_id = ? LIMIT ?`;
+      params = [serverId, limit];
+    }
+    try {
+      const results = await this.scyllaService.execute(query, params);
+      return results.rows;
+    } catch (err) {
+      console.error('Error fetching server members batch:', err);
+      throw err;
+    }
+  }
 }

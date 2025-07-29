@@ -222,4 +222,9 @@ export class ServerController {
   async findInvite(@Req() req: Request, @Param('id') id: string) {
     return await this.serverFservice.findInvite(req, id);
   }
+
+  @Post('members/fetch')
+  async fetchMembers(@Req() req: Request, @Param('id') id: string) {
+    return await this.serverFservice.fetchMembers(req, id);
+  }
 }

@@ -4,6 +4,9 @@ import Overview from "./Overview";
 import Roles from "./Roles";
 import Members from "./Members";
 import Channels from "./Channels";
+import clipboardIcon from "../../../../assets/clipboard.svg";
+import rolesIcon from "../../../../assets/roles.svg";
+import userGroupIcon from "../../../../assets/userGroup.svg";
 
 interface ServerSettingsProps {
   serverId: string;
@@ -26,10 +29,9 @@ const ServerSettings: React.FC<ServerSettingsProps> = ({
   const [error, setError] = useState<string | null>(null);
 
   const tabs = [
-    { id: "overview", name: "Overview", icon: "📋" },
-    { id: "roles", name: "Roles", icon: "👑" },
-    { id: "members", name: "Members", icon: "👥" },
-    { id: "channels", name: "Channels", icon: "💬" },
+    { id: "overview", name: "Overview", icon: clipboardIcon },
+    { id: "roles", name: "Roles", icon: rolesIcon },
+    { id: "members", name: "Members", icon: userGroupIcon },
   ];
 
   const fetchServerInfo = async () => {
@@ -171,7 +173,7 @@ const ServerSettings: React.FC<ServerSettingsProps> = ({
                         : "text-gray-300 hover:bg-[#2a2b2e] hover:text-white"
                     }`}
                   >
-                    <span className="text-lg">{tab.icon}</span>
+                    <img src={tab.icon} alt={tab.name} className="w-6 h-6" />
                     {tab.name}
                   </button>
                 </li>

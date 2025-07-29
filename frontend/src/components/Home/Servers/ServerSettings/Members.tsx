@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
 
 interface MembersProps {
@@ -6,28 +6,52 @@ interface MembersProps {
   onUpdate: () => void;
 }
 
+interface Member {
+  id: string;
+  display_name: string;
+  username: string;
+  pfp: string;
+  roles: string[];
+}
+
+interface Role {
+  id: string;
+  name: string;
+  color: string;
+}
+
 const Members: React.FC<MembersProps> = ({ serverId, onUpdate }) => {
-  const [members, setMembers] = useState<any[]>([]);
+  const [members, setMembers] = useState<Member[]>([]);
   const [loadingMembers, setLoadingMembers] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedMember, setSelectedMember] = useState<any | null>(null);
+  const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const [selectedRole, setSelectedRole] = useState("");
   const [assigningRole, setAssigningRole] = useState(false);
-  const [roles, setRoles] = useState<any[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [hasMore, setHasMore] = useState(true);
+  const [fetchingMore, setFetchingMore] = useState(false);
+  const observer = useRef<IntersectionObserver | null>(null);
+  const lastMemberRef = useRef<HTMLDivElement | null>(null);
+  const BATCH_SIZE = 20;
+  const [roleDropdownOpen, setRoleDropdownOpen] = useState(false);
+  const roleDropdownRef = useRef<HTMLDivElement | null>(null);
 
-  const fetchMembers = async () => {
+  const fetchMembers = async (afterId?: string) => {
+    if (loadingMembers || fetchingMore || !hasMore) return;
     setLoadingMembers(true);
     setError(null);
     try {
       const res = await axios.post(
         `http://localhost:3000/servers/${serverId}/members/fetch`,
-        {},
+        { limit: BATCH_SIZE, afterId },
         { withCredentials: true }
       );
-      setMembers(res.data.members || res.data);
+      const newMembers = res.data.members || [];
+      setMembers((prev) => (afterId ? [...prev, ...newMembers] : newMembers));
+      setHasMore(newMembers.length === BATCH_SIZE);
     } catch (err: any) {
-      setMembers([]);
+      if (!afterId) setMembers([]);
       setError(
         err?.response?.data?.error ||
           err?.response?.data?.message ||
@@ -35,6 +59,7 @@ const Members: React.FC<MembersProps> = ({ serverId, onUpdate }) => {
       );
     } finally {
       setLoadingMembers(false);
+      setFetchingMore(false);
     }
   };
 
@@ -52,62 +77,125 @@ const Members: React.FC<MembersProps> = ({ serverId, onUpdate }) => {
   };
 
   useEffect(() => {
+    setMembers([]);
+    setHasMore(true);
     fetchMembers();
     fetchRoles();
   }, [serverId]);
 
-  const filteredMembers = members.filter(
-    (member) =>
-      member.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      member.username?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        roleDropdownRef.current &&
+        !roleDropdownRef.current.contains(event.target as Node)
+      ) {
+        setRoleDropdownOpen(false);
+      }
+    }
+    if (roleDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [roleDropdownOpen]);
+
+  const filteredMembers = searchTerm
+    ? members.filter(
+        (member) =>
+          member.display_name
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          member.username?.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : members;
 
   const handleAssignRole = async () => {
     if (!selectedMember || !selectedRole) return;
     setAssigningRole(true);
+    setError("");
     try {
       await axios.post(
         `http://localhost:3000/servers/${serverId}/roles/assign`,
         {
-          serverId,
           userId: selectedMember.id,
-          roleId: selectedRole,
+          role: selectedRole,
         },
-        { withCredentials: true }
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
       );
-      fetchMembers();
-      setSelectedMember(null);
-      setSelectedRole("");
-    } catch (err: any) {
-      setError(
-        err?.response?.data?.error ||
-          err?.response?.data?.message ||
-          "Failed to assign role."
-      );
+    } catch (error: any) {
+      if (axios.isAxiosError(error) && error.response) {
+        setError(
+          error.response.data?.error ||
+            error.response.data?.message ||
+            error.response.data ||
+            JSON.stringify(error.response.data) ||
+            "Failed to assign role."
+        );
+        console.log("AssignRole error:", error.response.data);
+      } else {
+        setError(
+          error?.message || JSON.stringify(error) || "Failed to assign role."
+        );
+        console.log("AssignRole error (network or unknown):", error);
+      }
     }
     setAssigningRole(false);
   };
 
   const handleRemoveRole = async (memberId: string, roleId: string) => {
+    if (!memberId || !roleId) return;
     try {
       await axios.post(
         `http://localhost:3000/servers/${serverId}/roles/remove`,
         {
-          serverId,
           userId: memberId,
-          roleId,
+          role: roleId,
         },
         { withCredentials: true }
       );
+      setMembers([]);
+      setHasMore(true);
       fetchMembers();
     } catch (err: any) {
-      setError(
-        err?.response?.data?.error ||
-          err?.response?.data?.message ||
-          "Failed to remove role."
-      );
+      if (axios.isAxiosError(err) && err.response) {
+        console.log(err.response.data);
+        setError(
+          err.response.data?.error ||
+            err.response.data?.message ||
+            err.response.data ||
+            JSON.stringify(err.response.data) ||
+            "Failed to remove role."
+        );
+      } else {
+        setError(
+          err?.message || JSON.stringify(err) || "Failed to remove role."
+        );
+      }
     }
   };
+
+  const lastMemberElementRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (loadingMembers || fetchingMore || !hasMore) return;
+      if (observer.current) observer.current.disconnect();
+      observer.current = new window.IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && members.length > 0) {
+          setFetchingMore(true);
+          fetchMembers(members[members.length - 1].id);
+        }
+      });
+      if (node) observer.current.observe(node);
+    },
+    [loadingMembers, fetchingMore, hasMore, members]
+  );
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -136,10 +224,15 @@ const Members: React.FC<MembersProps> = ({ serverId, onUpdate }) => {
         <div className="text-gray-400">No members found.</div>
       ) : (
         <div className="space-y-4">
-          {filteredMembers.map((member) => (
+          {filteredMembers.map((member, index) => (
             <div
               key={member.id}
               className="flex items-center gap-4 p-4 rounded-lg bg-[#1e1f22] border border-[#3a3b3e]"
+              ref={
+                index === filteredMembers.length - 1
+                  ? lastMemberElementRef
+                  : null
+              }
             >
               <div className="w-10 h-10 rounded-full bg-[#2a2b2e] flex items-center justify-center border-2 border-[#3a3b3e]">
                 {member.pfp ? (
@@ -150,7 +243,11 @@ const Members: React.FC<MembersProps> = ({ serverId, onUpdate }) => {
                   />
                 ) : (
                   <span className="text-lg text-gray-500 font-bold">
-                    {member.display_name?.[0]?.toUpperCase() || "?"}
+                    {(
+                      member.display_name?.[0] ||
+                      member.username?.[0] ||
+                      "?"
+                    ).toUpperCase()}
                   </span>
                 )}
               </div>
@@ -161,24 +258,30 @@ const Members: React.FC<MembersProps> = ({ serverId, onUpdate }) => {
                 <div className="text-sm text-gray-400">@{member.username}</div>
                 {member.roles && member.roles.length > 0 && (
                   <div className="flex gap-2 mt-2">
-                    {member.roles.map((role: any) => (
-                      <div
-                        key={role.id}
-                        className="flex items-center gap-1 px-2 py-1 rounded bg-[#2a2b2e] border border-[#3a3b3e]"
-                      >
-                        <span
-                          className="w-2 h-2 rounded-full"
-                          style={{ background: role.color || "#5865F2" }}
-                        />
-                        <span className="text-xs text-white">{role.name}</span>
-                        <button
-                          onClick={() => handleRemoveRole(member.id, role.id)}
-                          className="text-red-400 hover:text-red-300 text-xs"
+                    {member.roles.map((roleId: string) => {
+                      const role = roles.find((r) => r.id === roleId);
+                      if (!role) return null;
+                      return (
+                        <div
+                          key={role.id}
+                          className="flex items-center gap-1 px-2 py-1 rounded bg-[#2a2b2e] border border-[#3a3b3e]"
                         >
-                          ×
-                        </button>
-                      </div>
-                    ))}
+                          <span
+                            className="w-2 h-2 rounded-full"
+                            style={{ background: role.color || "#5865F2" }}
+                          />
+                          <span className="text-xs text-white">
+                            {role.name}
+                          </span>
+                          <button
+                            onClick={() => handleRemoveRole(member.id, role.id)}
+                            className="text-red-400 hover:text-red-300 text-xs"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -230,18 +333,71 @@ const Members: React.FC<MembersProps> = ({ serverId, onUpdate }) => {
                 <label className="block text-sm font-semibold text-gray-300 mb-2">
                   Select Role
                 </label>
-                <select
-                  className="w-full px-3 py-2 rounded bg-[#18191c] border border-[#23232a] text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  value={selectedRole}
-                  onChange={(e) => setSelectedRole(e.target.value)}
-                >
-                  <option value="">Choose a role...</option>
-                  {roles.map((role) => (
-                    <option key={role.id} value={role.id}>
-                      {role.name}
-                    </option>
-                  ))}
-                </select>
+                <div className="relative" ref={roleDropdownRef}>
+                  <button
+                    type="button"
+                    className="w-full px-3 py-2 rounded bg-[#18191c] border border-[#23232a] text-white flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    onClick={() => setRoleDropdownOpen((open) => !open)}
+                  >
+                    {selectedRole ? (
+                      <span className="flex items-center gap-2">
+                        <span
+                          className="w-4 h-4 rounded-full inline-block border border-[#23232a]"
+                          style={{
+                            background:
+                              roles.find((r) => r.id === selectedRole)?.color ||
+                              "#5865F2",
+                          }}
+                        />
+                        {roles.find((r) => r.id === selectedRole)?.name ||
+                          "Choose a role..."}
+                      </span>
+                    ) : (
+                      <span className="text-gray-400">Choose a role...</span>
+                    )}
+                    <svg
+                      className="w-4 h-4 ml-2 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </button>
+                  {roleDropdownOpen && (
+                    <div className="absolute z-10 mt-2 w-full bg-[#23232a] border border-[#23232a] rounded shadow-lg max-h-60 overflow-y-auto">
+                      {roles.length === 0 && (
+                        <div className="px-4 py-2 text-gray-400">
+                          No roles found.
+                        </div>
+                      )}
+                      {roles.map((role) => (
+                        <button
+                          key={role.id}
+                          type="button"
+                          className={`w-full flex items-center gap-2 px-4 py-2 text-left hover:bg-[#18191c] transition-colors ${
+                            selectedRole === role.id ? "bg-[#18191c]" : ""
+                          }`}
+                          onClick={() => {
+                            setSelectedRole(role.id);
+                            setRoleDropdownOpen(false);
+                          }}
+                        >
+                          <span
+                            className="w-4 h-4 rounded-full inline-block border border-[#23232a]"
+                            style={{ background: role.color || "#5865F2" }}
+                          />
+                          <span className="text-white">{role.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="flex gap-3">
