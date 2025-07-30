@@ -401,4 +401,9 @@ export class HomeController {
   ) {
     return await this.homeService.fetchInviteInfo(req, inviteId);
   }
+
+  @Post('servers/permissionToAdd')
+  async permissionToAdd(@Req() req: Request) {
+    return await this.homeService.permissionToAdd(req);
+  }
 }

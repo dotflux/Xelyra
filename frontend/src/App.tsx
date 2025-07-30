@@ -13,6 +13,7 @@ import AppOverview from "./components/Developer/ApplicationSettings/AppOverview"
 import AppBot from "./components/Developer/ApplicationSettings/AppBot";
 import DeveloperLanding from "./components/Developer/DeveloperLanding/DeveloperLanding";
 import Documentation from "./components/Developer/Documentation";
+import AppBotAdd from "./components/Developer/ApplicationSettings/AppBotAdd";
 
 function App() {
   const router = createBrowserRouter([
@@ -73,6 +74,10 @@ function App() {
             {
               path: "bot",
               element: <AppBot />,
+            },
+            {
+              path: "add",
+              element: <AppBotAdd />,
             },
           ],
         },

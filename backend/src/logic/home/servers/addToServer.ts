@@ -67,6 +67,10 @@ export const addToServer = async (
     if (isValidInvite.length === 0) {
       throw new BadRequestException('No such invite');
     }
+    const isBanned = await serversService.findBan(serverId, user[0].id);
+    if (isBanned.length > 0) {
+      throw new BadRequestException('You are banned from this server');
+    }
 
     await Promise.all([
       serverMembersService.createServerMember(serverId, user[0].id, []),

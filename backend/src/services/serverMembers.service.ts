@@ -84,7 +84,7 @@ export class ServerMembersService {
     }
   }
 
-  async fetchBatch(serverId: string, limit: number, afterId?: string) {
+  async fetchBatch(serverId: string, limit: number = 70, afterId?: string) {
     let query: string;
     let params: any[];
     if (afterId) {

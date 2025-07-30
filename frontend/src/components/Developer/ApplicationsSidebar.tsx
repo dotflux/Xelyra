@@ -1,11 +1,12 @@
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import arrowRightIcon from "../../assets/arrowRight.svg";
 
-type AppKey = "overview" | "bot";
+type AppKey = "overview" | "bot" | "add";
 
 const appTabs: { key: AppKey; label: string }[] = [
   { key: "overview", label: "Overview" },
   { key: "bot", label: "Bot" },
+  { key: "add", label: "Add Application" },
 ];
 
 const ApplicationsSidebar = () => {

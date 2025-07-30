@@ -13,10 +13,10 @@ import { PermissionsService } from 'src/services/permissions.service';
 
 dotenv.config();
 
-export const kickMember = async (
+export const unbanMember = async (
   req: Request,
   serverId: string,
-  kickee: string,
+  banee: string,
   usersService: UsersService,
   messagesService: MessagesService,
   serversService: ServersService,
@@ -55,57 +55,44 @@ export const kickMember = async (
       throw new BadRequestException('Not a member');
     }
 
-    if (user[0].id.toString() === kickee) {
-      throw new BadRequestException('You cannot kick yourself');
+    if (user[0].id.toString() === banee) {
+      throw new BadRequestException('You cannot unban yourself');
     }
 
-    const canKick = await permissionsService.canDo(
+    const canBan = await permissionsService.canDo(
       serverId,
       user[0].id,
-      'KICK_USERS',
+      'BAN_USERS',
     );
     const isAdmin = await permissionsService.canDo(
       serverId,
       user[0].id,
       'ADMIN',
     );
-    const kickerIsOwner = server[0].owner.toString() === user[0].id.toString();
-    if (!canKick && !isAdmin && !kickerIsOwner) {
+    const isOwner = server[0].owner.toString() === user[0].id.toString();
+    if (!canBan && !isAdmin && !isOwner) {
       throw new BadRequestException('You do not have permission to do this');
     }
 
-    const kickeeMember = await serverMembersService.findById(serverId, kickee);
-    if (kickeeMember.length === 0) {
-      throw new BadRequestException(
-        'The person you wish to kick is not a member',
-      );
+    const baneeMember = await serverMembersService.findById(serverId, banee);
+    if (baneeMember.length > 0) {
+      throw new BadRequestException('Person already in server');
     }
-    const kickeeUser = await usersService.findById(kickeeMember[0].user_id);
-    if (kickeeUser.length === 0) {
+    const baneeUser = await usersService.findById(banee);
+    if (baneeUser.length === 0) {
       throw new BadRequestException('No such user in database');
     }
 
-    const cantBeKicked = await permissionsService.canDo(
-      serverId,
-      kickee,
-      'ADMIN',
-    );
-    const isOwner = server[0].owner.toString() === kickee;
-
-    if ((cantBeKicked || isOwner) && !kickerIsOwner) {
-      throw new BadRequestException(
-        'The person you wish to kick cannot be kicked',
-      );
+    const isBanned = await serversService.findBan(serverId, banee);
+    if (isBanned.length === 0) {
+      throw new BadRequestException('User is not banned');
     }
 
-    await Promise.all([
-      serverMembersService.removeMember(serverId, kickeeUser[0].id),
-      usersService.removeServer(serverId, kickeeUser[0].id),
-    ]);
+    await serversService.removeBan(serverId, banee);
 
     return {
       valid: true,
-      message: 'Kicked From Server.',
+      message: 'Unbanned From Server.',
     };
   } catch (error) {
     if (
@@ -114,7 +101,7 @@ export const kickMember = async (
     ) {
       throw error;
     }
-    console.log('Error in kicking from server.: ', error);
+    console.log('Error in unbanning from server.: ', error);
     throw new BadRequestException({
       valid: false,
       error: 'Internal Server Error',

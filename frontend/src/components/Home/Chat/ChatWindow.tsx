@@ -57,7 +57,7 @@ const ChatWindow = (props: Props) => {
 
   const fetchMessages = async (
     cursors?: { userCursor?: string; commandCursor?: string },
-    limit: number = cursors ? 10 : 20
+    limit: number = cursors ? 70 : 40
   ) => {
     setLoadingMore(true);
     try {

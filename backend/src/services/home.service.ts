@@ -43,6 +43,7 @@ import { changeUsername } from 'src/logic/home/user/changeUsername';
 import { changePassword } from 'src/logic/home/user/changePassword';
 import { fetchServerByInvite } from 'src/logic/home/servers/fetchServerByInvite';
 import { PermissionsService } from './permissions.service';
+import { permissionToAdd } from 'src/logic/home/permissionToAdd';
 
 @Injectable()
 export class HomeService {
@@ -377,6 +378,15 @@ export class HomeService {
       this.serversService,
       this.serverMembersService,
       this.channelsService,
+    );
+  }
+
+  async permissionToAdd(req: Request) {
+    return await permissionToAdd(
+      req,
+      this.usersService,
+      this.serversService,
+      this.permissionsService,
     );
   }
 }

@@ -34,7 +34,7 @@ const Members: React.FC<MembersProps> = ({ serverId, onUpdate, userId }) => {
   const [fetchingMore, setFetchingMore] = useState(false);
   const observer = useRef<IntersectionObserver | null>(null);
   const lastMemberRef = useRef<HTMLDivElement | null>(null);
-  const BATCH_SIZE = 20;
+  const BATCH_SIZE = 70;
   const [roleDropdownOpen, setRoleDropdownOpen] = useState(false);
   const roleDropdownRef = useRef<HTMLDivElement | null>(null);
 
@@ -53,11 +53,7 @@ const Members: React.FC<MembersProps> = ({ serverId, onUpdate, userId }) => {
       setHasMore(newMembers.length === BATCH_SIZE);
     } catch (err: any) {
       if (!afterId) setMembers([]);
-      setError(
-        err?.response?.data?.error ||
-          err?.response?.data?.message ||
-          "Failed to fetch members."
-      );
+      setError(err.response.data.message);
     } finally {
       setLoadingMembers(false);
       setFetchingMore(false);
@@ -133,19 +129,9 @@ const Members: React.FC<MembersProps> = ({ serverId, onUpdate, userId }) => {
       );
     } catch (error: any) {
       if (axios.isAxiosError(error) && error.response) {
-        setError(
-          error.response.data?.error ||
-            error.response.data?.message ||
-            error.response.data ||
-            JSON.stringify(error.response.data) ||
-            "Failed to assign role."
-        );
-        console.log("AssignRole error:", error.response.data);
+        setError(error.response.data.message);
       } else {
-        setError(
-          error?.message || JSON.stringify(error) || "Failed to assign role."
-        );
-        console.log("AssignRole error (network or unknown):", error);
+        setError(error.response.data.message);
       }
     }
     setAssigningRole(false);
@@ -168,17 +154,9 @@ const Members: React.FC<MembersProps> = ({ serverId, onUpdate, userId }) => {
     } catch (err: any) {
       if (axios.isAxiosError(err) && err.response) {
         console.log(err.response.data);
-        setError(
-          err.response.data?.error ||
-            err.response.data?.message ||
-            err.response.data ||
-            JSON.stringify(err.response.data) ||
-            "Failed to remove role."
-        );
+        setError(err.response.data.message);
       } else {
-        setError(
-          err?.message || JSON.stringify(err) || "Failed to remove role."
-        );
+        setError(err.response.data.message);
       }
     }
   };
@@ -199,17 +177,9 @@ const Members: React.FC<MembersProps> = ({ serverId, onUpdate, userId }) => {
     } catch (err: any) {
       if (axios.isAxiosError(err) && err.response) {
         console.log(err.response.data);
-        setError(
-          err.response.data?.error ||
-            err.response.data?.message ||
-            err.response.data ||
-            JSON.stringify(err.response.data) ||
-            "Failed to kick member."
-        );
+        setError(err.response.data.message);
       } else {
-        setError(
-          err?.message || JSON.stringify(err) || "Failed to kick member."
-        );
+        setError(err.response.data.message);
       }
     }
   };
@@ -230,17 +200,9 @@ const Members: React.FC<MembersProps> = ({ serverId, onUpdate, userId }) => {
     } catch (err: any) {
       if (axios.isAxiosError(err) && err.response) {
         console.log(err.response.data);
-        setError(
-          err.response.data?.error ||
-            err.response.data?.message ||
-            err.response.data ||
-            JSON.stringify(err.response.data) ||
-            "Failed to ban member."
-        );
+        setError(err.response.data.message);
       } else {
-        setError(
-          err?.message || JSON.stringify(err) || "Failed to ban member."
-        );
+        setError(err.response.data.message);
       }
     }
   };
@@ -290,7 +252,7 @@ const Members: React.FC<MembersProps> = ({ serverId, onUpdate, userId }) => {
           {filteredMembers.map((member, index) => (
             <div
               key={member.id}
-              className="flex items-center gap-4 p-4 rounded-lg bg-[#1e1f22] border border-[#3a3b3e]"
+              className="flex items-center gap-4 p-4 rounded-lg border border-[#2a2b2e]"
               ref={
                 index === filteredMembers.length - 1
                   ? lastMemberElementRef

@@ -3,12 +3,14 @@ import axios from "axios";
 import Overview from "./Overview";
 import Roles from "./Roles";
 import Members from "./Members";
+import Bans from "./Bans";
 import Channels from "./Channels";
 import clipboardIcon from "../../../../assets/clipboard.svg";
 import rolesIcon from "../../../../assets/roles.svg";
 import userGroupIcon from "../../../../assets/userGroup.svg";
 import openSidebarIcon from "../../../../assets/openSidebar.svg";
 import closeSidebarIcon from "../../../../assets/closeSidebar.svg";
+import banIcon from "../../../../assets/ban.svg";
 
 interface ServerSettingsProps {
   serverId: string;
@@ -37,6 +39,7 @@ const ServerSettings: React.FC<ServerSettingsProps> = ({
     { id: "overview", name: "Overview", icon: clipboardIcon },
     { id: "roles", name: "Roles", icon: rolesIcon },
     { id: "members", name: "Members", icon: userGroupIcon },
+    { id: "bans", name: "Bans", icon: banIcon },
   ];
 
   const fetchServerInfo = async () => {
@@ -248,6 +251,9 @@ const ServerSettings: React.FC<ServerSettingsProps> = ({
                 onUpdate={handleRefresh}
                 userId={userId}
               />
+            )}
+            {activeTab === "bans" && (
+              <Bans serverId={serverId} onUpdate={handleRefresh} />
             )}
             {activeTab === "channels" && (
               <Channels serverId={serverId} onUpdate={handleRefresh} />

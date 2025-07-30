@@ -33,6 +33,9 @@ import { leaveServer } from 'src/logic/home/servers/leaveServer';
 import { findInvite } from 'src/logic/home/servers/findInvite';
 import { fetchMembers } from 'src/logic/home/servers/fetchMembers';
 import { kickMember } from 'src/logic/home/servers/kickMember';
+import { banMember } from 'src/logic/home/servers/banMember';
+import { unbanMember } from 'src/logic/home/servers/unbanMember';
+import { listBans } from 'src/logic/home/servers/listBans';
 
 @Injectable()
 export class ServersFunctionService {
@@ -294,6 +297,7 @@ export class ServersFunctionService {
   }
 
   async fetchMembers(req: Request, id: string) {
+    const { limit = 70, afterId } = req.body;
     return await fetchMembers(
       req,
       id,
@@ -302,6 +306,8 @@ export class ServersFunctionService {
       this.serversService,
       this.serverMembersService,
       this.channelsService,
+      limit,
+      afterId,
     );
   }
 
@@ -316,6 +322,50 @@ export class ServersFunctionService {
       this.serverMembersService,
       this.channelsService,
       this.permissionsService,
+    );
+  }
+
+  async banMember(req: Request, id: string, banee: string) {
+    return await banMember(
+      req,
+      id,
+      banee,
+      this.usersService,
+      this.messagesService,
+      this.serversService,
+      this.serverMembersService,
+      this.channelsService,
+      this.permissionsService,
+    );
+  }
+
+  async unbanMember(req: Request, id: string, banee: string) {
+    return await unbanMember(
+      req,
+      id,
+      banee,
+      this.usersService,
+      this.messagesService,
+      this.serversService,
+      this.serverMembersService,
+      this.channelsService,
+      this.permissionsService,
+    );
+  }
+
+  async fetchBans(req: Request, id: string) {
+    const { limit = 70, afterId } = req.body;
+    return await listBans(
+      req,
+      id,
+      this.usersService,
+      this.messagesService,
+      this.serversService,
+      this.serverMembersService,
+      this.channelsService,
+      this.permissionsService,
+      limit,
+      afterId,
     );
   }
 }

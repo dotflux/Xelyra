@@ -236,4 +236,27 @@ export class ServerController {
   ) {
     return await this.serverFservice.kickMember(req, id, kickee);
   }
+
+  @Post('members/ban')
+  async banMember(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Body('banee') banee: string,
+  ) {
+    return await this.serverFservice.banMember(req, id, banee);
+  }
+
+  @Post('members/unban')
+  async unbanMember(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Body('banee') banee: string,
+  ) {
+    return await this.serverFservice.unbanMember(req, id, banee);
+  }
+
+  @Post('bans/fetch')
+  async fetchBans(@Req() req: Request, @Param('id') id: string) {
+    return await this.serverFservice.fetchBans(req, id);
+  }
 }

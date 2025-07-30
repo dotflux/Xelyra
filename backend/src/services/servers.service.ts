@@ -130,4 +130,63 @@ export class ServersService {
       throw err;
     }
   }
+
+  async createBan(serverId: string, bannedId: string) {
+    const createdAt = new Date();
+    const query = `
+      INSERT INTO xelyra.server_bans (server_id, banned_id, created_at)
+      VALUES (?, ?, ?)
+    `;
+    const params = [serverId, bannedId, createdAt];
+    try {
+      const results = await this.scyllaService.execute(query, params);
+      return results.rows;
+    } catch (err) {
+      console.error('Error creating ban:', err);
+      throw err;
+    }
+  }
+
+  async findBan(serverId: string, bannedId: string) {
+    const query = `SELECT * FROM xelyra.server_bans WHERE server_id = ? AND banned_id = ?`;
+    const params = [serverId, bannedId];
+    try {
+      const results = await this.scyllaService.execute(query, params);
+      return results.rows;
+    } catch (err) {
+      console.error('Error finding ban:', err);
+      throw err;
+    }
+  }
+
+  async removeBan(serverId: string, bannedId: string) {
+    const query = `DELETE FROM xelyra.server_bans WHERE server_id = ? AND banned_id = ?`;
+    const params = [serverId, bannedId];
+    try {
+      const results = await this.scyllaService.execute(query, params);
+      return results.rows;
+    } catch (err) {
+      console.error('Error removing ban:', err);
+      throw err;
+    }
+  }
+
+  async fetchBansBatch(serverId: string, limit: number = 70, afterId?: string) {
+    let query: string;
+    let params: any[];
+    if (afterId) {
+      query = `SELECT * FROM xelyra.server_bans WHERE server_id = ? AND banned_id > ? LIMIT ?`;
+      params = [serverId, afterId, limit];
+    } else {
+      query = `SELECT * FROM xelyra.server_bans WHERE server_id = ? LIMIT ?`;
+      params = [serverId, limit];
+    }
+    try {
+      const results = await this.scyllaService.execute(query, params);
+      return results.rows;
+    } catch (err) {
+      console.error('Error fetching server bans batch:', err);
+      throw err;
+    }
+  }
 }
