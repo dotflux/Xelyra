@@ -111,14 +111,14 @@ const AppOverview = () => {
   if (!appInfo) return null;
 
   return (
-    <div>
+    <div className="px-4 lg:px-0">
       <h1 className="text-white font-bold text-2xl mb-4">Overview</h1>
       <p className="text-gray-400 text-xl font-medium mb-4">
         Customise your app's information such as name,description and more.
       </p>
-      <div className="flex items-start justify-between gap-8">
+      <div className="flex flex-col lg:flex-row items-start justify-between gap-8">
         {/* Left side: Name & Description */}
-        <div className="flex-1 space-y-6">
+        <div className="flex-1 space-y-6 w-full">
           <div className="flex flex-col">
             <label className="text-white font-medium mb-1">Name</label>
             <input
@@ -148,7 +148,9 @@ const AppOverview = () => {
             <h4 className="font-bold text-white text-sm mb-2">
               Application ID
             </h4>
-            <p className="text-gray-400 text-sm mb-2">{appInfo.app_id}</p>
+            <p className="text-gray-400 text-sm mb-2 break-all">
+              {appInfo.app_id}
+            </p>
             <button
               className="text-white rounded bg-blue-700 shadow-sm transition-all px-4 py-1"
               onClick={() => navigator.clipboard.writeText(appInfo.app_id)}
@@ -169,7 +171,7 @@ const AppOverview = () => {
         </div>
 
         {/* Right side: Avatar box */}
-        <div className="flex-shrink-0 flex flex-col items-center justify-center gap-2">
+        <div className="flex-shrink-0 flex flex-col items-center justify-center gap-2 w-full lg:w-auto">
           <div className="h-32 w-32 bg-[#0d0d0e] rounded-2xl shadow-sm hover:shadow-md transition-shadow flex items-center justify-center overflow-hidden">
             {appInfo.pfp ? (
               <img
@@ -209,27 +211,29 @@ const AppOverview = () => {
         </div>
       </div>
       {isDirty && (
-        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 bg-[#2a2b2e] border border-[#3a3b3e] text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-4 max-w-xl w-[95%]">
-          <span className="flex-1 text-sm font-medium text-gray-200">
+        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 bg-[#2a2b2e] border border-[#3a3b3e] text-white px-6 py-4 rounded-lg shadow-lg flex flex-col sm:flex-row items-center gap-4 max-w-xl w-[95%]">
+          <span className="flex-1 text-sm font-medium text-gray-200 text-center sm:text-left">
             Unsaved changes were detected
           </span>
 
-          <button
-            onClick={() => {
-              setName(appInfo.app_name);
-              setDescription(appInfo.description);
-            }}
-            className="text-sm text-gray-300 hover:underline"
-          >
-            Reset
-          </button>
+          <div className="flex gap-2 w-full sm:w-auto">
+            <button
+              onClick={() => {
+                setName(appInfo.app_name);
+                setDescription(appInfo.description);
+              }}
+              className="text-sm text-gray-300 hover:underline"
+            >
+              Reset
+            </button>
 
-          <button
-            onClick={handleSave}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
-          >
-            Save Changes
-          </button>
+            <button
+              onClick={handleSave}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
+            >
+              Save Changes
+            </button>
+          </div>
         </div>
       )}
     </div>

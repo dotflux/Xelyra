@@ -54,6 +54,13 @@ export const addApplicationServer = async (
     if (exists.length > 0) {
       throw new BadRequestException('App is already in server');
     }
+    const isBanned = await serversService.findBan(
+      serverRow[0].id,
+      app[0].app_id,
+    );
+    if (isBanned.length > 0) {
+      throw new BadRequestException('App is banned from server');
+    }
 
     await serverAppsService.createServerApp(serverRow[0].id, app[0].app_id, []);
 

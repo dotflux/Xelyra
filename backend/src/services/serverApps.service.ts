@@ -33,14 +33,33 @@ export class ServerAppsService {
     }
   }
 
-  async findAll(id: string) {
+  async findAll(serverId: string) {
     const query = `SELECT * FROM xelyra.server_apps WHERE server_id = ?`;
-    const params = [id];
+    const params = [serverId];
     try {
       const results = await this.scyllaService.execute(query, params);
       return results.rows;
     } catch (err) {
-      console.error('Error finding all server_apps by server_id:', err);
+      console.error('Error finding all server apps:', err);
+      throw err;
+    }
+  }
+
+  async fetchBatch(serverId: string, limit: number = 70, afterId?: string) {
+    let query: string;
+    let params: any[];
+    if (afterId) {
+      query = `SELECT * FROM xelyra.server_apps WHERE server_id = ? AND app_id > ? LIMIT ?`;
+      params = [serverId, afterId, limit];
+    } else {
+      query = `SELECT * FROM xelyra.server_apps WHERE server_id = ? LIMIT ?`;
+      params = [serverId, limit];
+    }
+    try {
+      const results = await this.scyllaService.execute(query, params);
+      return results.rows;
+    } catch (err) {
+      console.error('Error fetching server apps batch:', err);
       throw err;
     }
   }
@@ -76,6 +95,18 @@ export class ServerAppsService {
       return results.rows;
     } catch (err) {
       console.error('Error assigning role to server_app:', err);
+      throw err;
+    }
+  }
+
+  async removeApp(server: string, id: string) {
+    const query = `DELETE FROM xelyra.server_apps WHERE server_id = ? AND app_id = ?`;
+    const params = [server, id];
+    try {
+      const results = await this.scyllaService.execute(query, params);
+      return results.rows;
+    } catch (err) {
+      console.error('Error removing server app:', err);
       throw err;
     }
   }

@@ -1,36 +1,37 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
 
-interface BansProps {
+interface ServerAppsBansProps {
   serverId: string;
   onUpdate: () => void;
 }
 
-interface BannedUser {
+interface BannedApp {
   id: string;
-  display_name: string;
-  username: string;
+  name: string;
   pfp: string;
 }
 
-const Bans: React.FC<BansProps> = ({ serverId, onUpdate }) => {
-  const [bans, setBans] = useState<BannedUser[]>([]);
-  const [loadingBans, setLoadingBans] = useState(false);
+const ServerAppsBans: React.FC<ServerAppsBansProps> = ({
+  serverId,
+  onUpdate,
+}) => {
+  const [bans, setBans] = useState<BannedApp[]>([]);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [hasMore, setHasMore] = useState(true);
   const [fetchingMore, setFetchingMore] = useState(false);
   const observer = useRef<IntersectionObserver | null>(null);
-  const lastBanRef = useRef<HTMLDivElement | null>(null);
   const BATCH_SIZE = 70;
 
   const fetchBans = async (afterId?: string) => {
-    if (loadingBans || fetchingMore || !hasMore) return;
-    setLoadingBans(true);
+    if (loading || fetchingMore || !hasMore) return;
+    setLoading(true);
     setError(null);
     try {
       const res = await axios.post(
-        `http://localhost:3000/servers/${serverId}/bans/fetch`,
+        `http://localhost:3000/servers/${serverId}/apps/bans/fetch`,
         { limit: BATCH_SIZE, afterId },
         {
           withCredentials: true,
@@ -39,14 +40,19 @@ const Bans: React.FC<BansProps> = ({ serverId, onUpdate }) => {
           },
         }
       );
-      const newBans = res.data.bansInfo || [];
+      const newBans = res.data.apps || [];
       setBans((prev) => (afterId ? [...prev, ...newBans] : newBans));
       setHasMore(newBans.length === BATCH_SIZE);
     } catch (err: any) {
       if (!afterId) setBans([]);
-      setError(err.response.data.message);
+      if (axios.isAxiosError(err) && err.response) {
+        console.log(err.response.data.message);
+        setError(err.response.data.message);
+      } else {
+        console.log("Network Error:", err);
+      }
     } finally {
-      setLoadingBans(false);
+      setLoading(false);
       setFetchingMore(false);
     }
   };
@@ -58,20 +64,18 @@ const Bans: React.FC<BansProps> = ({ serverId, onUpdate }) => {
   }, [serverId]);
 
   const filteredBans = searchTerm
-    ? bans.filter(
-        (ban) =>
-          ban.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          ban.username?.toLowerCase().includes(searchTerm.toLowerCase())
+    ? bans.filter((ban) =>
+        ban.name.toLowerCase().includes(searchTerm.toLowerCase())
       )
     : bans;
 
-  const handleUnbanUser = async (userId: string) => {
-    if (!userId) return;
+  const handleUnbanApp = async (appId: string) => {
+    if (!appId) return;
     try {
       await axios.post(
-        `http://localhost:3000/servers/${serverId}/members/unban`,
+        `http://localhost:3000/servers/${serverId}/apps/unban`,
         {
-          banee: userId,
+          banee: appId,
         },
         {
           withCredentials: true,
@@ -95,7 +99,7 @@ const Bans: React.FC<BansProps> = ({ serverId, onUpdate }) => {
 
   const lastBanElementRef = useCallback(
     (node: HTMLDivElement | null) => {
-      if (loadingBans || fetchingMore || !hasMore) return;
+      if (loading || fetchingMore || !hasMore) return;
       if (observer.current) observer.current.disconnect();
       observer.current = new window.IntersectionObserver((entries) => {
         if (entries[0].isIntersecting && bans.length > 0) {
@@ -105,7 +109,7 @@ const Bans: React.FC<BansProps> = ({ serverId, onUpdate }) => {
       });
       if (node) observer.current.observe(node);
     },
-    [loadingBans, fetchingMore, hasMore, bans]
+    [loading, fetchingMore, hasMore, bans]
   );
 
   return (
@@ -117,11 +121,11 @@ const Bans: React.FC<BansProps> = ({ serverId, onUpdate }) => {
       )}
 
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-bold text-white">Bans</h3>
+        <h3 className="text-lg font-bold text-white">Banned Apps</h3>
         <div className="flex items-center gap-4">
           <input
             type="text"
-            placeholder="Search bans..."
+            placeholder="Search banned apps..."
             className="px-4 py-2 rounded-lg bg-[#2a2b2e] border border-[#3a3b3e] text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -129,15 +133,15 @@ const Bans: React.FC<BansProps> = ({ serverId, onUpdate }) => {
         </div>
       </div>
 
-      {loadingBans ? (
-        <div className="text-gray-500">Loading bans...</div>
+      {loading ? (
+        <div className="text-gray-500">Loading banned apps...</div>
       ) : bans.length === 0 ? (
-        <div className="text-gray-400">No banned users found.</div>
+        <div className="text-gray-400">No banned apps found.</div>
       ) : (
         <div className="space-y-4">
           {filteredBans.map(
             (ban, index) =>
-              ban.username && (
+              ban.name && (
                 <div
                   key={ban.id}
                   className="flex items-center gap-4 p-4 rounded-lg border border-[#2a2b2e]"
@@ -153,28 +157,24 @@ const Bans: React.FC<BansProps> = ({ serverId, onUpdate }) => {
                             ? `http://localhost:3000${ban.pfp}`
                             : ban.pfp
                         }
-                        alt="Profile"
+                        alt="App Icon"
                         className="w-full h-full rounded-full object-cover"
                       />
                     ) : (
                       <span className="text-lg text-gray-500 font-bold">
-                        {(
-                          ban.display_name?.[0] ||
-                          ban.username?.[0] ||
-                          "?"
-                        ).toUpperCase()}
+                        {ban.name?.[0]?.toUpperCase() || "?"}
                       </span>
                     )}
                   </div>
                   <div className="flex-1">
-                    <div className="text-white font-semibold">
-                      {ban.display_name || ban.username}
+                    <div className="text-white font-semibold">{ban.name}</div>
+                    <div className="text-sm text-gray-400">
+                      App ID: {ban.id}
                     </div>
-                    <div className="text-sm text-gray-400">@{ban.username}</div>
                   </div>
                   <button
                     className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded font-semibold text-xs shadow transition-colors"
-                    onClick={() => handleUnbanUser(ban.id)}
+                    onClick={() => handleUnbanApp(ban.id)}
                   >
                     Unban
                   </button>
@@ -187,4 +187,4 @@ const Bans: React.FC<BansProps> = ({ serverId, onUpdate }) => {
   );
 };
 
-export default Bans;
+export default ServerAppsBans;

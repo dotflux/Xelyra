@@ -36,6 +36,13 @@ import { kickMember } from 'src/logic/home/servers/kickMember';
 import { banMember } from 'src/logic/home/servers/banMember';
 import { unbanMember } from 'src/logic/home/servers/unbanMember';
 import { listBans } from 'src/logic/home/servers/listBans';
+import { fetchServerApps } from 'src/logic/home/servers/fetchServerApps';
+import { ServerAppsService } from './serverApps.service';
+import { ApplicationsService } from './applications.service';
+import { kickServerApp } from 'src/logic/home/servers/kickServerApp';
+import { banServerApp } from 'src/logic/home/servers/banServerApp';
+import { unbanServerApp } from 'src/logic/home/servers/unbanServerApp';
+import { listServerAppsBans } from 'src/logic/home/servers/listServerAppsBans';
 
 @Injectable()
 export class ServersFunctionService {
@@ -51,6 +58,8 @@ export class ServersFunctionService {
     private readonly channelOverService: ChannelOverwritesService,
     private readonly permissionsService: PermissionsService,
     private readonly conversationsService: ConversationsService,
+    private readonly serverAppsService: ServerAppsService,
+    private readonly appService: ApplicationsService,
   ) {}
 
   async fetchServer(req: Request, id: string) {
@@ -364,6 +373,88 @@ export class ServersFunctionService {
       this.serverMembersService,
       this.channelsService,
       this.permissionsService,
+      limit,
+      afterId,
+    );
+  }
+
+  async fetchServerApps(req: Request, id: string) {
+    const { limit = 70, afterId } = req.body;
+    return await fetchServerApps(
+      req,
+      id,
+      this.usersService,
+      this.messagesService,
+      this.serversService,
+      this.serverMembersService,
+      this.serverAppsService,
+      this.permissionsService,
+      this.appService,
+      limit,
+      afterId,
+    );
+  }
+
+  async kickServerApp(req: Request, id: string, kickee: string) {
+    return await kickServerApp(
+      req,
+      id,
+      kickee,
+      this.usersService,
+      this.messagesService,
+      this.serversService,
+      this.serverMembersService,
+      this.channelsService,
+      this.permissionsService,
+      this.serverAppsService,
+      this.appService,
+    );
+  }
+
+  async banServerApp(req: Request, id: string, banee: string) {
+    return await banServerApp(
+      req,
+      id,
+      banee,
+      this.usersService,
+      this.messagesService,
+      this.serversService,
+      this.serverMembersService,
+      this.channelsService,
+      this.permissionsService,
+      this.serverAppsService,
+      this.appService,
+    );
+  }
+
+  async unbanServerApp(req: Request, id: string, banee: string) {
+    return await unbanServerApp(
+      req,
+      id,
+      banee,
+      this.usersService,
+      this.messagesService,
+      this.serversService,
+      this.serverMembersService,
+      this.channelsService,
+      this.permissionsService,
+      this.serverAppsService,
+      this.appService,
+    );
+  }
+
+  async fetchServerAppsBans(req: Request, id: string) {
+    const { limit = 70, afterId } = req.body;
+    return await listServerAppsBans(
+      req,
+      id,
+      this.usersService,
+      this.messagesService,
+      this.serversService,
+      this.serverMembersService,
+      this.serverAppsService,
+      this.permissionsService,
+      this.appService,
       limit,
       afterId,
     );

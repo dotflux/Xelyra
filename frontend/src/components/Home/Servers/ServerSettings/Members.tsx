@@ -262,7 +262,11 @@ const Members: React.FC<MembersProps> = ({ serverId, onUpdate, userId }) => {
               <div className="w-10 h-10 min-w-[2.5rem] min-h-[2.5rem] rounded-full bg-[#2a2b2e] flex items-center justify-center border-2 border-[#3a3b3e] flex-shrink-0">
                 {member.pfp ? (
                   <img
-                    src={member.pfp}
+                    src={
+                      member.pfp.startsWith("/uploads/")
+                        ? `http://localhost:3000${member.pfp}`
+                        : member.pfp
+                    }
                     alt="Profile"
                     className="w-full h-full rounded-full object-cover"
                   />

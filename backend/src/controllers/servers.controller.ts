@@ -259,4 +259,41 @@ export class ServerController {
   async fetchBans(@Req() req: Request, @Param('id') id: string) {
     return await this.serverFservice.fetchBans(req, id);
   }
+
+  @Post('apps/fetch')
+  async fetchServerApps(@Req() req: Request, @Param('id') id: string) {
+    return await this.serverFservice.fetchServerApps(req, id);
+  }
+
+  @Post('apps/kick')
+  async kickServerApp(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Body('kickee') kickee: string,
+  ) {
+    return await this.serverFservice.kickServerApp(req, id, kickee);
+  }
+
+  @Post('apps/ban')
+  async banServerApp(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Body('banee') banee: string,
+  ) {
+    return await this.serverFservice.banServerApp(req, id, banee);
+  }
+
+  @Post('apps/unban')
+  async unbanServerApp(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Body('banee') banee: string,
+  ) {
+    return await this.serverFservice.unbanServerApp(req, id, banee);
+  }
+
+  @Post('apps/bans/fetch')
+  async fetchServerAppsBans(@Req() req: Request, @Param('id') id: string) {
+    return await this.serverFservice.fetchServerAppsBans(req, id);
+  }
 }

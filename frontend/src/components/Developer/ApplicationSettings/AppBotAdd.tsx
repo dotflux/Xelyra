@@ -101,7 +101,11 @@ const AppBotAdd: React.FC = () => {
               <div className="w-10 h-10 min-w-[2.5rem] min-h-[2.5rem] rounded-full bg-[#2a2b2e] flex items-center justify-center border-2 border-[#3a3b3e] flex-shrink-0">
                 {server.pfp ? (
                   <img
-                    src={server.pfp}
+                    src={
+                      server.pfp.startsWith("/uploads/")
+                        ? `http://localhost:3000${server.pfp}`
+                        : server.pfp
+                    }
                     alt="Server Icon"
                     className="w-full h-full rounded-full object-cover"
                   />
