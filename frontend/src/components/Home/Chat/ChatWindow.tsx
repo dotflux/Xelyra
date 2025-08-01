@@ -224,6 +224,7 @@ const ChatWindow = (props: Props) => {
         showPanel={showPanel}
         setShowPanel={setShowPanel}
         onChannelInfoChange={setChannelInfo}
+        socket={socketRef.current}
       />
 
       {/* Messages Area */}

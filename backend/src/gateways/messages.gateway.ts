@@ -134,4 +134,85 @@ export class MessagesGateway implements OnGatewayInit {
     });
     console.log('app created called');
   }
+
+  // WebRTC Signaling Events
+  @SubscribeMessage('callUser')
+  handleCallUser(
+    @MessageBody()
+    data: { targetUserId: string; callerId: string; conversationId: string },
+    @ConnectedSocket() socket: Socket,
+  ) {
+    console.log(`User ${data.callerId} is calling user ${data.targetUserId}`);
+    this.server.to(data.targetUserId).emit('incomingCall', {
+      callerId: data.callerId,
+      conversationId: data.conversationId,
+    });
+  }
+
+  @SubscribeMessage('callAccepted')
+  handleCallAccepted(
+    @MessageBody() data: { targetUserId: string; accepterId: string },
+    @ConnectedSocket() socket: Socket,
+  ) {
+    console.log(
+      `User ${data.accepterId} accepted call from ${data.targetUserId}`,
+    );
+    this.server.to(data.targetUserId).emit('callAccepted', {
+      accepterId: data.accepterId,
+    });
+  }
+
+  @SubscribeMessage('callRejected')
+  handleCallRejected(
+    @MessageBody() data: { targetUserId: string; rejecterId: string },
+    @ConnectedSocket() socket: Socket,
+  ) {
+    console.log(
+      `User ${data.rejecterId} rejected call from ${data.targetUserId}`,
+    );
+    this.server.to(data.targetUserId).emit('callRejected', {
+      rejecterId: data.rejecterId,
+    });
+  }
+
+  @SubscribeMessage('iceCandidate')
+  handleIceCandidate(
+    @MessageBody() data: { targetUserId: string; candidate: any },
+    @ConnectedSocket() socket: Socket,
+  ) {
+    this.server.to(data.targetUserId).emit('iceCandidate', {
+      candidate: data.candidate,
+    });
+  }
+
+  @SubscribeMessage('offer')
+  handleOffer(
+    @MessageBody() data: { targetUserId: string; offer: any },
+    @ConnectedSocket() socket: Socket,
+  ) {
+    this.server.to(data.targetUserId).emit('offer', {
+      offer: data.offer,
+    });
+  }
+
+  @SubscribeMessage('answer')
+  handleAnswer(
+    @MessageBody() data: { targetUserId: string; answer: any },
+    @ConnectedSocket() socket: Socket,
+  ) {
+    this.server.to(data.targetUserId).emit('answer', {
+      answer: data.answer,
+    });
+  }
+
+  @SubscribeMessage('endCall')
+  handleEndCall(
+    @MessageBody() data: { targetUserId: string; enderId: string },
+    @ConnectedSocket() socket: Socket,
+  ) {
+    console.log(`User ${data.enderId} ended call with ${data.targetUserId}`);
+    this.server.to(data.targetUserId).emit('callEnded', {
+      enderId: data.enderId,
+    });
+  }
 }
