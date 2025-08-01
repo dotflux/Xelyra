@@ -310,19 +310,19 @@ const ChannelsList = (props: Props) => {
               </li>
             ))}
           </ul>
-          <ConfirmServerLeave
-            isOpen={leaveModalOpen}
-            onClose={() => setLeaveModalOpen(false)}
-            serverId={id || ""}
-            serverName={props.serverName}
-          />
-          <InviteModal
-            isOpen={inviteModalOpen}
-            onClose={() => setInviteModalOpen(false)}
-            serverId={id || ""}
-          />
         </nav>
       </div>
+      <InviteModal
+        isOpen={inviteModalOpen}
+        onClose={() => setInviteModalOpen(false)}
+        serverId={id || ""}
+      />
+      <ConfirmServerLeave
+        isOpen={leaveModalOpen}
+        onClose={() => setLeaveModalOpen(false)}
+        serverId={id || ""}
+        serverName={props.serverName}
+      />
     </>
   );
 };

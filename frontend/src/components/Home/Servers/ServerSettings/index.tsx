@@ -14,6 +14,9 @@ import botIcon from "../../../../assets/botIcon.svg";
 import ServerApps from "./ServerApps";
 import botBanIcon from "../../../../assets/hammer.svg";
 import ServerAppsBans from "./ServerAppsBans";
+import leaveIcon from "../../../../assets/leave.svg";
+import LeaveConfirm from "./LeaveConfirm";
+import { useNavigate } from "react-router-dom";
 
 interface ServerSettingsProps {
   serverId: string;
@@ -37,6 +40,8 @@ const ServerSettings: React.FC<ServerSettingsProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [leaveModalOpen, setLeaveModalOpen] = useState(false);
+  const navigate = useNavigate();
 
   const tabs = [
     { id: "overview", name: "Overview", icon: clipboardIcon },
@@ -168,14 +173,14 @@ const ServerSettings: React.FC<ServerSettingsProps> = ({
                 className="w-6 h-6"
               />
             </button>
-            <div className="p-6 border-b border-[#3a3b3e]">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-white">
+            <div className="p-5 border-b border-[#3a3b3e] bg-gradient-to-br from-[#1e1f22] to-[#23232a]">
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="text-xl font-bold text-white tracking-tight">
                   Server Settings
                 </h2>
                 <button
                   onClick={onClose}
-                  className="text-gray-400 hover:text-white p-2 rounded-full hover:bg-gray-700 transition-colors"
+                  className="text-gray-400 hover:text-white p-2 rounded-lg hover:bg-[#2a2b2e] transition-all duration-200"
                 >
                   <svg
                     className="w-5 h-5"
@@ -192,8 +197,8 @@ const ServerSettings: React.FC<ServerSettingsProps> = ({
                   </svg>
                 </button>
               </div>
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-[#2a2b2e] flex items-center justify-center border-2 border-[#3a3b3e] shadow-lg overflow-hidden">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#2a2b2e] to-[#3a3b3e] flex items-center justify-center border-2 border-[#3a3b3e] shadow-lg overflow-hidden">
                   {serverInfo?.pfp ? (
                     <img
                       src={serverInfo.pfp}
@@ -201,13 +206,13 @@ const ServerSettings: React.FC<ServerSettingsProps> = ({
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <span className="text-2xl text-gray-500 font-bold">
+                    <span className="text-2xl text-gray-400 font-bold">
                       {serverInfo?.name?.[0]?.toUpperCase() || "?"}
                     </span>
                   )}
                 </div>
-                <div>
-                  <div className="text-white font-semibold">
+                <div className="flex-1 min-w-0">
+                  <div className="text-white font-bold text-lg truncate">
                     {serverInfo?.name}
                   </div>
                   <div className="text-sm text-gray-400">Server Settings</div>
@@ -215,24 +220,46 @@ const ServerSettings: React.FC<ServerSettingsProps> = ({
               </div>
             </div>
 
-            <nav className="flex-1 p-4">
-              <ul className="space-y-2">
+            <nav className="flex-1 p-5">
+              <div className="space-y-2">
                 {tabs.map((tab) => (
-                  <li key={tab.id}>
-                    <button
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-semibold transition-colors ${
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg font-semibold transition-all duration-200 group ${
+                      activeTab === tab.id
+                        ? "bg-gradient-to-r from-indigo-600 to-indigo-700 text-white shadow-lg shadow-indigo-500/25"
+                        : "text-gray-300 hover:bg-[#2a2b2e] hover:text-white hover:shadow-md"
+                    }`}
+                  >
+                    <div
+                      className={`p-2 rounded-md transition-all duration-200 ${
                         activeTab === tab.id
-                          ? "bg-indigo-600 text-white shadow-lg"
-                          : "text-gray-300 hover:bg-[#2a2b2e] hover:text-white"
+                          ? "bg-white/20"
+                          : "bg-[#2a2b2e] group-hover:bg-[#3a3b3e]"
                       }`}
                     >
-                      <img src={tab.icon} alt={tab.name} className="w-6 h-6" />
-                      {tab.name}
-                    </button>
-                  </li>
+                      <img src={tab.icon} alt={tab.name} className="w-5 h-5" />
+                    </div>
+                    <span className="text-sm">{tab.name}</span>
+                    {activeTab === tab.id && (
+                      <div className="ml-auto w-2 h-2 bg-white rounded-full"></div>
+                    )}
+                  </button>
                 ))}
-              </ul>
+              </div>
+
+              <div className="mt-6 pt-4 border-t border-[#2a2b2e]">
+                <button
+                  onClick={() => setLeaveModalOpen(true)}
+                  className="w-full flex items-center gap-4 px-4 py-3 rounded-lg font-semibold transition-all duration-200 text-red-400 hover:bg-red-500/10 hover:text-red-300 group"
+                >
+                  <div className="p-2 rounded-md bg-red-500/10 group-hover:bg-red-500/20 transition-all duration-200">
+                    <img src={leaveIcon} alt="Leave" className="w-5 h-5" />
+                  </div>
+                  <span className="text-sm">Leave Server</span>
+                </button>
+              </div>
             </nav>
           </div>
         </div>
@@ -270,6 +297,18 @@ const ServerSettings: React.FC<ServerSettingsProps> = ({
           </div>
         </div>
       </div>
+
+      <LeaveConfirm
+        isOpen={leaveModalOpen}
+        onClose={() => setLeaveModalOpen(false)}
+        serverId={serverId}
+        serverName={serverInfo?.name || ""}
+        onLeaveSuccess={() => {
+          setLeaveModalOpen(false);
+          onClose();
+          navigate("/home");
+        }}
+      />
     </div>
   );
 };

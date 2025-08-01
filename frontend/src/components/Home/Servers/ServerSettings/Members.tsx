@@ -99,15 +99,21 @@ const Members: React.FC<MembersProps> = ({ serverId, onUpdate, userId }) => {
     };
   }, [roleDropdownOpen]);
 
+  const sortedMembers = [...members].sort((a, b) => {
+    if (a.id === userId) return -1;
+    if (b.id === userId) return 1;
+    return 0;
+  });
+
   const filteredMembers = searchTerm
-    ? members.filter(
+    ? sortedMembers.filter(
         (member) =>
           member.display_name
             ?.toLowerCase()
             .includes(searchTerm.toLowerCase()) ||
           member.username?.toLowerCase().includes(searchTerm.toLowerCase())
       )
-    : members;
+    : sortedMembers;
 
   const handleAssignRole = async () => {
     if (!selectedMember || !selectedRole) return;

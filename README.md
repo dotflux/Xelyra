@@ -39,6 +39,12 @@ _Easily update your profile picture by uploading an image file—Xyn handles the
 
 _Change your display name and other details just by chatting with Xyn—no forms required!_
 
+**Dedicated AI Chat Interface:**
+
+![Special AI Chat Window](frontend/src/assets/specialWindow.jpg)
+
+_Dedicated AI assistant chat window with natural language processing capabilities._
+
 ### 🔧 **Advanced Bot SDK & Developer Tools**
 
 **Developer Portal:**
@@ -47,7 +53,13 @@ _Change your display name and other details just by chatting with Xyn—no forms
 
 _Powerful developer dashboard for managing your applications, bots, and integrations._
 
-**Comprehensive SDK Documentation:**
+**Application Management:**
+
+![Developer App Settings](frontend/src/assets/devAppSettings.jpg)
+
+_Comprehensive application management with overview, bot configuration, and settings._
+
+**SDK Documentation & Examples:**
 
 ![SDK Documentation](frontend/src/assets/sdk_documentation.gif)
 
@@ -58,6 +70,16 @@ _In-depth, interactive SDK documentation to help you build bots and integrations
 ![Message Formats and Embeds](frontend/src/assets/formats_and_embed.gif)
 
 _Send messages with rich embeds, formatting, and media for a dynamic chat experience._
+
+**Advanced Bot Interactions:**
+
+![Bot Interactions Showcase](frontend/src/assets/showcaseBotInteractions.gif)
+
+_Advanced bot interactions with rich embeds, buttons, and dynamic responses._
+
+![Button Types](frontend/src/assets/buttonTypes.jpg)
+
+_Support for primary, secondary, and destructive button types in bot interactions._
 
 #### **🚀 Xelyra Bot SDK - The Most Advanced Bot Framework**
 
@@ -155,6 +177,24 @@ bot.login();
 - **Reply threading** with context preservation
 - **Message reactions** and interactive elements
 
+### 👤 **User Experience & Communication Features**
+
+**Profile Management:**
+
+![Manual Profile Management](frontend/src/assets/manualProfile.jpg)
+
+_Comprehensive user profile settings with display name, username, and password management._
+
+**Media & Communication:**
+
+![Tenor GIFs Integration](frontend/src/assets/tenorGifs.jpg)
+
+_Seamless GIF integration with Tenor for expressive communication._
+
+![Voice Call Interface](frontend/src/assets/voiceCall.jpg)
+
+_Crystal-clear voice calling with intuitive controls and status indicators._
+
 ### 🏗️ **Scalable Architecture**
 
 **Backend Stack:**
@@ -175,10 +215,46 @@ bot.login();
 
 ### 🎮 **Server Management & Social Features**
 
-**Server Creation:**
+**Server Creation & Overview:**
 
 ![Server Creation](frontend/src/assets/create_server.gif)
 _Create new servers in seconds—customize everything from the name to the icon._
+
+![Server Showcase](frontend/src/assets/showcaseServer.gif)
+
+_Complete server experience with channels, members, and real-time communication._
+
+**Server Administration:**
+
+![Server Settings Overview](frontend/src/assets/serverSettings.png)
+
+_Comprehensive server settings with overview, roles, members, and application management._
+
+**Member Management:**
+
+![Server Members](frontend/src/assets/members.jpg)
+
+_Advanced member management with role assignment, kicking, and banning capabilities._
+
+**Role System:**
+
+![Server Roles](frontend/src/assets/roles.jpg)
+
+_Flexible role system with custom permissions and role management._
+
+**Invite System:**
+
+![Invite Friends Modal](frontend/src/assets/inviteFriends.jpg)
+
+_Invite friends directly or share server invite links with expiration tracking._
+
+![Invite Links - Not Joined](frontend/src/assets/inviteLinksNotJoined.jpg)
+
+_Server invitation cards with join buttons for new members._
+
+![Invite Links - Joined](frontend/src/assets/inviteLinksJoined.jpg)
+
+_Invitation confirmation showing successful server joins._
 
 **Friend System:**
 
@@ -298,13 +374,13 @@ Run the CQL scripts in order:
 
 ## 🔧 **Development & Architecture**
 
-## 🗄️ Database Schema Overview
+## 🗄️ **Database Schema Overview**
 
-Below is a comprehensive diagram of the Xelyra database schema, showing how all major tables (users, servers, channels, roles, messaging, bots, etc.) are related. The diagram is grouped by feature area for clarity, making it easy to understand how different parts of the system connect:
+Below is a comprehensive entity-relationship diagram of the Xelyra database schema, showing how all major entities (users, servers, channels, roles, messaging, bots, applications, etc.) are interconnected. The diagram illustrates the complex relationships and data flow throughout the platform:
 
-![Xelyra Database Schema](frontend/src/assets/schema.png)
+![Xelyra Database Schema](frontend/src/assets/schemaUpdated.png)
 
-_This schema illustrates the relationships between users, servers, channels, roles, permissions, messaging, bots, applications, and more, as implemented in ScyllaDB. Each group of tables (users/auth, servers/structure, messaging, bots/apps, etc.) is visually clustered to highlight their connections and responsibilities within the platform._
+_This updated schema diagram shows the complete data architecture of Xelyra, including user management, server administration, messaging systems, bot integrations, and application management. The relationships demonstrate how data flows between different components, from user authentication to real-time messaging and bot interactions._
 
 ### **Project Structure**
 
@@ -451,6 +527,25 @@ Below is a summary of the main backend API endpoints exposed by Xelyra. These en
 | `/developer/servers/:id/`                                       | POST   | Developer server endpoint           |
 | `/developer/commands/:id/conversation/:conversation/fetch/info` | POST   | Fetch command info                  |
 | `/developer/applications/:id/update/pfp`                        | POST   | Update app picture                  |
+| `/servers/:id/leave`                                            | POST   | Leave server                        |
+| `/servers/:id/invites/create`                                   | POST   | Create server invite                |
+| `/servers/:id/invites/find`                                     | POST   | Find server invite                  |
+| `/servers/:id/members/fetch`                                    | POST   | Fetch server members                |
+| `/servers/:id/members/kick`                                     | POST   | Kick member from server             |
+| `/servers/:id/members/ban`                                      | POST   | Ban member from server              |
+| `/servers/:id/members/unban`                                    | POST   | Unban member from server            |
+| `/servers/:id/bans/fetch`                                       | POST   | Fetch server bans                   |
+| `/servers/:id/apps/fetch`                                       | POST   | Fetch server applications           |
+| `/servers/:id/apps/kick`                                        | POST   | Kick app from server                |
+| `/servers/:id/apps/ban`                                         | POST   | Ban app from server                 |
+| `/servers/:id/apps/unban`                                       | POST   | Unban app from server               |
+| `/servers/:id/apps/bans/fetch`                                  | POST   | Fetch server app bans               |
+| `/home/api/tenor/:id`                                           | POST   | Fetch Tenor GIF by ID               |
+| `/home/api/tenorsearch`                                         | POST   | Search Tenor GIFs                   |
+| `/home/api/tenortrending`                                       | POST   | Fetch trending Tenor GIFs           |
+| `/home/api/tenorcategories`                                     | POST   | Fetch Tenor GIF categories          |
+| `/home/servers/invites/fetch`                                   | POST   | Fetch server invites                |
+| `/home/servers/permissionToAdd`                                 | POST   | Check permission to add to server   |
 | `/genai/message`                                                | POST   | Send message to GenAI               |
 | `/metrics`                                                      | GET    | Fetch metrics                       |
 

@@ -4,6 +4,7 @@ import axios from "axios";
 import { io, Socket } from "socket.io-client";
 import Typer from "./Chat/Typer";
 import MessageBox from "./Chat/MessageBox";
+import xynIcon from "../../../public/xelyra.png";
 
 interface Message {
   user: string;
@@ -133,7 +134,7 @@ const Xyn = () => {
       {/* Top Bar */}
       <div className="flex items-center space-x-4 w-full p-3 bg-[#191a1d] border-b border-[#2a2b2e] shadow-lg min-h-[44px]">
         <div className="h-8 w-8 bg-gradient-to-br from-gray-800 to-gray-900 rounded-full flex items-center justify-center text-base font-bold text-white shadow-md mr-2">
-          X
+          <img src={xynIcon} alt="Xyn" className="w-full h-full rounded-full" />
         </div>
         <div className="flex flex-col justify-center">
           <h1 className="text-white font-bold text-[15px] leading-tight">
