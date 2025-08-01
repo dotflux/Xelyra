@@ -331,6 +331,9 @@ GEMINI_API_KEY=your_gemini_api_key
 
 # AI_ID must be set to this value for the app to function correctly
 AI_ID=117cd972-3760-47b9-9c38-e6bbc28196f5
+
+# YOUR tenor api key
+TENOR_API = your_tenor_api_key
 ```
 
 ### **1. Backend Setup**
