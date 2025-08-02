@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import { useUser } from "./UserContext";
 import Profile from "./UserSettings/Profile";
 import Account from "./UserSettings/Account";
 
-const TABS = ["Account", "Profile"];
+const TABS = ["Account", "Profile", "Developer"];
 
 function UserSettings({
   isOpen,
@@ -12,10 +14,13 @@ function UserSettings({
   isOpen: boolean;
   onClose: () => void;
 }) {
+  const navigate = useNavigate();
   const { user, setUser } = useUser();
   const [tab, setTab] = useState("Account");
   const [userInfo, setUserInfo] = useState<any>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [logoutModalOpen, setLogoutModalOpen] = useState(false);
+  const [logoutLoading, setLogoutLoading] = useState(false);
 
   useEffect(() => {
     if (!isOpen || !user) return;
@@ -33,8 +38,38 @@ function UserSettings({
   };
 
   const handleTabSelect = (t: string) => {
+    if (t === "Developer") {
+      navigate("/developer");
+      onClose();
+      return;
+    }
     setTab(t);
     setSidebarOpen(false);
+  };
+
+  const handleLogout = async () => {
+    setLogoutLoading(true);
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/home/logout",
+        {},
+        { withCredentials: true }
+      );
+
+      if (response.data.valid) {
+        onClose();
+        navigate("/login");
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        console.log(error.response.data.message);
+      } else {
+        console.log("Network Error:", error);
+      }
+    } finally {
+      setLogoutLoading(false);
+      setLogoutModalOpen(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -112,12 +147,18 @@ function UserSettings({
             </button>
           ))}
         </nav>
-        <div className="p-4 border-t border-[#3a3b3e]">
+        <div className="p-4 border-t border-[#3a3b3e] space-y-2">
           <button
             onClick={onClose}
             className="w-full px-4 py-2 text-gray-400 hover:text-white hover:bg-[#3a3b3e] rounded-lg transition-colors font-medium"
           >
             Close
+          </button>
+          <button
+            onClick={() => setLogoutModalOpen(true)}
+            className="w-full px-4 py-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors font-medium"
+          >
+            Logout
           </button>
         </div>
         {/* Close button for mobile sidebar */}
@@ -186,6 +227,53 @@ function UserSettings({
           )}
         </div>
       </div>
+
+      {/* Logout Confirmation Modal */}
+      {logoutModalOpen && (
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/80">
+          <div className="bg-[#2f3136] rounded-lg p-6 w-96 max-w-sm mx-4">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg
+                  className="w-8 h-8 text-red-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-white mb-2">Logout</h3>
+              <p className="text-gray-400 text-sm">
+                Are you sure you want to logout? You will be signed out of your
+                account.
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setLogoutModalOpen(false)}
+                className="flex-1 px-4 py-2 bg-[#3a3b3e] hover:bg-[#4a4b4e] text-white rounded-lg font-medium transition-colors"
+                disabled={logoutLoading}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleLogout}
+                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={logoutLoading}
+              >
+                {logoutLoading ? "Logging out..." : "Logout"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

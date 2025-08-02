@@ -19,6 +19,7 @@ export interface SenderInfo {
   banner: string;
   primary_theme: string;
   secondary_theme: string;
+  id: string;
 }
 
 export const fetchPopupInfo = async (
@@ -82,6 +83,7 @@ export const fetchPopupInfo = async (
       banner: isUser ? senderRow[0].banner : null,
       primary_theme: isUser ? senderRow[0].primary_theme : null,
       secondary_theme: isUser ? senderRow[0].secondary_theme : null,
+      id: isUser ? senderRow[0].id : botRow[0].bot_id,
     };
 
     return {

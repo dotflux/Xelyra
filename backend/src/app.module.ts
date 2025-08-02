@@ -26,6 +26,7 @@ import { DeveloperModule } from './modules/developer.module';
 import { GenAIModule } from './modules/genai.module';
 import { MetricsController } from './controllers/metrics.controller';
 import { BotsInteractionsGatewayModule } from './modules/botsInteractionsGateway.module';
+import { DummyForgetModule } from './modules/dummyForget.module';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { BotsInteractionsGatewayModule } from './modules/botsInteractionsGateway
     DeveloperModule,
     GenAIModule,
     BotsInteractionsGatewayModule,
+    DummyForgetModule,
   ],
   controllers: [MetricsController],
 })

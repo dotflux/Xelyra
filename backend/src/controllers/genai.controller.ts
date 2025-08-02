@@ -128,6 +128,7 @@ export class GenAiController {
         req,
         genaiImageService: this.genaiImageService,
         messagesService: this.messagesService,
+        messagesGateway: this.messagesGateway,
         conversationId,
         replyTo,
         files,

@@ -55,6 +55,20 @@ export const fetchReciever = async (
 
       // find the other user
       const otherId = participants.find((p) => p !== user[0].id.toString())!;
+      if (otherId === process.env.AI_ID) {
+        console.log('Xyn DM detected');
+        return {
+          valid: true,
+          message: 'DM receiver fetched.',
+          recieverData: {
+            id: process.env.AI_ID,
+            username: 'Xyn',
+            displayName: 'Xyn',
+            type: 'ai',
+            pfp: '/uploads/xyn_pfp.png',
+          },
+        };
+      }
       const otherRows = await usersService.findById(otherId);
       if (otherRows.length === 0) {
         throw new BadRequestException(`User ${otherId} not found`);

@@ -18,6 +18,18 @@ interface Sender {
   pfp?: string;
 }
 
+interface PopupInfo {
+  username: string;
+  displayName: string;
+  type: string;
+  pfp: string;
+  description: string;
+  banner: string;
+  primary_theme: string;
+  secondary_theme: string;
+  id: string;
+}
+
 interface Props {
   user: string;
   id: string;
@@ -50,7 +62,7 @@ const MessageBox = (props: Props) => {
     [key: number]: { width: number; height: number };
   }>({});
   const [userPopupOpen, setUserPopupOpen] = useState(false);
-  const [userPopupData, setUserPopupData] = useState<any | null>(null);
+  const [userPopupData, setUserPopupData] = useState<PopupInfo | null>(null);
   const pfpRef = useRef<HTMLDivElement>(
     null
   ) as React.RefObject<HTMLDivElement>;
@@ -291,7 +303,15 @@ const MessageBox = (props: Props) => {
       <UserPopup
         open={userPopupOpen}
         onClose={() => setUserPopupOpen(false)}
-        senderData={userPopupData || {}}
+        senderData={
+          userPopupData || {
+            pfp: "",
+            username: "",
+            displayName: "",
+            type: "",
+            id: "",
+          }
+        }
         anchorRef={pfpRef}
       />
       {/* Discord-style reply bar and connector above the username/timestamp */}

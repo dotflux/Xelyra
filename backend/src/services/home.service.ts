@@ -44,6 +44,7 @@ import { changePassword } from 'src/logic/home/user/changePassword';
 import { fetchServerByInvite } from 'src/logic/home/servers/fetchServerByInvite';
 import { PermissionsService } from './permissions.service';
 import { permissionToAdd } from 'src/logic/home/permissionToAdd';
+import { logOut } from 'src/logic/home/logOut';
 
 @Injectable()
 export class HomeService {
@@ -388,5 +389,9 @@ export class HomeService {
       this.serversService,
       this.permissionsService,
     );
+  }
+
+  async logOut(req: Request, res: Response) {
+    return await logOut(req, res, this.usersService);
   }
 }

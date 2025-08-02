@@ -5,7 +5,12 @@ import {
   type Dispatch,
   type SetStateAction,
 } from "react";
-import { useSearchParams, useParams } from "react-router-dom";
+import {
+  useSearchParams,
+  useParams,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
 import axios from "axios";
 import { Socket } from "socket.io-client";
 import { useUser } from "../UserContext";
@@ -29,9 +34,20 @@ interface Props {
 
 const TopBar = (props: Props) => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
   const { id: serverId } = useParams();
   const channel = searchParams.get("channel");
   const [recieverInfo, setReciever] = useState<Reciever | null>(null);
+
+  const handleBackClick = () => {
+    const url = new URL(
+      location.pathname + location.search,
+      window.location.origin
+    );
+    url.searchParams.delete("channel");
+    navigate(url.pathname + url.search);
+  };
   const [channelInfo, setChannelInfo] = useState<{
     name: string;
     type: string;
@@ -508,6 +524,26 @@ const TopBar = (props: Props) => {
 
   return (
     <div className="flex items-center space-x-4 w-full p-2 bg-[#191a1d] border-b border-[#2a2b2e] shadow-lg min-h-[44px]">
+      <button
+        onClick={handleBackClick}
+        className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors mr-2"
+        title="Back"
+      >
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M15 19l-7-7 7-7"
+          />
+        </svg>
+      </button>
+
       {serverId && channelInfo ? (
         <div className="h-8 w-8 flex items-center justify-center rounded-full bg-[#23232b] mr-2">
           {channelInfo.type === "voice" ? (
@@ -551,37 +587,43 @@ const TopBar = (props: Props) => {
               : "Text Channel"
             : recieverInfo?.type === "group"
             ? "Group"
+            : recieverInfo?.type === "ai"
+            ? "Your AI Assistant"
             : "Direct Message"}
         </span>
       </div>
 
       <div className="ml-auto flex items-center space-x-2">
-        <div
-          className="cursor-pointer p-1.5 hover:bg-gray-900 rounded-lg transition-all duration-200 hover:scale-110"
-          onClick={() => {
-            if (isInCall) {
-              endCall();
-            } else if (incomingCall) {
-              acceptCall();
-            } else {
-              startCall();
-            }
-          }}
-        >
-          <svg
-            className={`h-4 w-4 transition-all duration-200 ${
-              isInCall
-                ? "text-red-500 opacity-100"
-                : incomingCall
-                ? "text-yellow-500 opacity-100"
-                : "text-green-500 opacity-70 hover:opacity-100"
-            }`}
-            fill="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 00-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19c-.54 0-.99.45-.99.99 0 9.36 7.59 16.95 16.95 16.95.54 0 .99-.45.99-.99v-3.45c0-.54-.45-.99-.99-.99z" />
-          </svg>
-        </div>
+        {recieverInfo?.type !== "group" &&
+          recieverInfo?.type !== "ai" &&
+          !serverId && (
+            <div
+              className="cursor-pointer p-1.5 hover:bg-gray-900 rounded-lg transition-all duration-200 hover:scale-110"
+              onClick={() => {
+                if (isInCall) {
+                  endCall();
+                } else if (incomingCall) {
+                  acceptCall();
+                } else {
+                  startCall();
+                }
+              }}
+            >
+              <svg
+                className={`h-4 w-4 transition-all duration-200 ${
+                  isInCall
+                    ? "text-red-500 opacity-100"
+                    : incomingCall
+                    ? "text-yellow-500 opacity-100"
+                    : "text-green-500 opacity-70 hover:opacity-100"
+                }`}
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 00-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19c-.54 0-.99.45-.99.99 0 9.36 7.59 16.95 16.95 16.95.54 0 .99-.45.99-.99v-3.45c0-.54-.45-.99-.99-.99z" />
+              </svg>
+            </div>
+          )}
 
         {incomingCall && (
           <div className="flex items-center space-x-2 bg-yellow-600 px-3 py-1 rounded-lg">

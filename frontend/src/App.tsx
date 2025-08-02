@@ -14,6 +14,9 @@ import AppBot from "./components/Developer/ApplicationSettings/AppBot";
 import DeveloperLanding from "./components/Developer/DeveloperLanding/DeveloperLanding";
 import Documentation from "./components/Developer/Documentation";
 import AppBotAdd from "./components/Developer/ApplicationSettings/AppBotAdd";
+import DeveloperDashboard from "./components/Developer/DeveloperDashboard";
+import ForgetPassword from "./components/ForgetPassword/ForgetPassword";
+import ForgetPassOtp from "./components/ForgetPassword/ForgetPassOtp";
 
 function App() {
   const router = createBrowserRouter([
@@ -32,6 +35,14 @@ function App() {
     {
       path: "/login",
       element: <Login />,
+    },
+    {
+      path: "/forgetpassword",
+      element: <ForgetPassword />,
+    },
+    {
+      path: "/forgetpassword/otp",
+      element: <ForgetPassOtp />,
     },
     {
       path: "/home",
@@ -55,6 +66,10 @@ function App() {
       path: "/developer/development",
       element: <Developer />,
       children: [
+        {
+          index: true,
+          element: <DeveloperDashboard />,
+        },
         {
           path: "applications",
           element: <ApplicationsList />,

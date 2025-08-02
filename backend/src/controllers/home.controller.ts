@@ -406,4 +406,9 @@ export class HomeController {
   async permissionToAdd(@Req() req: Request) {
     return await this.homeService.permissionToAdd(req);
   }
+
+  @Post('logout')
+  async logOut(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    return await this.homeService.logOut(req, res);
+  }
 }

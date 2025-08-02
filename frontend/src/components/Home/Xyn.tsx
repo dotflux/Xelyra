@@ -5,6 +5,7 @@ import { io, Socket } from "socket.io-client";
 import Typer from "./Chat/Typer";
 import MessageBox from "./Chat/MessageBox";
 import xynIcon from "../../../public/xelyra.png";
+import { useNavigate } from "react-router-dom";
 
 interface Message {
   user: string;
@@ -21,6 +22,7 @@ interface Message {
 
 const Xyn = () => {
   const { user } = useUser();
+  const navigate = useNavigate();
   const xynId = user?.xyn_id;
   const [messages, setMessages] = useState<Message[]>([]);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -132,18 +134,42 @@ const Xyn = () => {
   return (
     <section className="flex flex-col h-full w-full bg-[#191a1e] border-l border-[#23232a] shadow-2xl">
       {/* Top Bar */}
-      <div className="flex items-center space-x-4 w-full p-3 bg-[#191a1d] border-b border-[#2a2b2e] shadow-lg min-h-[44px]">
-        <div className="h-8 w-8 bg-gradient-to-br from-gray-800 to-gray-900 rounded-full flex items-center justify-center text-base font-bold text-white shadow-md mr-2">
-          <img src={xynIcon} alt="Xyn" className="w-full h-full rounded-full" />
+      <div className="flex items-center justify-between w-full p-3 bg-[#191a1d] border-b border-[#2a2b2e] shadow-lg min-h-[44px]">
+        <div className="flex items-center space-x-4">
+          <div className="h-8 w-8 bg-gradient-to-br from-gray-800 to-gray-900 rounded-full flex items-center justify-center text-base font-bold text-white shadow-md mr-2">
+            <img
+              src={xynIcon}
+              alt="Xyn"
+              className="w-full h-full rounded-full"
+            />
+          </div>
+          <div className="flex flex-col justify-center">
+            <h1 className="text-white font-bold text-[15px] leading-tight">
+              Xyn
+            </h1>
+            <span className="text-gray-400 text-xs leading-tight">
+              Your AI Assistant
+            </span>
+          </div>
         </div>
-        <div className="flex flex-col justify-center">
-          <h1 className="text-white font-bold text-[15px] leading-tight">
-            Xyn
-          </h1>
-          <span className="text-gray-400 text-xs leading-tight">
-            Your AI Assistant
-          </span>
-        </div>
+        <button
+          onClick={() => navigate(`/home?channel=${xynId}`)}
+          className="px-3 py-1.5 hover:bg-gray-800 text-white rounded-lg font-semibold transition-colors text-sm flex items-center gap-2"
+        >
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M13 7l5 5m0 0l-5 5m5-5H6"
+            />
+          </svg>
+        </button>
       </div>
       <div
         className="flex-1 overflow-y-auto px-4 py-6 space-y-2"

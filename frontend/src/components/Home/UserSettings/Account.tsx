@@ -33,6 +33,21 @@ const maskEmail = (email: string) => {
   );
 };
 
+function isColorLight(hex: string) {
+  if (!hex) return false;
+  let c = hex.replace("#", "");
+  if (c.length === 3)
+    c = c
+      .split("")
+      .map((x) => x + x)
+      .join("");
+  if (c.length !== 6) return false;
+  const r = parseInt(c.slice(0, 2), 16);
+  const g = parseInt(c.slice(2, 4), 16);
+  const b = parseInt(c.slice(4, 6), 16);
+  return r * 0.299 + g * 0.587 + b * 0.114 > 186;
+}
+
 const Account: React.FC<AccountProps> = ({
   userInfo,
   onUpdate,
@@ -120,9 +135,40 @@ const Account: React.FC<AccountProps> = ({
   return (
     <div className="max-w-2xl mx-auto space-y-8">
       {/* Unified Profile + Info Card */}
-      <div className="bg-[#23232a] rounded-xl border border-[#3a3b3e] relative overflow-hidden">
+      <div
+        className="rounded-xl border border-[#3a3b3e] relative overflow-hidden shadow-2xl"
+        style={{
+          background:
+            userInfo?.primary_theme && userInfo?.secondary_theme
+              ? `linear-gradient(135deg, ${userInfo.primary_theme}, ${userInfo.secondary_theme})`
+              : "#1e1f22",
+        }}
+      >
+        {/* Dynamic text color based on theme brightness */}
+        <style>
+          {`
+             .theme-text {
+               color: ${
+                 userInfo?.primary_theme
+                   ? isColorLight(userInfo.primary_theme)
+                     ? "#000000"
+                     : "#ffffff"
+                   : "#ffffff"
+               } !important;
+             }
+             .theme-text-secondary {
+               color: ${
+                 userInfo?.primary_theme
+                   ? isColorLight(userInfo.primary_theme)
+                     ? "#374151"
+                     : "#9ca3af"
+                   : "#9ca3af"
+               } !important;
+             }
+           `}
+        </style>
         {/* Banner section */}
-        <div className="w-full h-24 relative rounded-t-xl overflow-hidden bg-[#23232a]">
+        <div className="w-full h-24 relative rounded-t-xl overflow-hidden bg-[#2a2b2e]">
           {userInfo.banner ? (
             <img
               src={
@@ -133,85 +179,94 @@ const Account: React.FC<AccountProps> = ({
               alt="Banner"
               className="w-full h-full object-cover"
             />
-          ) : null}
+          ) : (
+            <div
+              className="w-full h-full bg-gradient-to-r"
+              style={{
+                background: `linear-gradient(90deg, ${
+                  userInfo?.primary_theme || "#5865F2"
+                }, ${userInfo?.secondary_theme || "#23232a"})`,
+              }}
+            />
+          )}
         </div>
         {/* Card content row: avatar + text */}
-        <div
-          className="flex flex-row items-center w-full"
-          style={{ padding: "0 24px", paddingTop: 32, marginBottom: 12 }}
-        >
-          <div className="relative" style={{ width: 80, height: 80 }}>
-            <div className="w-20 h-20 rounded-full border-4 border-[#23232a] bg-[#1e1f22] overflow-hidden flex items-center justify-center">
-              {userInfo?.pfp ? (
-                <img
-                  src={
-                    userInfo.pfp.startsWith("/uploads/")
-                      ? `http://localhost:3000${userInfo.pfp}`
-                      : userInfo.pfp
-                  }
-                  alt="Profile"
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <span className="text-3xl text-gray-500 font-bold">
-                  {userInfo?.displayName?.[0]?.toUpperCase() ||
-                    userInfo?.username?.[0]?.toUpperCase() ||
-                    "?"}
-                </span>
-              )}
-            </div>
-            <span className="absolute right-1 bottom-1 w-4 h-4 rounded-full bg-green-400 border-2 border-[#23232a]" />
-          </div>
-          <div style={{ marginLeft: 20, flex: 1 }}>
-            <span
-              className="text-2xl font-extrabold leading-tight truncate text-white"
-              style={{ display: "block", textAlign: "left" }}
-            >
-              {userInfo?.displayName || userInfo?.username}
-            </span>
-            <span
-              className="text-base leading-tight truncate text-gray-400"
-              style={{ display: "block", textAlign: "left" }}
-            >
-              @{userInfo?.username}
-            </span>
-          </div>
-          <button
-            className="ml-auto px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold transition-colors"
-            onClick={onProfileTab}
-          >
-            Edit User Profile
-          </button>
-        </div>
-        {/* Info section (no border, no extra radius) */}
-        <div className="px-4 md:px-8 pt-6 pb-6">
-          <div className="space-y-4">
-            {/* Display Name */}
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="font-semibold text-white">Display Name</div>
-                <div className="text-gray-300">
-                  {userInfo?.displayName || "-"}
-                </div>
+        <div className="relative px-4 pb-4">
+          <div className="flex items-end">
+            <div className="relative -mt-12">
+              <div className="w-20 h-20 rounded-full border-4 border-[#1e1f22] bg-[#2a2b2e] overflow-hidden flex items-center justify-center shadow-lg">
+                {userInfo?.pfp ? (
+                  <img
+                    src={
+                      userInfo.pfp.startsWith("/uploads/")
+                        ? `http://localhost:3000${userInfo.pfp}`
+                        : userInfo.pfp
+                    }
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-2xl text-gray-500 font-bold">
+                    {userInfo?.displayName?.[0]?.toUpperCase() ||
+                      userInfo?.username?.[0]?.toUpperCase() ||
+                      "?"}
+                  </span>
+                )}
               </div>
+            </div>
+          </div>
+          {/* User Info Section */}
+          <div className="mt-3">
+            <div className="flex items-center gap-2 mb-1">
+              <h3 className="text-lg font-bold theme-text truncate">
+                {userInfo?.displayName || userInfo?.username}
+              </h3>
+            </div>
+            <p className="text-sm theme-text-secondary mb-3">
+              @{userInfo?.username}
+            </p>
+
+            {/* Info section */}
+            <div className="space-y-4">
+              {/* Display Name */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-semibold theme-text">Display Name</div>
+                  <div className="theme-text-secondary">
+                    {userInfo?.displayName || "-"}
+                  </div>
+                </div>
+                <button
+                  className="px-4 py-2 bg-[#23232a] hover:bg-[#3a3b3e] text-gray-200 rounded-lg font-semibold transition-colors"
+                  onClick={onProfileTab}
+                >
+                  Edit
+                </button>
+              </div>
+              {/* Username */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-semibold theme-text">Username</div>
+                  <div className="theme-text-secondary">
+                    {userInfo?.username}
+                  </div>
+                </div>
+                <button
+                  className="px-4 py-2 bg-[#23232a] hover:bg-[#3a3b3e] text-gray-200 rounded-lg font-semibold transition-colors"
+                  onClick={() => setShowUsernameModal(true)}
+                >
+                  Edit
+                </button>
+              </div>
+            </div>
+
+            {/* Edit User Profile Button */}
+            <div className="border-t border-[#3a3b3e] pt-3 mt-4">
               <button
-                className="px-4 py-2 bg-[#23232a] hover:bg-[#3a3b3e] text-gray-200 rounded-lg font-semibold transition-colors"
+                className="w-full px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold transition-colors"
                 onClick={onProfileTab}
               >
-                Edit
-              </button>
-            </div>
-            {/* Username */}
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="font-semibold text-white">Username</div>
-                <div className="text-gray-300">{userInfo?.username}</div>
-              </div>
-              <button
-                className="px-4 py-2 bg-[#23232a] hover:bg-[#3a3b3e] text-gray-200 rounded-lg font-semibold transition-colors"
-                onClick={() => setShowUsernameModal(true)}
-              >
-                Edit
+                Edit User Profile
               </button>
             </div>
           </div>

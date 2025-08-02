@@ -36,8 +36,8 @@ const Profile: React.FC<ProfileProps> = ({ userInfo, onUpdate }) => {
     bio: userInfo?.bio || "",
     pfp: userInfo?.pfp || "",
     banner: userInfo?.banner || null,
-    primary_theme: userInfo?.primary_theme || "#5865F2",
-    secondary_theme: userInfo?.secondary_theme || "#23232a",
+    primary_theme: userInfo?.primary_theme || "",
+    secondary_theme: userInfo?.secondary_theme || "",
   });
   const [savingUser, setSavingUser] = useState(false);
   const [uploadingPfp, setUploadingPfp] = useState(false);
@@ -56,8 +56,8 @@ const Profile: React.FC<ProfileProps> = ({ userInfo, onUpdate }) => {
     userEdit.bio !== (userInfo?.bio || "") ||
     userEdit.pfp !== (userInfo?.pfp || "") ||
     userEdit.banner !== (userInfo?.banner || null) ||
-    userEdit.primary_theme !== (userInfo?.primary_theme || "#5865F2") ||
-    userEdit.secondary_theme !== (userInfo?.secondary_theme || "#23232a");
+    userEdit.primary_theme !== (userInfo?.primary_theme || "") ||
+    userEdit.secondary_theme !== (userInfo?.secondary_theme || "");
 
   const handleUserField = (field: string, value: any) => {
     setUserEdit((prev: any) => ({ ...prev, [field]: value }));
@@ -106,8 +106,8 @@ const Profile: React.FC<ProfileProps> = ({ userInfo, onUpdate }) => {
       }
       if (
         userEdit.banner !== (userInfo?.banner || null) ||
-        userEdit.primary_theme !== (userInfo?.primary_theme || "#5865F2") ||
-        userEdit.secondary_theme !== (userInfo?.secondary_theme || "#23232a")
+        userEdit.primary_theme !== (userInfo?.primary_theme || "") ||
+        userEdit.secondary_theme !== (userInfo?.secondary_theme || "")
       ) {
         const formData = new FormData();
         if (bannerFile) formData.append("banner", bannerFile);
@@ -154,8 +154,8 @@ const Profile: React.FC<ProfileProps> = ({ userInfo, onUpdate }) => {
       bio: userInfo?.bio || "",
       pfp: userInfo?.pfp || "",
       banner: userInfo?.banner || null,
-      primary_theme: userInfo?.primary_theme || "#5865F2",
-      secondary_theme: userInfo?.secondary_theme || "#23232a",
+      primary_theme: userInfo?.primary_theme || "",
+      secondary_theme: userInfo?.secondary_theme || "",
     });
     setBannerFile(null);
     setBannerPreview(userInfo?.banner || null);
@@ -243,7 +243,9 @@ const Profile: React.FC<ProfileProps> = ({ userInfo, onUpdate }) => {
             className="relative h-24 rounded-xl overflow-hidden border border-[#3a3b3e] mb-2 flex items-center justify-center bg-gradient-to-r"
             style={{
               background: !previewBanner
-                ? `linear-gradient(90deg, ${userEdit.primary_theme}, ${userEdit.secondary_theme})`
+                ? userEdit.primary_theme && userEdit.secondary_theme
+                  ? `linear-gradient(90deg, ${userEdit.primary_theme}, ${userEdit.secondary_theme})`
+                  : "#2a2b2e"
                 : undefined,
             }}
           >
@@ -403,76 +405,118 @@ const Profile: React.FC<ProfileProps> = ({ userInfo, onUpdate }) => {
       </div>
       <div className="w-full md:w-[350px] flex-shrink-0">
         <div
-          className="rounded-2xl shadow-xl overflow-hidden bg-gradient-to-br"
+          className="rounded-xl border border-[#3a3b3e] relative overflow-hidden shadow-2xl"
           style={{
-            backgroundImage: `linear-gradient(to bottom right, ${userEdit.primary_theme}, ${userEdit.secondary_theme})`,
-            border: `2px solid ${userEdit.secondary_theme}`,
+            background:
+              userEdit.primary_theme && userEdit.secondary_theme
+                ? `linear-gradient(135deg, ${userEdit.primary_theme}, ${userEdit.secondary_theme})`
+                : "#1e1f22",
           }}
         >
-          <div style={{ position: "relative", zIndex: 1 }}>
-            <div className="h-24 w-full">
-              {previewBanner ? (
-                <img
-                  src={previewBanner}
-                  alt="Banner"
-                  className="w-full h-full object-cover"
-                />
-              ) : null}
+          {/* Dynamic text color based on theme brightness */}
+          <style>
+            {`
+                .theme-text {
+                  color: ${
+                    userEdit.primary_theme
+                      ? isColorLight(userEdit.primary_theme)
+                        ? "#000000"
+                        : "#ffffff"
+                      : "#ffffff"
+                  } !important;
+                }
+                .theme-text-secondary {
+                  color: ${
+                    userEdit.primary_theme
+                      ? isColorLight(userEdit.primary_theme)
+                        ? "#374151"
+                        : "#9ca3af"
+                      : "#9ca3af"
+                  } !important;
+                }
+              `}
+          </style>
+          {/* Banner Section */}
+          <div className="w-full h-24 relative rounded-t-xl overflow-hidden bg-[#2a2b2e]">
+            {previewBanner ? (
+              <img
+                src={previewBanner}
+                alt="Banner"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div
+                className="w-full h-full bg-gradient-to-r"
+                style={{
+                  background:
+                    userEdit.primary_theme && userEdit.secondary_theme
+                      ? `linear-gradient(90deg, ${userEdit.primary_theme}, ${userEdit.secondary_theme})`
+                      : "#2a2b2e",
+                }}
+              />
+            )}
+          </div>
+          {/* Avatar Section */}
+          <div className="relative px-4 pb-4">
+            <div className="flex items-end">
+              <div className="relative -mt-12">
+                <div className="w-20 h-20 rounded-full border-4 border-[#1e1f22] bg-[#2a2b2e] overflow-hidden flex items-center justify-center shadow-lg">
+                  {previewPfp ? (
+                    <img
+                      src={previewPfp}
+                      alt="Avatar"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-2xl text-gray-500 font-bold">
+                      {userEdit.displayName?.[0]?.toUpperCase() ||
+                        userInfo?.username?.[0]?.toUpperCase() ||
+                        "?"}
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
-            <div className="flex flex-col items-center -mt-10 pb-6">
-              <div className="w-20 h-20 rounded-full border-4 border-[#23232a] bg-[#1e1f22] overflow-hidden flex items-center justify-center">
-                {previewPfp ? (
-                  <img
-                    src={previewPfp}
-                    alt="Avatar"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <span className="text-3xl text-gray-500 font-bold">
-                    {userEdit.displayName?.[0]?.toUpperCase() ||
-                      userInfo?.username?.[0]?.toUpperCase() ||
-                      "?"}
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center gap-2 mt-2">
-                <span
-                  className={`text-xl font-bold ${
-                    isColorLight(userEdit.primary_theme) &&
-                    isColorLight(userEdit.secondary_theme)
-                      ? "text-gray-900"
-                      : "text-white"
-                  }`}
-                >
+            {/* User Info Section */}
+            <div className="mt-3">
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="text-lg font-bold theme-text truncate">
                   {userEdit.displayName || userInfo?.username}
-                </span>
-                <span className="text-green-400 text-lg">●</span>
+                </h3>
               </div>
-              <div
-                className={`${
-                  isColorLight(userEdit.primary_theme) &&
-                  isColorLight(userEdit.secondary_theme)
-                    ? "text-gray-700"
-                    : "text-gray-400"
-                } text-sm`}
-              >
+              <p className="text-sm theme-text-secondary mb-3">
                 @{userInfo?.username}
+              </p>
+
+              {/* Bio */}
+              {userEdit.bio && (
+                <div
+                  className="rounded-lg p-3 mb-3"
+                  style={{
+                    background: isColorLight(userEdit.primary_theme)
+                      ? "#e5e7eb"
+                      : "#2a2b2e",
+                  }}
+                >
+                  <p className="text-sm theme-text-secondary leading-relaxed">
+                    {userEdit.bio}
+                  </p>
+                </div>
+              )}
+
+              {/* Example Button */}
+              <div className="border-t border-[#3a3b3e] pt-3">
+                <button
+                  className="w-full px-4 py-2 rounded-lg font-semibold cursor-default theme-text-secondary"
+                  style={{
+                    background: isColorLight(userEdit.primary_theme)
+                      ? "#d1d5db"
+                      : "#23232a",
+                  }}
+                >
+                  Example Button
+                </button>
               </div>
-              <div
-                className={`text-xs mt-2 text-center max-w-[90%] ${
-                  isColorLight(userEdit.primary_theme) &&
-                  isColorLight(userEdit.secondary_theme)
-                    ? "text-gray-700"
-                    : "text-gray-400"
-                }`}
-              >
-                {userEdit.bio || (
-                  <span className="italic text-gray-600">No bio set.</span>
-                )}
-              </div>
-              <button className="mt-4 px-4 py-2 bg-[#23232a] text-gray-300 rounded-lg font-semibold cursor-default">
-                Example Button
-              </button>
             </div>
           </div>
         </div>

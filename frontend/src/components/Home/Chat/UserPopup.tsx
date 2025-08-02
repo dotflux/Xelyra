@@ -12,15 +12,11 @@ interface UserPopupProps {
     banner?: string;
     primary_theme?: string;
     secondary_theme?: string;
+    id: string;
     [key: string]: any;
   };
-  anchorRef?: React.RefObject<HTMLDivElement>;
+  anchorRef?: React.RefObject<HTMLElement | null>;
 }
-
-const DISCORD_GRAY = "#232428";
-const DISCORD_CARD_BORDER = "#36393f";
-const DISCORD_CARD_WIDTH = 320;
-const DISCORD_CARD_HEIGHT = 370;
 
 function isColorLight(hex: string) {
   if (!hex) return false;
@@ -88,104 +84,173 @@ const UserPopup: React.FC<UserPopupProps> = ({
   }, [open, onClose, anchorRef]);
 
   if (!open) return null;
-  const hasTheme = senderData.primary_theme && senderData.secondary_theme;
-  const bannerBg = hasTheme
-    ? `linear-gradient(135deg, ${senderData.primary_theme}, ${senderData.secondary_theme})`
-    : DISCORD_GRAY;
-  const cardBorder = hasTheme
-    ? `2px solid ${senderData.secondary_theme}`
-    : `2px solid ${DISCORD_CARD_BORDER}`;
+
   const banner = senderData.banner
     ? senderData.banner.startsWith("/uploads/")
       ? "http://localhost:3000" + senderData.banner
       : senderData.banner
     : null;
 
-  const useDarkText =
-    hasTheme &&
-    isColorLight(senderData.primary_theme || "") &&
-    isColorLight(senderData.secondary_theme || "");
   return (
     <div
       ref={popupRef}
-      className="z-50 fixed shadow-2xl rounded-2xl flex flex-col animate-fade-in p-0"
+      className="z-50 fixed shadow-2xl rounded-xl flex flex-col animate-fade-in overflow-hidden"
       style={{
         top: position.top,
         left: position.left,
-        width: DISCORD_CARD_WIDTH,
-        minHeight: DISCORD_CARD_HEIGHT,
-        background: hasTheme ? bannerBg : DISCORD_GRAY,
-        border: cardBorder,
+        width: 320,
+        background:
+          senderData.primary_theme && senderData.secondary_theme
+            ? `linear-gradient(135deg, ${senderData.primary_theme}, ${senderData.secondary_theme})`
+            : "#1e1f22",
+        border: "1px solid #3a3b3e",
       }}
     >
+      {/* Dynamic text color based on theme brightness */}
+      <style>
+        {`
+            .theme-text {
+              color: ${
+                isColorLight(senderData.primary_theme || "#1e1f22")
+                  ? "#000000"
+                  : "#ffffff"
+              } !important;
+            }
+            .theme-text-secondary {
+              color: ${
+                isColorLight(senderData.primary_theme || "#1e1f22")
+                  ? "#374151"
+                  : "#9ca3af"
+              } !important;
+            }
+            .theme-button {
+              color: ${
+                isColorLight(senderData.primary_theme || "#1e1f22")
+                  ? "#374151"
+                  : "#9ca3af"
+              } !important;
+            }
+            .theme-button:hover {
+              color: ${
+                isColorLight(senderData.primary_theme || "#1e1f22")
+                  ? "#000000"
+                  : "#ffffff"
+              } !important;
+              background-color: ${
+                isColorLight(senderData.primary_theme || "#1e1f22")
+                  ? "#d1d5db"
+                  : "#2a2b2e"
+              } !important;
+            }
+            .theme-id-bg {
+              background-color: ${
+                isColorLight(senderData.primary_theme || "#1e1f22")
+                  ? "#d1d5db"
+                  : "#3a3b3e"
+              } !important;
+            }
+            .theme-id-text {
+              color: ${
+                isColorLight(senderData.primary_theme || "#1e1f22")
+                  ? "#374151"
+                  : "#9ca3af"
+              } !important;
+            }
+          `}
+      </style>
+      {/* Banner Section */}
       <div
-        className="w-full rounded-t-2xl overflow-hidden relative"
-        style={{ height: 96, background: bannerBg }}
+        className="relative h-24"
+        style={{
+          background: banner
+            ? "linear-gradient(135deg, #6366f1, #8b5cf6)"
+            : senderData.primary_theme && senderData.secondary_theme
+            ? `linear-gradient(90deg, ${senderData.primary_theme}, ${senderData.secondary_theme})`
+            : "#2a2b2e",
+        }}
       >
-        {banner ? (
+        {banner && (
           <img
             src={banner}
             alt="Banner"
-            className="w-full h-full object-cover absolute top-0 left-0"
-            style={{ zIndex: 1 }}
+            className="w-full h-full object-cover"
           />
-        ) : null}
+        )}
+        {banner && <div className="absolute inset-0 bg-black/20" />}
       </div>
-      {/* Card content row: avatar + text */}
-      <div
-        className="flex flex-row items-start w-full"
-        style={{ padding: "0 24px", marginTop: 20, marginBottom: 12 }}
-      >
-        <div
-          className="w-20 h-20 rounded-full border-4 bg-[#1e1f22] overflow-hidden flex items-center justify-center"
-          style={{ borderColor: DISCORD_GRAY }}
-        >
-          {senderData.pfp ? (
-            <img
-              src={
-                senderData.pfp && senderData.pfp.startsWith("/uploads/")
-                  ? "http://localhost:3000" + senderData.pfp
-                  : senderData.pfp
-              }
-              alt={senderData.username}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <span className="text-4xl text-gray-500 font-bold">
-              {senderData.username?.[0]?.toUpperCase() || "?"}
-            </span>
-          )}
+
+      {/* Avatar Section */}
+      <div className="relative px-4 pb-4">
+        <div className="flex items-end">
+          <div className="relative -mt-12">
+            <div className="w-20 h-20 rounded-full border-4 border-[#1e1f22] bg-[#2a2b2e] overflow-hidden flex items-center justify-center shadow-lg">
+              {senderData.pfp ? (
+                <img
+                  src={
+                    senderData.pfp.startsWith("/uploads/")
+                      ? "http://localhost:3000" + senderData.pfp
+                      : senderData.pfp
+                  }
+                  alt={senderData.username}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-2xl text-gray-500 font-bold">
+                  {senderData.username?.[0]?.toUpperCase() || "?"}
+                </span>
+              )}
+            </div>
+          </div>
         </div>
-        <div style={{ marginLeft: 16, marginTop: 12 }}>
-          <span
-            className={`text-2xl font-extrabold leading-tight truncate ${
-              useDarkText ? "text-gray-900" : "text-white"
-            }`}
-            style={{ display: "block", textAlign: "left" }}
-          >
-            {senderData.displayName || senderData.username}
-          </span>
-          <span
-            className={`text-base leading-tight truncate ${
-              useDarkText ? "text-gray-700" : "text-gray-400"
-            }`}
-            style={{ display: "block", textAlign: "left" }}
-          >
+
+        {/* User Info Section */}
+        <div className="mt-3">
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="text-lg font-bold theme-text truncate">
+              {senderData.displayName || senderData.username}
+            </h3>
+            {senderData.type === "bot" && (
+              <span className="px-2 py-0.5 bg-indigo-600 text-white text-xs rounded-full font-medium">
+                BOT
+              </span>
+            )}
+          </div>
+          <p className="text-sm theme-text-secondary mb-3">
             @{senderData.username}
-          </span>
+          </p>
+
+          {/* Description */}
+          {senderData.description && (
+            <div
+              className="rounded-lg p-3 mb-3"
+              style={{
+                background: isColorLight(senderData.primary_theme || "#1e1f22")
+                  ? "#e5e7eb"
+                  : "#2a2b2e",
+              }}
+            >
+              <p className="text-sm theme-text-secondary leading-relaxed">
+                {senderData.description}
+              </p>
+            </div>
+          )}
+
+          {/* Copy User ID Button */}
+          <div className="border-t border-[#3a3b3e] pt-3">
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(senderData.id);
+              }}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-sm theme-button"
+            >
+              <div className="w-6 h-6 rounded flex items-center justify-center theme-id-bg">
+                <span className="text-xs font-medium theme-id-text">ID</span>
+              </div>
+              Copy User ID
+            </button>
+          </div>
         </div>
       </div>
-      {/* Description below */}
-      {senderData.description && (
-        <div
-          className={`w-full text-sm text-left break-words ${
-            useDarkText ? "text-gray-700" : "text-gray-300"
-          }`}
-          style={{ paddingLeft: 120, paddingRight: 24, marginTop: 8 }}
-        >
-          {senderData.description}
-        </div>
-      )}
     </div>
   );
 };

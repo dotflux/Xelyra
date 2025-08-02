@@ -4,7 +4,7 @@ import { gsap } from "gsap";
 const resources = [
   {
     label: "Docs",
-    href: "https://docs.xelyra.com",
+    href: "https://github.com/dotflux/xelyra",
     icon: (
       <svg
         className="w-8 h-8 text-blue-400"
@@ -21,7 +21,7 @@ const resources = [
   },
   {
     label: "SDK",
-    href: "https://github.com/dotflux/xelyra-bot-sdk",
+    href: "https://github.com/dotflux/Xelyra/tree/main/xelyra-bot-sdk",
     icon: (
       <svg
         className="w-8 h-8 text-purple-400"
@@ -37,7 +37,7 @@ const resources = [
     color: "from-purple-500 to-pink-500",
   },
   {
-    label: "Community",
+    label: "Twitter",
     href: "https://x.com/dotflux56",
     icon: (
       <svg
@@ -51,8 +51,8 @@ const resources = [
     color: "from-blue-400 to-purple-400",
   },
   {
-    label: "Branding",
-    href: "https://xelyra.com/branding",
+    label: "Developer",
+    href: "https://dotflux.github.io",
     icon: (
       <svg
         className="w-8 h-8 text-yellow-400"

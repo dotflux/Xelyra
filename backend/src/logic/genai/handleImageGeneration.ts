@@ -6,6 +6,7 @@ export async function handleImageGeneration({
   req,
   genaiImageService,
   messagesService,
+  messagesGateway,
   conversationId,
   replyTo,
   files,
@@ -49,7 +50,7 @@ export async function handleImageGeneration({
       replyTo,
       [generatedImageFile],
     );
-    messagesService.sendToConversation(conversationId, {
+    messagesGateway.sendToConversation(conversationId, {
       conversation: conversationId,
       message: msg,
       user: process.env.AI_ID as string,
@@ -73,7 +74,7 @@ export async function handleImageGeneration({
       replyTo,
       files,
     );
-    messagesService.sendToConversation(conversationId, {
+    messagesGateway.sendToConversation(conversationId, {
       conversation: conversationId,
       message: msg,
       user: process.env.AI_ID as string,

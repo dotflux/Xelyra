@@ -21,7 +21,15 @@ Meet **Xyn**, your intelligent AI companion integrated directly into Xelyra. Xyn
 
 _Meet Xyn: Your friendly, always-available AI assistant in Xelyra._
 
+**Dedicated AI Chat Interface:**
+
+![Special AI Chat Window](frontend/src/assets/specialWindow.jpg)
+
+_Dedicated AI assistant chat window with natural language processing capabilities._
+
 **AI-Generated Profile Pictures:**
+
+![AI Profile Picture Generation - Before](frontend/src/assets/staticGeneratedPfp.jpg)
 
 ![AI Profile Picture Generation](frontend/src/assets/xyn_changes_generated_pfp.gif)
 
@@ -35,15 +43,33 @@ _Easily update your profile picture by uploading an image file—Xyn handles the
 
 **Natural Language Account Management:**
 
+![Natural Language Account Management - Before](frontend/src/assets/staticNameChange.jpg)
+
 ![Natural Language Account Management](frontend/src/assets/xyn_changes_name.gif)
 
 _Change your display name and other details just by chatting with Xyn—no forms required!_
 
-**Dedicated AI Chat Interface:**
+**AI-Generated Banners:**
 
-![Special AI Chat Window](frontend/src/assets/specialWindow.jpg)
+![AI Banner Generation - Before](frontend/src/assets/staticBannerChange.jpg)
 
-_Dedicated AI assistant chat window with natural language processing capabilities._
+![AI Banner Generation - After](frontend/src/assets/updatedBanner.jpg)
+
+_Create stunning custom banners with natural language descriptions—Xyn brings your vision to life!_
+
+**AI Profile Theme Customization:**
+
+![AI Profile Theme Change - Before](frontend/src/assets/staticProfileThemeChange.jpg)
+
+![AI Profile Theme Change - After](frontend/src/assets/updatedprofileTheme.jpg)
+
+_Personalize your profile with custom color themes using simple commands—Xyn handles the color matching!_
+
+**AI Image Generation:**
+
+![AI Image Generation](frontend/src/assets/imageGeneration.png)
+
+_Ask Xyn to generate any image you can imagine—from cosmic wormholes to custom artwork, Xyn brings your ideas to life!_
 
 ### 🔧 **Advanced Bot SDK & Developer Tools**
 
@@ -61,7 +87,7 @@ _Comprehensive application management with overview, bot configuration, and sett
 
 **SDK Documentation & Examples:**
 
-![SDK Documentation](frontend/src/assets/sdk_documentation.gif)
+![SDK Documentation](frontend/src/assets/updated_sdk_documentation.gif)
 
 _In-depth, interactive SDK documentation to help you build bots and integrations quickly._
 
@@ -181,9 +207,25 @@ bot.login();
 
 **Profile Management:**
 
-![Manual Profile Management](frontend/src/assets/manualProfile.jpg)
+![Manual Profile Management](frontend/src/assets/updatedManualProfile.jpg)
 
 _Comprehensive user profile settings with display name, username, and password management._
+
+**Advanced Profile Management:**
+
+![Advanced Profile Management](frontend/src/assets/advancedProfileManual.png)
+
+_Advanced profile editing with real-time preview, color theme customization, and banner management._
+
+**Adaptive Profile Themes:**
+
+![Light Theme Profile](frontend/src/assets/profileLightTheme.jpg)
+
+![Red Theme Profile](frontend/src/assets/profileRedTheme.jpg)
+
+![Dark Theme Profile](frontend/src/assets/profileBlackTheme.jpg)
+
+_Profile cards automatically adapt to light and dark themes, with dynamic text colors and backgrounds that ensure optimal readability and visual appeal._
 
 **Media & Communication:**
 
@@ -465,6 +507,9 @@ Below is a summary of the main backend API endpoints exposed by Xelyra. These en
 | `/signup/auth`                                                  | POST   | Authenticate signup OTP             |
 | `/login`                                                        | POST   | User login                          |
 | `/login/auth`                                                   | POST   | Authenticate login                  |
+| `/login/forget/auth`                                            | POST   | Forget password authentication      |
+| `/login/forget/validate`                                        | POST   | Validate forget password data       |
+| `/login/forget/otp`                                             | POST   | Forget password OTP verification    |
 | `/home/auth`                                                    | POST   | Home authentication                 |
 | `/home/friends`                                                 | POST   | Fetch friends list                  |
 | `/home/conversations`                                           | POST   | Fetch conversations                 |
@@ -549,7 +594,70 @@ Below is a summary of the main backend API endpoints exposed by Xelyra. These en
 | `/home/api/tenorcategories`                                     | POST   | Fetch Tenor GIF categories          |
 | `/home/servers/invites/fetch`                                   | POST   | Fetch server invites                |
 | `/home/servers/permissionToAdd`                                 | POST   | Check permission to add to server   |
-| `/genai/message`                                                | POST   | Send message to GenAI               |
+| `/home/logout`                                                  | POST   | User logout                         |
+| `/api/genai/message`                                            | POST   | Send message to GenAI               |
 | `/metrics`                                                      | GET    | Fetch metrics                       |
 
 _The frontend calls these endpoints using axios from React components to power all user and developer features._
+
+## 🔗 Frontend Routes
+
+Below is a comprehensive list of all frontend routes in Xelyra, organized by functionality:
+
+### **Public Routes**
+
+| Route                 | Component        | Description                                 |
+| --------------------- | ---------------- | ------------------------------------------- |
+| `/`                   | `Index`          | Landing page with app overview and features |
+| `/signup`             | `Signup`         | User registration form                      |
+| `/signup/otp`         | `SignupOtp`      | OTP verification for signup                 |
+| `/login`              | `Login`          | User login form                             |
+| `/forgetpassword`     | `ForgetPassword` | Password reset request form                 |
+| `/forgetpassword/otp` | `ForgetPassOtp`  | OTP verification for password reset         |
+
+### **Authenticated Routes**
+
+| Route               | Component             | Description                             |
+| ------------------- | --------------------- | --------------------------------------- |
+| `/home`             | `AuthenticatedLayout` | Main authenticated layout with sidebar  |
+| `/home` (index)     | `Home`                | Main chat interface and conversations   |
+| `/home/servers/:id` | `Server`              | Server-specific interface with channels |
+
+### **Developer Routes**
+
+| Route                                              | Component             | Description                             |
+| -------------------------------------------------- | --------------------- | --------------------------------------- |
+| `/developer`                                       | `DeveloperLanding`    | Developer portal landing page           |
+| `/developer/development`                           | `Developer`           | Main developer dashboard layout         |
+| `/developer/development` (index)                   | `DeveloperDashboard`  | Developer dashboard overview            |
+| `/developer/development/applications`              | `ApplicationsList`    | List of user's applications             |
+| `/developer/development/documentation`             | `Documentation`       | SDK documentation and examples          |
+| `/developer/development/applications/:id`          | `ApplicationSettings` | Application settings and management     |
+| `/developer/development/applications/:id/overview` | `AppOverview`         | Application overview and basic settings |
+| `/developer/development/applications/:id/bot`      | `AppBot`              | Bot configuration and management        |
+| `/developer/development/applications/:id/add`      | `AppBotAdd`           | Add new bot to application              |
+
+### **Route Structure**
+
+```
+/
+├── /signup
+│   └── /otp
+├── /login
+├── /forgetpassword
+│   └── /otp
+├── /home
+│   ├── / (index - main chat)
+│   └── /servers/:id
+└── /developer
+    └── /development
+        ├── / (index - dashboard)
+        ├── /applications
+        ├── /documentation
+        └── /applications/:id
+            ├── /overview
+            ├── /bot
+            └── /add
+```
+
+_The frontend uses React Router v6 with nested routing for organized navigation and proper authentication flow._

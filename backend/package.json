@@ -30,6 +30,7 @@
     "axios": "^1.10.0",
     "bcrypt": "^6.0.0",
     "cassandra-driver": "^4.8.0",
+    "color-namer": "^1.4.0",
     "cookie-parser": "^1.4.7",
     "dotenv": "^17.0.1",
     "ioredis": "^5.6.1",

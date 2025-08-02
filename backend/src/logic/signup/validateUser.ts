@@ -70,7 +70,7 @@ export const validateUser = async (
       }
     });
 
-    const dummyUser = await dummyUsersService.createDummyUser(
+    await dummyUsersService.createDummyUser(
       id,
       username,
       email,
@@ -91,7 +91,7 @@ export const validateUser = async (
     await sendEmail(
       email,
       'One Time Password for Xelyra',
-      `Your One Time Password (OTP) for signup procedure in our app Stratum is ${otp}`,
+      `Your One Time Password (OTP) for signup procedure in our app Xelyra is ${otp}`,
     );
 
     return { valid: true, message: 'User validated successfully' };

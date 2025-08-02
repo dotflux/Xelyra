@@ -89,7 +89,7 @@ const JoinCommunity = () => {
           <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-16 h-1 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300"></span>
         </a>
         <a
-          href="https://github.com/dotflux/Xelyra"
+          href="https://github.com/dotflux"
           target="_blank"
           rel="noopener noreferrer"
           className="join-link group flex flex-col items-center gap-2 hover:scale-110 transition-all relative"
