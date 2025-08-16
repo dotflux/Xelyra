@@ -11,7 +11,6 @@ interface BotInfo {
 const AppBot = () => {
   const { id } = useParams();
   const [botInfo, setBotInfo] = useState<BotInfo | null>(null);
-  const [isDirty, setIsDirty] = useState(false);
   const [token, setToken] = useState("");
   const [isPublic, setIsPublic] = useState(false);
   const [isViewOpen, setViewOpen] = useState(false);
@@ -109,24 +108,7 @@ const AppBot = () => {
           </div>
         </div>
       </div>
-      {isDirty && (
-        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 bg-[#2a2b2e] border border-[#3a3b3e] text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-4 max-w-xl w-[95%]">
-          <span className="flex-1 text-sm font-medium text-gray-200">
-            Unsaved changes were detected
-          </span>
 
-          <button
-            onClick={() => {}}
-            className="text-sm text-gray-300 hover:underline"
-          >
-            Reset
-          </button>
-
-          <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">
-            Save Changes
-          </button>
-        </div>
-      )}
       {isViewOpen && (
         <VerifyTokenModal
           setToken={setToken}

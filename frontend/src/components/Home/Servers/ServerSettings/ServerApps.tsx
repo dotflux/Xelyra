@@ -12,7 +12,7 @@ interface ServerApp {
   pfp: string;
 }
 
-const ServerApps: React.FC<ServerAppsProps> = ({ serverId, onUpdate }) => {
+const ServerApps: React.FC<ServerAppsProps> = ({ serverId }) => {
   const [apps, setApps] = useState<ServerApp[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

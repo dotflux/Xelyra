@@ -158,7 +158,6 @@ export default function SlashAutocomplete({
       // Find the last partial word (\w*) before the cursor
       const match = before.match(/(?:^| )([\w]*)$/);
       const partial = match ? match[1] : "";
-      const prefix = ` ${item.name}:`;
       // Replace the partial word with the option name
       let newBefore = before;
       if (partial) {
@@ -184,11 +183,6 @@ export default function SlashAutocomplete({
     setOpts([]);
   }
 
-  // --- Styling ---
-  // We'll use a portal-like approach: render the dropdown inside a relatively positioned parent (Typer)
-  // and anchor it just above the input box.
-  // We'll use max-w-md, rounded-xl, shadow-xl, border, and Discord-like colors.
-
   return (
     <div
       className="absolute left-0 right-0 bottom-14 flex flex-col items-start z-50 pointer-events-none w-full"
@@ -205,7 +199,7 @@ export default function SlashAutocomplete({
         >
           {cmds.map((it, i) => (
             <div
-              key={it.name}
+              key={i}
               className={`px-4 py-2 flex justify-between items-center cursor-pointer transition-colors duration-100 select-none
                 ${
                   i === cursor

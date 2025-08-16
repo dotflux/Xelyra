@@ -222,7 +222,7 @@ const Features: React.FC = () => {
 
       // Add hover listeners for each card
       const cards = document.querySelectorAll(".feature-card");
-      cards.forEach((card, index) => {
+      cards.forEach((card, _index) => {
         card.addEventListener("mouseenter", () => {
           gsap.to(card, {
             y: -8,

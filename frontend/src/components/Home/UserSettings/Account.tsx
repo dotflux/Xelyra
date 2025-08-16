@@ -13,25 +13,11 @@ interface UsernameForm {
   password: string;
 }
 
-interface EmailForm {
-  newEmail: string;
-  password: string;
-}
-
 interface PasswordForm {
   currentPassword: string;
   newPassword: string;
   confirmPassword: string;
 }
-
-const maskEmail = (email: string) => {
-  if (!email) return "";
-  const [name, domain] = email.split("@");
-  if (!name || !domain) return email;
-  return (
-    name.slice(0, 2) + "*".repeat(Math.max(0, name.length - 2)) + "@" + domain
-  );
-};
 
 function isColorLight(hex: string) {
   if (!hex) return false;
@@ -62,7 +48,6 @@ const Account: React.FC<AccountProps> = ({
   }
   const [showUsernameModal, setShowUsernameModal] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [showEmail, setShowEmail] = useState(false);
   const [usernameError, setUsernameError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [usernameLoading, setUsernameLoading] = useState(false);

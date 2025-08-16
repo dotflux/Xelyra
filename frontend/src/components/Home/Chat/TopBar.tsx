@@ -613,7 +613,7 @@ const TopBar = (props: Props) => {
                 className={`h-4 w-4 transition-all duration-200 ${
                   isInCall
                     ? "text-red-500 opacity-100"
-                    : incomingCall
+                    : incomingCall || isCalling
                     ? "text-yellow-500 opacity-100"
                     : "text-green-500 opacity-70 hover:opacity-100"
                 }`}

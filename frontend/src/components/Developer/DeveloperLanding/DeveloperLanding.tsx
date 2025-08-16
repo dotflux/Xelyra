@@ -1,7 +1,5 @@
-import React, { useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
-import AnimatedBackground from "./AnimatedBackground";
 import DevBackground from "./DevBackground";
 import DevHero from "./DevHero";
 import DevSDKInfo from "./DevSDKInfo";
@@ -14,18 +12,7 @@ import ResourcesSection from "./ResourcesSection";
 import StickyNav from "./StickyNav";
 import Footer from "./Footer";
 
-const sdkCode = `import { XelyraClient } from 'xelyra-bot-sdk';
-
-const client = new XelyraClient({ token: 'YOUR_BOT_TOKEN' });
-
-client.command('hello', (ctx) => {
-  ctx.reply('Hello, world!');
-});
-
-client.login();`;
-
 const DeveloperLanding = () => {
-  const navigate = useNavigate();
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

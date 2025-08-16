@@ -17,7 +17,7 @@ const ALL_PERMISSIONS = [
   "ADMIN",
 ];
 
-const Roles: React.FC<RolesProps> = ({ serverId, onUpdate }) => {
+const Roles: React.FC<RolesProps> = ({ serverId }) => {
   const [roles, setRoles] = useState<any[]>([]);
   const [loadingRoles, setLoadingRoles] = useState(false);
   const [showCreateRole, setShowCreateRole] = useState(false);

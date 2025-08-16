@@ -147,7 +147,7 @@ const TechStack: React.FC = () => {
         </div>
 
         <div className="tech-grid grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-6 max-w-6xl mx-auto">
-          {technologies.map((tech, index) => (
+          {technologies.map((tech, _index) => (
             <div
               key={tech.name}
               className="tech-card group bg-gradient-to-br from-[#1a1a1a] to-[#2a2a2a] p-6 rounded-xl border border-[#3a3a3a] hover:border-gray-500 transition-all duration-300 cursor-pointer"

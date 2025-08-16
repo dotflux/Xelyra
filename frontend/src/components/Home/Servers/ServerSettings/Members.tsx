@@ -21,7 +21,7 @@ interface Role {
   color: string;
 }
 
-const Members: React.FC<MembersProps> = ({ serverId, onUpdate, userId }) => {
+const Members: React.FC<MembersProps> = ({ serverId, userId }) => {
   const [members, setMembers] = useState<Member[]>([]);
   const [loadingMembers, setLoadingMembers] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +33,7 @@ const Members: React.FC<MembersProps> = ({ serverId, onUpdate, userId }) => {
   const [hasMore, setHasMore] = useState(true);
   const [fetchingMore, setFetchingMore] = useState(false);
   const observer = useRef<IntersectionObserver | null>(null);
-  const lastMemberRef = useRef<HTMLDivElement | null>(null);
+  //const lastMemberRef = useRef<HTMLDivElement | null>(null);
   const BATCH_SIZE = 70;
   const [roleDropdownOpen, setRoleDropdownOpen] = useState(false);
   const roleDropdownRef = useRef<HTMLDivElement | null>(null);

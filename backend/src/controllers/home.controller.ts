@@ -407,6 +407,14 @@ export class HomeController {
     return await this.homeService.permissionToAdd(req);
   }
 
+  @Post('conversation/participants')
+  async conversationParticipants(
+    @Req() req: Request,
+    @Body('conversation') conversation: string,
+  ) {
+    return await this.homeService.conversationParticipants(req, conversation);
+  }
+
   @Post('logout')
   async logOut(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     return await this.homeService.logOut(req, res);

@@ -44,6 +44,7 @@ import { changePassword } from 'src/logic/home/user/changePassword';
 import { fetchServerByInvite } from 'src/logic/home/servers/fetchServerByInvite';
 import { PermissionsService } from './permissions.service';
 import { permissionToAdd } from 'src/logic/home/permissionToAdd';
+import { conversationParticipants } from 'src/logic/home/conversationParticipants';
 import { logOut } from 'src/logic/home/logOut';
 
 @Injectable()
@@ -388,6 +389,18 @@ export class HomeService {
       this.usersService,
       this.serversService,
       this.permissionsService,
+    );
+  }
+
+  async conversationParticipants(req: Request, conversation: string) {
+    return await conversationParticipants(
+      req,
+      conversation,
+      this.usersService,
+      this.conversationsService,
+      this.serverMembersService,
+      this.serversService,
+      this.channelsService,
     );
   }
 

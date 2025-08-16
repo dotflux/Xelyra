@@ -109,7 +109,7 @@ const WhyBuild = () => {
         stagger: 0.1,
       });
       gsap.to(".why-card", {
-        y: (i, target) => (i % 2 === 0 ? -12 : 12),
+        y: (i, _target) => (i % 2 === 0 ? -12 : 12),
         duration: 2.5,
         yoyo: true,
         repeat: -1,

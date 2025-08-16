@@ -55,12 +55,6 @@ const ChannelsList = (props: Props) => {
   const searchParams = new URLSearchParams(location.search);
   const selectedChannel = searchParams.get("channel");
 
-  // Helper to check if there are any channels
-  const noChannels =
-    !categories ||
-    categories.length === 0 ||
-    categories.every((cat) => !cat.channels || cat.channels.length === 0);
-
   const onMount = async () => {
     try {
       const response = await axios.post(

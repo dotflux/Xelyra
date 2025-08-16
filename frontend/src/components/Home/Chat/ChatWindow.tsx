@@ -7,7 +7,7 @@ import Typer from "./Typer";
 import MessageBox from "./MessageBox";
 import GroupPanel from "./Group/GroupPanel";
 import CommandBox from "./CommandBox";
-import { useUser } from "../UserContext";
+import MembersPanel from "./MembersPanel";
 
 interface Message {
   user: string;
@@ -15,10 +15,11 @@ interface Message {
   conversation: string;
   is_read: boolean;
   id: string;
-  created_at: string;
-  created_timestamp: string;
+  created_at: string | null;
+  created_timestamp: string | null;
+  created_ts?: number | null;
   edited: boolean;
-  reply_to: string;
+  reply_to: string | null;
   command?: string;
   bot_id?: string;
   app_id?: string;
@@ -34,6 +35,7 @@ interface Props {
 const ChatWindow = (props: Props) => {
   const socketRef = useRef<Socket | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const lastScrollTopRef = useRef<number>(0);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [searchParams] = useSearchParams();
   const channel = searchParams.get("channel");
@@ -45,7 +47,6 @@ const ChatWindow = (props: Props) => {
   const [repliedSenderType, setRepliedSenderType] = useState<string | null>(
     null
   );
-
   const [showPanel, setShowPanel] = useState(false);
   const [initialLoad, setInitialLoad] = useState(true);
   const [channelInfo, setChannelInfo] = useState<{
@@ -53,15 +54,37 @@ const ChatWindow = (props: Props) => {
     type: string;
   } | null>(null);
 
-  const { user } = useUser();
+  const normalizeRows = (rows: any[] = []): Message[] => {
+    if (!Array.isArray(rows) || rows.length === 0) return [];
+    return rows.map((r: any) => {
+      const created_ts =
+        typeof r.created_timestamp === "number"
+          ? r.created_timestamp
+          : r.created_timestamp instanceof Date
+          ? r.created_timestamp.getTime()
+          : typeof r.created_timestamp === "string"
+          ? Number.isNaN(Date.parse(r.created_timestamp))
+            ? null
+            : Date.parse(r.created_timestamp)
+          : null;
+      return {
+        ...r,
+        created_timestamp: r.created_timestamp ?? null,
+        created_at: r.created_at ? String(r.created_at) : null,
+        created_ts,
+        reply_to: r.reply_to ? String(r.reply_to) : null,
+        files: r.files || [],
+      } as Message;
+    });
+  };
 
   const fetchMessages = async (
     cursors?: { userCursor?: string; commandCursor?: string },
     limit: number = cursors ? 70 : 40
   ) => {
+    if (!channel) return;
     setLoadingMore(true);
     try {
-      console.log("Fetching messages. Cursors:", cursors, "Limit:", limit);
       const response = await axios.post(
         "http://localhost:3000/home/messages",
         {
@@ -72,54 +95,42 @@ const ChatWindow = (props: Props) => {
         },
         { withCredentials: true }
       );
-      if (response.data.valid) {
-        // Merge and sort messages and commands by created_timestamp (oldest to newest)
-        const allMessages = [
-          ...(response.data.messages || []),
-          ...(response.data.commands || []),
-        ].sort(
-          (a, b) =>
-            new Date(a.created_timestamp).getTime() -
-            new Date(b.created_timestamp).getTime()
-        );
-        // Debug: print the final render order
-        console.log("FINAL RENDER ORDER:");
-        allMessages.forEach((msg, idx) => {
-          console.log(
-            `#${idx + 1}:`,
-            msg.created_timestamp,
-            msg.command ? `(COMMAND: /${msg.command})` : "(USER MESSAGE)"
-          );
-        });
-        setHasMore(
-          response.data.messages?.length === limit ||
-            response.data.commands?.length === limit
-        );
-        if (cursors) {
-          // Pagination: prepend and maintain scroll
-          if (messagesContainerRef.current) {
-            const prevScrollHeight = messagesContainerRef.current.scrollHeight;
-            const prevScrollTop = messagesContainerRef.current.scrollTop;
-            setMessages((prev) => [...allMessages, ...prev]);
-            setTimeout(() => {
-              if (messagesContainerRef.current) {
-                const newScrollHeight =
-                  messagesContainerRef.current.scrollHeight;
-                messagesContainerRef.current.scrollTop =
-                  newScrollHeight - prevScrollHeight + prevScrollTop;
-              }
-            }, 0);
-          } else {
-            setMessages((prev) => [...allMessages, ...prev]);
-          }
+      if (!response.data.valid) {
+        setLoadingMore(false);
+        return;
+      }
+      const msgs = normalizeRows(response.data.messages || []);
+      const cmds = normalizeRows(response.data.commands || []);
+      const allMessages = [...msgs, ...cmds].sort((a, b) => {
+        const A = a.created_ts ?? 0;
+        const B = b.created_ts ?? 0;
+        return A - B;
+      });
+      setHasMore(
+        (Array.isArray(response.data.messages) &&
+          response.data.messages.length === limit) ||
+          (Array.isArray(response.data.commands) &&
+            response.data.commands.length === limit)
+      );
+      if (cursors) {
+        if (messagesContainerRef.current) {
+          const prevScrollHeight = messagesContainerRef.current.scrollHeight;
+          const prevScrollTop = messagesContainerRef.current.scrollTop;
+          setMessages((prev) => [...allMessages, ...prev]);
+          setTimeout(() => {
+            if (!messagesContainerRef.current) return;
+            const newScrollHeight = messagesContainerRef.current.scrollHeight;
+            messagesContainerRef.current.scrollTop =
+              newScrollHeight - prevScrollHeight + prevScrollTop;
+          }, 0);
         } else {
-          // Initial load: set messages and scroll to bottom
-          setMessages(allMessages);
-          setInitialLoad(true);
+          setMessages((prev) => [...allMessages, ...prev]);
         }
+      } else {
+        setMessages(allMessages);
+        setInitialLoad(true);
       }
     } catch (error) {
-      // Handle error as you wish
       console.error(error);
     }
     setLoadingMore(false);
@@ -131,26 +142,19 @@ const ChatWindow = (props: Props) => {
 
   useEffect(() => {
     if (!channel) return;
-
-    // 1) connect to your namespace (if you used namespace '/messages', include it)
     socketRef.current = io("http://localhost:3000/messages", {
       withCredentials: true,
     });
-
-    // 2) join the conversation room
     socketRef.current.emit("joinConversation", channel);
-
-    // 3) listen for new messages
     socketRef.current.on("newMessage", (msg: Message) => {
-      setMessages((prev) => [...prev, msg]);
+      const normalized = normalizeRows([msg])[0];
+      setMessages((prev) => [...prev, normalized]);
     });
-
     socketRef.current.on("messageEdited", ({ messageId, message, edited }) => {
       setMessages((prev) =>
         prev.map((m) => (m.id === messageId ? { ...m, message, edited } : m))
       );
     });
-
     socketRef.current.on(
       "commandEdited",
       ({ messageId, message, edited, embeds, buttons }) => {
@@ -169,65 +173,78 @@ const ChatWindow = (props: Props) => {
         );
       }
     );
-
     socketRef.current.on("messageDeleted", ({ messageId }) => {
       setMessages((prev) => prev.filter((m) => m.id !== messageId));
     });
-
     socketRef.current.on("commandDeleted", ({ messageId }) => {
       setMessages((prev) => prev.filter((m) => m.id !== messageId));
     });
-
-    // 4) cleanup on unmount or channel change
     return () => {
       socketRef.current?.disconnect();
       socketRef.current = null;
     };
   }, [channel]);
 
-  // Scroll handler
+  useEffect(() => {
+    if (!initialLoad) return;
+    if (!messages || messages.length === 0) {
+      setInitialLoad(false);
+      return;
+    }
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop =
+        messagesContainerRef.current.scrollHeight;
+      setInitialLoad(false);
+      return;
+    }
+    setTimeout(() => {
+      bottomRef.current?.scrollIntoView({ block: "end" });
+      setInitialLoad(false);
+    }, 0);
+  }, [messages, initialLoad]);
+
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const target = e.target as HTMLDivElement;
-    console.log(
-      "ScrollTop:",
-      target.scrollTop,
-      "hasMore:",
-      hasMore,
-      "loadingMore:",
-      loadingMore
-    );
-    if (target.scrollTop < 100 && hasMore && !loadingMore) {
-      // Find the oldest user message and command message created_at
-      const oldestUserCreatedAt = messages.filter((m) => !m.command)[0]
-        ?.created_at;
-      const oldestCommandCreatedAt = messages.filter((m) => m.command)[0]
-        ?.created_at;
-      console.log("Fetching older messages with cursors:", {
-        userCursor: oldestUserCreatedAt,
-        commandCursor: oldestCommandCreatedAt,
-      });
-      if (oldestUserCreatedAt || oldestCommandCreatedAt)
-        fetchMessages(
-          {
-            userCursor: oldestUserCreatedAt,
-            commandCursor: oldestCommandCreatedAt,
-          },
-          10
-        );
+    const current = target.scrollTop;
+
+    const isScrollingUp = current < lastScrollTopRef.current;
+    lastScrollTopRef.current = current;
+    if (!isScrollingUp) return;
+
+    if (!(current < 100 && hasMore && !loadingMore)) return;
+
+    if (!messages || messages.length === 0) {
+      setHasMore(false);
+      return;
     }
+
+    const oldestUser = messages.find((m) => !m.command);
+    const oldestCommand = messages.find((m) => m.command);
+    const userCursor = oldestUser?.created_at ?? null;
+    const commandCursor = oldestCommand?.created_at ?? null;
+
+    if (!userCursor && !commandCursor) {
+      setHasMore(false);
+      return;
+    }
+
+    fetchMessages(
+      {
+        userCursor: userCursor ?? undefined,
+        commandCursor: commandCursor ?? undefined,
+      },
+      10
+    );
   };
 
   return (
     <div className="flex flex-col h-full bg-[#121316]">
-      {/* Top Bar */}
       <TopBar
         showPanel={showPanel}
         setShowPanel={setShowPanel}
         onChannelInfoChange={setChannelInfo}
         socket={socketRef.current}
       />
-
-      {/* Messages Area */}
       <div
         className="flex-1 overflow-y-auto px-4 py-3 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent"
         ref={messagesContainerRef}
@@ -267,24 +284,19 @@ const ChatWindow = (props: Props) => {
         ) : messages?.length ? (
           messages.map((msg, i) => {
             const prev = messages[i - 1];
-            const sameSender = prev && prev.user === msg.user;
+            const sameSender = !!prev && prev.user === msg.user;
             const sameMinute =
-              prev &&
-              Math.abs(
-                new Date(msg.created_timestamp).getTime() -
-                  new Date(prev.created_timestamp).getTime()
-              ) < 60_000;
-            const isReply = msg.reply_to && msg.reply_to.trim() !== "";
-            const prevIsCommand = prev && prev.command;
-            const currentIsCommand = msg.command;
+              !!prev &&
+              Math.abs((msg.created_ts ?? 0) - (prev.created_ts ?? 0)) < 60_000;
+            const isReply = !!msg.reply_to && msg.reply_to.trim() !== "";
+            const prevIsCommand = !!prev && !!prev.command;
+            const currentIsCommand = !!msg.command;
             const grouped =
               sameSender &&
               sameMinute &&
               !isReply &&
               !prevIsCommand &&
               !currentIsCommand;
-
-            // Render CommandBox for command/bot messages
             if (msg.command) {
               return (
                 <CommandBox
@@ -292,8 +304,8 @@ const ChatWindow = (props: Props) => {
                   botName={msg.bot_id ? msg.bot_id : "Bot"}
                   command={msg.command}
                   message={msg.message}
-                  createdAt={msg.created_at}
-                  createdAtTimestamp={msg.created_timestamp}
+                  createdAt={msg.created_at ?? ""}
+                  createdAtTimestamp={msg.created_timestamp ?? ""}
                   conversation={msg.conversation}
                   id={msg.id}
                   edited={msg.edited}
@@ -303,16 +315,14 @@ const ChatWindow = (props: Props) => {
                 />
               );
             }
-
-            // Render MessageBox for normal messages
             return (
               <MessageBox
                 key={i}
                 user={msg.user}
                 id={msg.id}
                 message={msg.message}
-                createdAtTimestamp={msg.created_timestamp}
-                createdAt={msg.created_at}
+                createdAtTimestamp={msg.created_timestamp ?? ""}
+                createdAt={msg.created_at ?? ""}
                 grouped={grouped}
                 edited={msg.edited}
                 conversation={msg.conversation}
@@ -338,8 +348,6 @@ const ChatWindow = (props: Props) => {
         )}
         <div ref={bottomRef} />
       </div>
-
-      {/* Typer */}
       <div className="border-t border-[#2a2b2e] bg-[#191a1d]">
         <Typer
           channelId={channel}
@@ -352,16 +360,20 @@ const ChatWindow = (props: Props) => {
           channelType={channelInfo?.type}
         />
       </div>
-
-      {showPanel && (
-        <GroupPanel
-          showPanel={showPanel}
-          onClose={() => {
-            setShowPanel(false);
-          }}
-          channel={channel}
-        />
-      )}
+      {showPanel &&
+        (channelInfo?.type === "group" ? (
+          <GroupPanel
+            showPanel={showPanel}
+            onClose={() => setShowPanel(false)}
+            channel={channel}
+          />
+        ) : (
+          <MembersPanel
+            showPanel={showPanel}
+            onClose={() => setShowPanel(false)}
+            channel={channel}
+          />
+        ))}
     </div>
   );
 };

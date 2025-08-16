@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import plusIcon from "../../assets/plus.svg";
-import CreateServer from "./Servers/CreateServer";
 import xelyraIcon from "../../../public/xelyra-icon.png";
 
 interface ServerInfo {
@@ -14,25 +13,6 @@ interface ServerInfo {
 interface Props {
   onOpenCreateServer: () => void;
 }
-
-const getColorFromName = (name: string) => {
-  // Simple hash to color
-  const colors = [
-    "bg-indigo-600",
-    "bg-purple-600",
-    "bg-pink-600",
-    "bg-blue-600",
-    "bg-green-600",
-    "bg-yellow-600",
-    "bg-red-600",
-    "bg-teal-600",
-  ];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return colors[Math.abs(hash) % colors.length];
-};
 
 const ServersList = ({ onOpenCreateServer }: Props) => {
   const [serversInfo, setServers] = useState<ServerInfo[] | null>(null);

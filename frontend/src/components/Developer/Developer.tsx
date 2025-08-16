@@ -7,7 +7,6 @@ import DevSidebar from "./DevSidebar";
 import DeveloperTopBar from "./DeveloperTopBar";
 import ApplicationsSidebar from "./ApplicationsSidebar";
 import { io, Socket } from "socket.io-client";
-import ApplicationsList from "./ApplicationsList";
 
 interface User {
   id: string;

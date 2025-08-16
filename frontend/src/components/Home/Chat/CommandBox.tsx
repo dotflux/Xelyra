@@ -5,6 +5,7 @@ import { parseMessageFormatting } from "../../../utils/messageFormatting";
 import CommandAvatar from "./Message/CommandAvatar";
 import { io, Socket } from "socket.io-client";
 import { useUser } from "../UserContext";
+import TimestampLabel from "./Message/TimestampLabel";
 
 interface CommandBoxProps {
   botName: string;
@@ -35,9 +36,7 @@ interface CommandInfo {
 const CommandBox: React.FC<CommandBoxProps> = ({
   botName,
   botAvatar,
-  command,
   message,
-  createdAt,
   createdAtTimestamp,
   conversation,
   id,
@@ -85,6 +84,26 @@ const CommandBox: React.FC<CommandBoxProps> = ({
   }, []);
 
   const msgDate = new Date(createdAtTimestamp);
+  const now = new Date();
+
+  // Build "Today / Yesterday / MM/DD/YYYY" prefix
+  let dayLabel: string;
+  if (msgDate.toDateString() === now.toDateString()) {
+    dayLabel = "";
+  } else {
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+    if (msgDate.toDateString() === yesterday.toDateString()) {
+      dayLabel = "Yesterday at";
+    } else {
+      const m = msgDate.getMonth() + 1;
+      const d = msgDate.getDate();
+      const y = msgDate.getFullYear();
+      dayLabel = `${m}/${d}/${y} at`;
+    }
+  }
+
+  // Format time as before
   const time = msgDate.toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
@@ -183,7 +202,7 @@ const CommandBox: React.FC<CommandBoxProps> = ({
               <span className="bg-blue-700 text-xs text-white px-2 py-0.5 rounded ml-1 font-bold tracking-wide">
                 BOT
               </span>
-              <span className="text-xs text-gray-400">{time}</span>
+              <TimestampLabel dayLabel={dayLabel} time={time} />
               {edited && (
                 <span className="text-xs italic text-gray-400 ml-1">
                   (edited)

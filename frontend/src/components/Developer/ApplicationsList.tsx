@@ -59,7 +59,7 @@ const ApplicationsList = () => {
     });
 
     // Listen for appCreated event
-    const handleAppCreated = (data: { userId: string }) => {
+    const handleAppCreated = () => {
       fetchApplications();
       console.log("fetched realtime");
     };

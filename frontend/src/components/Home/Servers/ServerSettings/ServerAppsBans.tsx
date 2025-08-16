@@ -12,10 +12,7 @@ interface BannedApp {
   pfp: string;
 }
 
-const ServerAppsBans: React.FC<ServerAppsBansProps> = ({
-  serverId,
-  onUpdate,
-}) => {
+const ServerAppsBans: React.FC<ServerAppsBansProps> = ({ serverId }) => {
   const [bans, setBans] = useState<BannedApp[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

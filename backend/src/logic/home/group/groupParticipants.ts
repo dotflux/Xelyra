@@ -12,6 +12,8 @@ dotenv.config();
 export interface ParticipantInfo {
   username: string;
   id: string;
+  pfp: string;
+  displayName: string;
 }
 
 export const groupParticipants = async (
@@ -64,6 +66,8 @@ export const groupParticipants = async (
       partData.push({
         username: participantUser[0].username,
         id: participantUser[0].id,
+        pfp: participantUser[0].pfp,
+        displayName: participantUser[0].displayName,
       });
     }
 

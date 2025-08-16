@@ -13,7 +13,7 @@ interface BannedUser {
   pfp: string;
 }
 
-const Bans: React.FC<BansProps> = ({ serverId, onUpdate }) => {
+const Bans: React.FC<BansProps> = ({ serverId }) => {
   const [bans, setBans] = useState<BannedUser[]>([]);
   const [loadingBans, setLoadingBans] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -21,7 +21,6 @@ const Bans: React.FC<BansProps> = ({ serverId, onUpdate }) => {
   const [hasMore, setHasMore] = useState(true);
   const [fetchingMore, setFetchingMore] = useState(false);
   const observer = useRef<IntersectionObserver | null>(null);
-  const lastBanRef = useRef<HTMLDivElement | null>(null);
   const BATCH_SIZE = 70;
 
   const fetchBans = async (afterId?: string) => {

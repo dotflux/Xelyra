@@ -20,7 +20,10 @@ import { handleRemoveMessageLogic } from './botGateway/handleRemoveMessage';
 
 @WebSocketGateway({
   namespace: '/bot',
-  cors: { origin: 'http://localhost:5173', credentials: true },
+  cors: {
+    origin: ['http://localhost:5173', 'http://localhost:4173'],
+    credentials: true,
+  },
 })
 export class BotsGateway implements OnGatewayConnection, OnGatewayInit {
   @WebSocketServer() server: Server;

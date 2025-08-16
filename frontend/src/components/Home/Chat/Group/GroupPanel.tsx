@@ -17,6 +17,8 @@ interface Props {
 interface Participant {
   username: string;
   id: string;
+  pfp: string;
+  displayName: string;
 }
 
 const GroupPanel = (props: Props) => {
@@ -125,10 +127,26 @@ const GroupPanel = (props: Props) => {
               className="group flex items-center justify-between p-2 rounded hover:bg-[#2a2b2e] transition"
             >
               <div className="flex items-center space-x-3">
-                <div className="h-10 w-10 bg-gradient-to-br from-gray-800 to-gray-900 rounded-full flex items-center justify-center text-lg font-bold text-white shadow-md mr-3">
-                  {p.username.charAt(0).toUpperCase()}
+                <div className="h-10 w-10 bg-gradient-to-br from-gray-800 to-gray-900 rounded-full flex items-center justify-center text-lg font-bold text-white shadow-md overflow-hidden">
+                  {p.pfp ? (
+                    <img
+                      src={
+                        p.pfp.startsWith("/uploads/")
+                          ? `http://localhost:3000${p.pfp}`
+                          : p.pfp
+                      }
+                      alt={p.displayName ? p.displayName : p.username}
+                      className="h-full w-full object-cover rounded-full"
+                    />
+                  ) : (
+                    <span className="text-sm font-bold">
+                      {p.username.charAt(0).toUpperCase()}
+                    </span>
+                  )}
                 </div>
-                <span className="text-sm text-white">{p.username}</span>
+                <span className="text-sm text-white">
+                  {p.displayName ? p.displayName : p.username}
+                </span>
               </div>
               <button
                 className="opacity-0 group-hover:opacity-100 p-1 hover:bg-[#3a3b3e] rounded transition"

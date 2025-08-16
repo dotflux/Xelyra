@@ -66,10 +66,12 @@ const Profile: React.FC<ProfileProps> = ({ userInfo, onUpdate }) => {
   const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setUploadingBanner(true);
     setBannerFile(file);
     const url = URL.createObjectURL(file);
     setBannerPreview(url);
     setUserEdit((prev) => ({ ...prev, banner: url }));
+    setUploadingBanner(false);
   };
 
   const handleRemoveBanner = () => {

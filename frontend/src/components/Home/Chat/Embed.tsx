@@ -3,7 +3,6 @@ import React from "react";
 // Simple markdown parser for *italic* and **bold**
 function parseMessageFormatting(text: string): React.ReactNode[] {
   const result: React.ReactNode[] = [];
-  let remaining = text;
   const regex = /\*\*([^*]+)\*\*|\*([^*]+)\*/g;
   let lastIndex = 0;
   let match;
