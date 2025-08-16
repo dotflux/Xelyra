@@ -1,16 +1,14 @@
-import { BadRequestException } from '@nestjs/common';
-import { UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
 import * as dotenv from 'dotenv';
 import { Request } from 'express';
 import { UsersService } from 'src/services/users.service';
 import { MessagesService } from 'src/services/messages.service';
 import { ConversationsService } from 'src/services/conversations.service';
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4, v1 as uuidv1, validate as uuidValidate } from 'uuid';
 import { MessagesGateway } from 'src/gateways/messages.gateway';
 import { GroupsService } from 'src/services/groups.service';
 import { ChannelsService } from 'src/services/channels.service';
-import { types } from 'cassandra-driver';
 import { ServerMembersService } from 'src/services/serverMembers.service';
 
 dotenv.config();
@@ -31,34 +29,27 @@ export const sendMessage = async (
 ) => {
   try {
     const token = req.cookies?.user_token;
-    if (!token) {
-      throw new UnauthorizedException('No token provided');
-    }
+    if (!token) throw new UnauthorizedException('No token provided');
 
-    // Verify JWT
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {
       id: string;
     };
+    if (!decoded?.id) throw new UnauthorizedException('Invalid token');
 
-    if (!decoded?.id) {
-      throw new UnauthorizedException('Invalid token');
-    }
-
-    const user = await usersService.findById(decoded?.id);
-    if (user.length === 0) {
+    const user = await usersService.findById(decoded.id);
+    if (user.length === 0)
       throw new UnauthorizedException('No such user in database');
-    }
 
     const conversationRow = await conversationsService.findById(conversation);
     const groupRow = await groupsService.findById(conversation);
     const channelRow = await channelsService.findById(conversation);
+
     if (
       conversationRow.length === 0 &&
       groupRow.length === 0 &&
       channelRow.length === 0
-    ) {
+    )
       throw new BadRequestException('Invalid conversation');
-    }
 
     const isDm = conversationRow.length > 0;
     const isGroup = groupRow.length > 0;
@@ -68,6 +59,7 @@ export const sendMessage = async (
     const isMember = isChannel
       ? await serverMembersService.findById(channelRow[0].server_id, user[0].id)
       : [];
+
     if (
       (isDm &&
         !conversationRow[0].participants
@@ -76,17 +68,23 @@ export const sendMessage = async (
       (isGroup &&
         !groupRow[0].participants.map((m) => m.toString()).includes(userId)) ||
       (isChannel && isMember.length === 0)
-    ) {
+    )
       throw new BadRequestException('Not a member');
-    }
 
-    if (message.length === 2000) {
+    if (message.length > 2000)
       throw new BadRequestException('Message exceeds limit of 2000 characters');
+
+    console.log('replyTo: ', replyTo);
+
+    let replyToTimeUUID: string | null = null;
+    if (replyTo) {
+      const repliedMessage = await messagesService.findByTimeId(replyTo);
+      if (repliedMessage.length > 0) {
+        replyToTimeUUID = repliedMessage[0].created_at;
+      }
     }
 
-    const repliedMessage = replyTo
-      ? await messagesService.findByTimeId(replyTo)
-      : [];
+    console.log('replyToTimeUUID: ', replyToTimeUUID);
 
     const messageId = uuidv4();
 
@@ -97,23 +95,23 @@ export const sendMessage = async (
       conversation,
       false,
       false,
-      repliedMessage.length > 0 ? repliedMessage[0].created_at : '',
+      replyToTimeUUID,
       files || undefined,
     );
 
     if (isDm) {
-      const otherId = conversationRow[0].participants.find(
-        (p: string) => p != user[0].id.toString(),
-      );
-      await conversationsService.createUnreadCounter(conversation, otherId);
+      const otherId = conversationRow[0].participants.find((p) => p != userId);
+      if (otherId)
+        await conversationsService.createUnreadCounter(conversation, otherId);
       await conversationsService.setLastMessageTimestamp(
         conversation,
         new Date(saved.created_timestamp),
       );
     }
+
     if (isGroup) {
       for (const participant of groupRow[0].participants) {
-        if (participant.toString() != user[0].id.toString()) {
+        if (participant.toString() !== userId) {
           await conversationsService.createUnreadCounter(
             conversation,
             participant.toString(),
@@ -127,13 +125,13 @@ export const sendMessage = async (
     }
 
     messagesGateway.sendToConversation(conversation, {
-      conversation: conversation.toString(),
-      message: message,
-      user: user[0].id.toString(),
+      conversation,
+      message,
+      user: userId,
       created_at: saved.created_at,
       created_timestamp: saved.created_timestamp,
-      id: saved.id.toString(),
-      reply_to: saved.reply_to,
+      id: saved.id,
+      reply_to: saved.reply_to || null,
       files: saved.files || [],
     });
 
@@ -152,13 +150,9 @@ export const sendMessage = async (
     if (
       error instanceof BadRequestException ||
       error instanceof UnauthorizedException
-    ) {
+    )
       throw error;
-    }
-    console.error(
-      'Error in sending message:',
-      error && error.stack ? error.stack : error,
-    );
+    console.error('Error in sending message:', error.stack || error);
     throw new BadRequestException({
       valid: false,
       error: 'Internal Server Error',

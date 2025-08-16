@@ -1,0 +1,21 @@
+# Node modules and build outputs
+node_modules
+dist
+build
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Logs and caches
+npm-debug.log
+yarn-error.log
+.pnpm-debug.log
+.vscode
+.idea
+.DS_Store
+
+# Git
+.git
+.gitignore

@@ -1,8 +1,7 @@
 import { XelyraClient } from "../xelyra-bot-sdk/src/client";
 
 const bot = new XelyraClient({
-  token:
-    "890e0b08-15d0-49c6-bda9-6fb7918a0976.6d311b7ebdef40593fa38410117988b53cf00381c1868156f509e8f2778b8ada",
+  token: "YOUR_TOKEN_HERE",
   gatewayUrl: "http://localhost:3000/bot",
 });
 

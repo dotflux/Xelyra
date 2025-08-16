@@ -332,7 +332,7 @@ const MessageBox = (props: Props) => {
         {/* Action bar on hover */}
         <MessageActions
           onReply={() => {
-            props.setRepliedTo(props.id);
+            props.setRepliedTo(props.createdAt);
             props.setRepliedContent(props.message);
             if (props.setRepliedSenderType)
               props.setRepliedSenderType(senderInfo?.type || null);

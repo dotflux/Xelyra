@@ -376,7 +376,13 @@ AI_ID=117cd972-3760-47b9-9c38-e6bbc28196f5
 
 # YOUR tenor api key
 TENOR_API = your_tenor_api_key
+
+# Set this one either as 'docker' or 'dev' depending on which way u run the backend
+CURRENT_ENV=the_env_name_look_at_comment
+
 ```
+
+## Dev Environment Setup
 
 ### **1. Backend Setup**
 
@@ -408,13 +414,20 @@ npm install
 
 ### **4. Database Initialization**
 
-Run the CQL scripts in order:
+Run the CQL scripts in order (its automatic just run the backend or docker compose file):
 
 ```bash
 # Execute scripts from backend/src/db/cql_scripts/
 # 001_create_keyspace.cql
 # 002_create_users.cql
 # ... (all scripts in numerical order)
+```
+
+## Docker Environment Setup
+
+```bash
+# in the ROOT directory
+docker compose up --build
 ```
 
 ## 🔧 **Development & Architecture**

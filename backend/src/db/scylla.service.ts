@@ -1,5 +1,8 @@
 import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import { Client, types } from 'cassandra-driver';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 @Injectable()
 export class ScyllaService implements OnModuleDestroy {
@@ -7,7 +10,8 @@ export class ScyllaService implements OnModuleDestroy {
 
   constructor() {
     this.client = new Client({
-      contactPoints: ['127.0.0.1'],
+      contactPoints:
+        process.env.CURRENT_ENV === 'docker' ? ['scylla'] : ['127.0.0.1'],
       localDataCenter: 'datacenter1',
       keyspace: 'xelyra',
       pooling: {

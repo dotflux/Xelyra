@@ -2,12 +2,16 @@ import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
 import { Client } from 'cassandra-driver';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 @Injectable()
 export class CqlLoaderService implements OnModuleInit {
   private readonly logger = new Logger(CqlLoaderService.name);
   private readonly client = new Client({
-    contactPoints: ['127.0.0.1'],
+    contactPoints:
+      process.env.CURRENT_ENV === 'docker' ? ['scylla'] : ['127.0.0.1'],
     localDataCenter: 'datacenter1',
   });
 

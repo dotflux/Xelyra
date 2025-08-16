@@ -1,0 +1,39 @@
+# Stage 1: Build
+FROM node:20-alpine AS builder
+WORKDIR /app
+
+# Copy package files and install dependencies
+COPY package*.json ./
+RUN npm ci
+
+# Copy all backend source
+COPY . .
+
+# Build NestJS
+RUN npm run build
+
+# Stage 2: Run
+FROM node:20-alpine
+WORKDIR /app
+
+# Copy node_modules and built dist
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/src/db/cql_scripts ./src/db/cql_scripts
+COPY package*.json ./
+
+# Ensure uploads folder exists in container
+RUN mkdir -p /app/uploads
+
+# Copy default file from backend/uploads into container uploads
+COPY uploads/xyn_pfp.png /app/uploads/xyn_pfp.png
+
+# Copy the wait-for-scylla script
+COPY wait-for-scylla.sh /wait-for-scylla.sh
+RUN chmod +x /wait-for-scylla.sh
+
+# Expose port
+EXPOSE 3000
+
+# Start the app after Scylla is ready
+CMD ["/wait-for-scylla.sh", "scylla", "node", "dist/main.js"]

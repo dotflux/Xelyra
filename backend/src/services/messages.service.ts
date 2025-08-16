@@ -13,7 +13,7 @@ export class MessagesService {
     conversation: string,
     isRead: boolean,
     edited: boolean,
-    replyTo: string,
+    replyTo: string | null,
     files?: any[],
   ) {
     const createdAt = uuidv1();

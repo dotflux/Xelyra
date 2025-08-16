@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: DockerFile
+    container_name: xelyra-backend
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./backend/.env
+    environment:
+      - NODE_ENV=production
+      - SCYLLA_CONTACT_POINTS=scylla
+      - SCYLLA_PORT=9042
+    depends_on:
+      - scylla
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: DockerFile
+    container_name: xelyra-frontend
+    ports:
+      - "5173:80" # frontend exposed on :5173 to match your dev setup
+    depends_on:
+      - backend
+
+  scylla:
+    image: scylladb/scylla:5.4
+    container_name: xelyra-scylla
+    ports:
+      - "9042:9042"
+    command: --smp 1 --memory 1G --overprovisioned 1
+    volumes:
+      - scylla-data:/var/lib/scylla
+      - uploads-data:/app/uploads
+
+volumes:
+  scylla-data:
+  uploads-data:
